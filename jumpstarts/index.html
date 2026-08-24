@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MuleSoft Jumpstarts</title>
+  <meta name="description" content="Hands-on, guided MuleSoft jumpstarts. Step through building small applications and adding features across integrations." />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto p-6 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">MuleSoft Jumpstarts</h1>
+      <a href="https://mulesoft-accelerator.github.io/" class="text-blue-500 hover:underline">Home Page</a>
+    </div>
+  </header>
+
+  <section class="max-w-7xl mx-auto p-8">
+    <h2 class="text-3xl font-semibold mb-2">Jumpstarts</h2>
+    <p class="mb-6 text-lg text-gray-700">Guided, hands-on tutorials. Each jumpstart steps you through building a small application or adding a new feature. 34 labs available.</p>
+
+    <div class="mb-6 flex flex-col gap-4">
+      <input id="search" type="search" placeholder="Search jumpstarts&hellip;"
+             class="w-full md:w-1/2 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300">
+      <div class="flex flex-wrap gap-2">
+        <button data-filter="all" class="filter-btn px-3 py-1 rounded-full text-sm border border-blue-500 bg-blue-500 text-white">All</button>
+      <button data-filter="azure" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Azure</button>
+      <button data-filter="github" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">GitHub</button>
+      <button data-filter="google" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Google</button>
+      <button data-filter="mongodb" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">MongoDB</button>
+      <button data-filter="mulesoft" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">MuleSoft</button>
+      <button data-filter="munit" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">MUnit</button>
+      <button data-filter="odata" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">OData</button>
+      <button data-filter="sfdc" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Salesforce</button>
+      <button data-filter="sap" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">SAP</button>
+      <button data-filter="sharepoint" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">SharePoint</button>
+      <button data-filter="slack" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Slack</button>
+      <button data-filter="snowflake" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Snowflake</button>
+      <button data-filter="tableau" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Tableau</button>
+      </div>
+    </div>
+
+    <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <a href="./build-a-cicd-solution-with-azure-pipelines/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="build a cicd solution with azure pipelines" data-cat="azure" data-tags="mulesoft">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Azure</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Build a CICD Solution with Azure Pipelines</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 23 min</span>
+          <span>Updated 2024-09-04</span>
+        </div>
+      </a>
+      <a href="./connect-to-azure-event-hubs/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="connect to azure event hubs" data-cat="azure" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Azure</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Connect to Azure Event Hubs</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 16 min</span>
+          <span>Updated 2022-12-15</span>
+        </div>
+      </a>
+      <a href="./cicd-with-github-actions/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="cicd with github actions" data-cat="github" data-tags="devops,github,maven">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">GitHub</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">CICD with GitHub Actions</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; —</span>
+          <span>Updated 2024-08-09</span>
+        </div>
+      </a>
+      <a href="./call-google-apis-oauth20/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="call google apis using the http connector and oauth model in mule 4" data-cat="google" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Google</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Call Google APIs using the HTTP Connector and OAuth Model in Mule 4</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 11 min</span>
+          <span>Updated 2021-03-10</span>
+        </div>
+      </a>
+      <a href="./google-api-service-account/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="connect to google apis with a service account" data-cat="google" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Google</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Connect to Google APIs with a Service Account</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 22 min</span>
+          <span>Updated 2024-11-08</span>
+        </div>
+      </a>
+      <a href="./jumpstart-setup/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="getting started with jumpstart" data-cat="google" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Google</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Getting started with Jumpstart</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 9 min</span>
+          <span>Updated 2021-03-15</span>
+        </div>
+      </a>
+      <a href="./mongodb-atlas/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="connect to mongodb atlas" data-cat="mongodb" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MongoDB</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Connect to MongoDB Atlas</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 6 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./add-flex-gateway-to-kubernetes/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="add flex gateway to kubernetes" data-cat="mulesoft" data-tags="flexgateway,kubernetes,uapim">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Add Flex Gateway to Kubernetes</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; —</span>
+          <span>Updated 2022-12-15</span>
+        </div>
+      </a>
+      <a href="./customize-edi-schema-language-file/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="customize an edi x12 schema language file" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Customize an EDI X12 Schema Language File</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 9 min</span>
+          <span>Updated 2021-08-04</span>
+        </div>
+      </a>
+      <a href="./implement-2-way-ssl/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="implement 2-way ssl" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Implement 2-way SSL</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 12 min</span>
+          <span>Updated 2021-03-10</span>
+        </div>
+      </a>
+      <a href="./mulesoft-alexa-integration/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="integrate mulesoft with amazon alexa" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Integrate MuleSoft with Amazon Alexa</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 21 min</span>
+          <span>Updated 2021-11-15</span>
+        </div>
+      </a>
+      <a href="./connected-app-publish-connector/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="publish connector to exchange using connected app" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Publish Connector to Exchange using Connected App</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 6 min</span>
+          <span>Updated 2023-08-10</span>
+        </div>
+      </a>
+      <a href="./publish-flex-gateway-policy-to-exchange/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="publish flex gateway policy to exchange" data-cat="mulesoft" data-tags="flexgateway,kubernetes,uapim">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Publish Flex Gateway Policy to Exchange</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 7 min</span>
+          <span>Updated 2023-05-31</span>
+        </div>
+      </a>
+      <a href="./remote-debugging-with-anypoint-studio-7-and-mule-4/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="remote debugging with anypoint studio 7 and mule 4" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Remote Debugging with Anypoint Studio 7 and Mule 4</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 6 min</span>
+          <span>Updated 2021-08-04</span>
+        </div>
+      </a>
+      <a href="./setup-embedded-derby-db/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup an embedded derby database in mule 4" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup an Embedded Derby Database in Mule 4</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 11 min</span>
+          <span>Updated 2021-03-15</span>
+        </div>
+      </a>
+      <a href="./setup-composer-sync/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup composer sync" data-cat="mulesoft" data-tags="composer">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup Composer Sync</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 7 min</span>
+          <span>Updated 2022-11-11</span>
+        </div>
+      </a>
+      <a href="./apim-oauth2-provider-policy/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup oauth 2.0 access token enforcement using mule oauth provider policy for mule 4.x" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup OAuth 2.0 Access Token Enforcement using Mule OAuth Provider Policy for Mule 4.x</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 13 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./tls-upstream-flexgateway/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup tls context for upstream with flex gateway in connected mode" data-cat="mulesoft" data-tags="flexgateway,kubernetes,uapim">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup TLS Context for Upstream with Flex Gateway in Connected Mode</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 6 min</span>
+          <span>Updated 2023-05-31</span>
+        </div>
+      </a>
+      <a href="./ap-transit-gateways/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup transit gateways in anypoint platform" data-cat="mulesoft" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MuleSoft</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup Transit Gateways in Anypoint Platform</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 10 min</span>
+          <span>Updated 2023-07-31</span>
+        </div>
+      </a>
+      <a href="./munit-test-recorder/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="mulesoft munit - generate test suite with test recorder" data-cat="munit" data-tags="munit,web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MUnit</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">MuleSoft MUnit - Generate Test Suite with Test Recorder</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 11 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./munit-custom-assertion/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="mulesoft munit - run custom assertion" data-cat="munit" data-tags="munit,web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MUnit</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">MuleSoft MUnit - Run Custom Assertion</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 12 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./munit-spy-verify/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="mulesoft munit - spy and verify" data-cat="munit" data-tags="munit,web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MUnit</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">MuleSoft MUnit - Spy and Verify</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 12 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./munit-mocking/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="mulesoft munit - using the mock when processor" data-cat="munit" data-tags="munit,web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">MUnit</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">MuleSoft MUnit - Using the Mock When Processor</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 8 min</span>
+          <span>Updated 2021-06-28</span>
+        </div>
+      </a>
+      <a href="./odata-apikit-extension/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="create an odata api in mulesoft" data-cat="odata" data-tags="odata,web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">OData</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Create an OData API in MuleSoft</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 20 min</span>
+          <span>Updated 2021-03-15</span>
+        </div>
+      </a>
+      <a href="./odata-salesforce-lightning-connect/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="use odata api with salesforce lightning connect" data-cat="odata" data-tags="odata,web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">OData</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Use OData API with Salesforce Lightning Connect</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 6 min</span>
+          <span>Updated 2021-08-03</span>
+        </div>
+      </a>
+      <a href="./connect-with-tableau-crm/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="connect with crm analytics (formerly tableau crm)" data-cat="sfdc" data-tags="analytics,tableau,tableaucrm">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Salesforce</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Connect with CRM Analytics (formerly Tableau CRM)</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 9 min</span>
+          <span>Updated 2024-08-09</span>
+        </div>
+      </a>
+      <a href="./sap-lab-bapi-outbound/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="call sap bapi/function from mulesoft" data-cat="sap" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">SAP</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Call SAP BAPI/Function From MuleSoft</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 9 min</span>
+          <span>Updated 2021-03-10</span>
+        </div>
+      </a>
+      <a href="./sap-table-data-with-mulesoft-part-1/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="exposing sap table data with mulesoft - part 1" data-cat="sap" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">SAP</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Exposing SAP Table Data with MuleSoft - Part 1</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 11 min</span>
+          <span>Updated 2023-07-06</span>
+        </div>
+      </a>
+      <a href="./sap-lab-idoc-inbound/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup mulesoft as an idoc listener" data-cat="sap" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">SAP</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup MuleSoft as an IDoc Listener</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 8 min</span>
+          <span>Updated 2021-03-10</span>
+        </div>
+      </a>
+      <a href="./microsoft-sharepoint-online-with-mulesoft/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="connect to microsoft sharepoint online" data-cat="sharepoint" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">SharePoint</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Connect to Microsoft SharePoint Online</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 9 min</span>
+          <span>Updated 2023-08-22</span>
+        </div>
+      </a>
+      <a href="./send-a-message-to-slack/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="send a message to slack" data-cat="slack" data-tags="slack">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Slack</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Send a message to Slack</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 16 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./connect-snowflake-using-mulesoft-composer/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="insert data into snowflake using mulesoft composer" data-cat="snowflake" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Snowflake</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Insert data into Snowflake using MuleSoft Composer</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 6 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./load-snowflakedb-copy/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="load 10m records into snowflake in under 20 seconds" data-cat="snowflake" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Snowflake</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Load 10M records into Snowflake in under 20 seconds</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 14 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+      <a href="./tableau-analytics-extension-mulesoft/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="setup a tableau analytics extension with mulesoft" data-cat="tableau" data-tags="web">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Tableau</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Setup a Tableau Analytics Extension with MuleSoft</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 8 min</span>
+          <span>Updated 2022-11-16</span>
+        </div>
+      </a>
+    </div>
+    <p id="empty" class="hidden text-center text-gray-500 py-12">No jumpstarts match your search.</p>
+  </section>
+
+  <footer class="bg-white text-center p-4 shadow-inner mt-8">
+    <p class="text-sm text-gray-500">&copy; 2026 MuleSoft Accelerators. Interactive guides designed for rapid developer enablement.</p>
+  </footer>
+
+  <script>
+    const cards = Array.from(document.querySelectorAll('.codelab-card'));
+    const search = document.getElementById('search');
+    const empty = document.getElementById('empty');
+    const btns = Array.from(document.querySelectorAll('.filter-btn'));
+    let activeCat = 'all';
+
+    function apply() {
+      const q = search.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(c => {
+        const matchCat = activeCat === 'all' || c.dataset.cat === activeCat;
+        const matchText = !q || c.dataset.title.includes(q) || c.dataset.tags.includes(q);
+        const show = matchCat && matchText;
+        c.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      empty.classList.toggle('hidden', visible !== 0);
+    }
+
+    search.addEventListener('input', apply);
+    btns.forEach(b => b.addEventListener('click', () => {
+      activeCat = b.dataset.filter;
+      btns.forEach(x => {
+        const on = x === b;
+        x.classList.toggle('bg-blue-500', on);
+        x.classList.toggle('text-white', on);
+        x.classList.toggle('border-blue-500', on);
+        x.classList.toggle('text-gray-600', !on);
+        x.classList.toggle('border-gray-300', !on);
+      });
+      apply();
+    }));
+  </script>
+</body>
+</html>

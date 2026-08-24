@@ -1,0 +1,184 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Integrate MuleSoft with Amazon Alexa</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  codelab-ga4id=""
+                  id="mulesoft-alexa-integration"
+                  title="Integrate MuleSoft with Amazon Alexa"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=mulesoft-alexa-integration">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>This codelab will guide you through an example of leveraging a MuleSoft developed API as the backend for an Amazon Alexa skill. A natural-language voice experience is built to offer customers a more intuitive way to interact with the Mule application that they use everyday. </p>
+<p>You will learn how easy it is to replace an AWS Lambda backend with an API designed and developed with MuleSoft Anypoint Platform.</p>
+<h2 is-upgraded>Prerequisites</h2>
+<ol type="1" start="1">
+<li><strong>Amazon Developer Account – for creating Alexa Skills</strong></li>
+</ol>
+<ul>
+<li>Alexa Skills are like apps. You can enable and disable Skills, using the Alexa app or a web browser, in the same way that you install and uninstall apps on your smartphone or tablet. Skills are voice-driven Alexa capabilities. You can add Alexa Skills to your Echo to bring products and services to life. You can view available Skills and enable or disable them using your Alexa app. </li>
+</ul>
+<ol type="1" start="2">
+<li><strong>  Anypoint Studio - for developing and testing Mule application</strong></li>
+</ol>
+<ul>
+<li>Anypoint Studio is MuleSoft&#39;s IDE for developing and testing Mule applications.</li>
+</ul>
+<ol type="1" start="3">
+<li><strong>  Anypoint Platform - to deploy Mule application to Cloudhub</strong></li>
+</ol>
+<ul>
+<li>Anypoint Platform provides us the runtime to run and deploy our applications in the cloud or on-premises. </li>
+<li>Tools and framework for creating an API and building simpler Mule Applications (for complex applications we use Anypoint studio).</li>
+<li>Library to store our assets (APIs and applications) where we can view and test them, and it can be reused by other developers in the organization. </li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create an Alexa Skill" duration="5">
+        <ul>
+<li>Login in to <a href="https://developer.amazon.com/en-US/Alexa" target="_blank">https://developer.amazon.com/en-US/Alexa</a> </li>
+<li>Go to create Alexa Skills, click the console tab then Create Skill.</li>
+<li>Enter Skill name i.e. &#34;HelloWorld<em>&#34;</em>. Leave default settings for &#34;<em>Default language</em>&#34;, &#34;<em>Choose a model to add to your Skill</em>&#34;, &#34;<em>Choose a method to host your Skill&#39;s backend resources</em>&#34;, then click on &#34;<em>Create Skill</em>&#34;.</li>
+<li>Choose the &#34;<em>Start from Scratch</em>&#34; template and click &#34;<em>Choose</em>&#34;.</li>
+<li><em>&#34;Skill invocation name&#34; </em>(which will trigger launch request at MULE application side) is the &#34;<em>Skill Name&#34; </em>you provided while creating skill</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/495e2d8d26628150.png"></p>
+<ul>
+<li> Then we will add Intents. Go To Intents→Add Intent→Type your custom intent name-→Click &#34;Create Custom Intent&#34;. I have created &#34;<em>userIntent</em>&#34; with one Utterance &#34;<em>get me the user details of {userId}&#34;. </em>The value inside {} is called a slot. </li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/62750a09159676eb.png"></p>
+<ul>
+<li>Now define slot with Slot name as <em>userId</em> and and slot type as <em>userId</em></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/1a9004df1b594ac9.png"></p>
+<ul>
+<li>Add values to slot type &#34;<em>userId</em>&#34;. Values<em> &#34;ten&#34;, &#34;nine&#34;, &#34;eight&#34;,&#34;seven&#34; are added</em></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/b17a7e1ed2b86d5a.png"></p>
+<ul>
+<li>Similarly create &#34;<em>byeIntent</em>&#34;. We will be using this intent to end the session.</li>
+<li>Now Click on  &#34;Save Model&#34; and then Click on &#34;Build Model&#34;. You should get &#34;<em>Quick Build Successful</em>&#34; popup.</li>
+<li>Now go to the &#34;<em>Endpoint</em>&#34; tab on the &#34;<em>Interaction Model</em>&#34; window. Select &#34;HTTPS&#34; Service Endpoint, Paste the full API Url (Note: - link to create a self-signed certificate is explained there(in blue), you need to create a certificate as directed and upload) </li>
+</ul>
+<p class="image-container"><img style="width: 619.50px" src="img/dbecb52d7f1378d6.png"></p>
+<ul>
+<li>Now click on &#34;<em>Save Endpoints</em>&#34; .You can set endpoint details later when your mule application is up and running on CloudHub because you need the full API Url to complete this step.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create the Mule Alexa API" duration="10">
+        <p><strong>Things to do</strong></p>
+<ol type="1" start="1">
+<li>Create an HTTPS listener with a self-signed certificate configuration.</li>
+<li>Create the Mule app to take input from the Alexa voice command and perform requested action.</li>
+<li>Deploy the Mule app to Cloudhub</li>
+</ol>
+<p><strong>Step One<br></strong>Create an HTTPS connection to connect to the Alexa Skill. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/20a6ab390a35376b.png"></p>
+<ul>
+<li>Listener Configuration:- </li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/19f6f6117b7fe655.png"></p>
+<ul>
+<li>Create a <em>properties.yaml </em>file to store the value of <em>HTTP.port </em>in location <em>src/main/resources</em>. </li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/bb5fb755eb637e92.png"></p>
+<ul>
+<li>Go to the TLS tab and configure the TLS settings (The certificate can be created with the help of documentation in the Alexa developer console. The same certificate should be used in the Alexa Skill endpoint as well as Mule application). </li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/2b2eeb23dee9a5f7.png"></p>
+<p><strong>Step Two</strong></p>
+<p>Two types of actions can be invoked using alexa skill </p>
+<ol type="1" start="1">
+<li>Launch - to start the session</li>
+<li>Intent - perform specific action</li>
+</ol>
+<p><strong>Launch section coding</strong></p>
+<p class="image-container"><img style="width: 275.56px" src="img/af7fd0547cb54bc4.png"></p>
+<p><strong>Launch JSON Response</strong></p>
+<ul>
+<li>Line 4 to 11 -  is the Alexa&#39;s voice response</li>
+<li>Line 12 to 20  -  Alexa&#39;s response on video capable devices</li>
+<li>Line 21 to 27 - Text which will be prompted upon no response from user</li>
+<li>Line 29 - Session to remain open or close</li>
+</ul>
+<p class="image-container"><img style="width: 473.86px" src="img/90ad0acadb0a26e3.png"></p>
+<p>After Launch Response, let&#39;s code the<strong> Intent section</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/19793975ca174099.png"></p>
+<p><strong>JSON response of the User Intent</strong></p>
+<p class="image-container"><img style="width: 616.98px" src="img/13a26c236e324f87.png"></p>
+<p><strong>Step Three</strong></p>
+<ul>
+<li>Similarly we will code the ByeIntent with [&#34;<em>shouldEndSession&#34;: true</em>] to end the session.</li>
+<li>Now Test the MULE application in Advanced Rest Client or SOAP UI to ensure that your Mule<br>application is working.</li>
+<li>Upon successful testing, deploy the application to CloudHub. Your application should be in&#34;Started state&#34; </li>
+<li>Take the Full API URL from Runtime Manager and set it in the Alexa skill endpoint section.</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/7f6314cbcdbcf303.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Testing the Alexa Skill" duration="5">
+        <ol type="1" start="1">
+<li>Enable your Skill.</li>
+<li>Now go to the test console, select ‘<em>Development</em>&#39; in &#34;<em>Skill testing is enabled in</em>&#34;</li>
+<li>Either you can use the mic or type commands.</li>
+<li>First, give the launch request command &#34;<em>Open hello muleys</em>&#34;. Launch request command should always start with <em>Open</em>. You will get the customized response from your MULE application.</li>
+<li>Now give the Intent request(userIntent) command &#34;<em>give me user details of {userId}</em>&#34;. You will get the customized response from your MULE application.</li>
+<li>Now give the Intent request command(bye Intent) &#34;<em>goodbye alexa</em>&#34;. You will get the customized<br>response from your MULE application.</li>
+<li>If you have set any image URL in JSON response, That image too will be<br>displayed on the Alexa Test Console. </li>
+</ol>
+<p class="image-container"><img style="width: 387.96px" src="img/80d853977cd10690.png"></p>
+<p class="image-container"><img style="width: 428.37px" src="img/8ca8aa5a5fe02fdf.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>In this codelab, you learned how easy it is to replace an AWS Lambda backend with an API designed and developed using Anypoint Platform. While we only created the implementation part using Anypoint studio, generally you would design it first using the Design Centre and the implementation part would be handled by Anypoint Studio . This can be further enhanced to create cool Voice over Mule connected Apps like <em>starting and stopping Mule apps using Alexa</em>.</p>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://github.com/mulesoft-consulting/alexaIntegration" target="_blank">https://github.com/mulesoft-consulting/alexaIntegration</a></li>
+<li><a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit" target="_blank">https://developer.amazon.com/en-US/alexa/alexa-skills-kit</a></li>
+<li><a href="https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html" target="_blank">https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html</a></li>
+<li><a href="https://docs.mulesoft.com/mule-runtime/4.3/build-an-https-service" target="_blank">https://docs.mulesoft.com/mule-runtime/4.3/build-an-https-service</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

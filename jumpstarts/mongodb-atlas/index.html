@@ -1,0 +1,185 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Connect to MongoDB Atlas</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="mongodb-atlas"
+                  title="Connect to MongoDB Atlas"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-16</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>MongoDB Atlas is a global cloud database service for modern applications. It allows developers to deploy fully managed MongoDB across AWS, Azure, or GCP. Using MuleSoft&#39;s MongoDB Connector, you can easily integrate your systems with MongoDB Atlas.</p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>In this codelab, you&#39;re going to build simple Mule flow that exposes an HTTP endpoint. The flow will call MongoDB Atlas using the MongoDB Connector and return the response back to the user in JSON format.</p>
+<p class="image-container"><img style="width: 369.00px" src="img/7aa8b80568e4b2b4.png"><br></p>
+<aside class="warning"><p><strong>Note:</strong> This codelab assumes you already have access to a MongoDB Atlas environment.</p>
+</aside>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to configure the MongoDB Connector for MongoDB Atlas</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.5.x</li>
+<li>Mule EE 4.3.0</li>
+<li>MongoDB Connector 6.1.1</li>
+<li><a href="https://www.mongodb.com/cloud/atlas" target="_blank">MongoDB Atlas</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup HTTP Connector" duration="1">
+        <h2 is-upgraded><strong>Create a new project</strong></h2>
+<p>Open Anypoint Studio and create a new <strong>Mule Project</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/7b2270d151442f9d.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. <strong>mongodb-atlas</strong>), select a Runtime, and then click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/40f4f084fff78360.png"></p>
+<p>Once the new project is created, you&#39;ll be presented with a blank canvas. In the <strong>Mule Palette</strong> on the right, click on <strong>HTTP</strong> and then drag and drop the <strong>Listener</strong> into the canvas.</p>
+<p class="image-container"><img style="width: 190.00px" src="img/1ae43d6b515c1a2.png"></p>
+<h2 is-upgraded><br><br><strong>Add HTTP Listener Configuration</strong></h2>
+<p>If the Mule Properties tab doesn&#39;t open, click the <strong>Listener</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 420.17px" src="img/196ce9d4f08b5111.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, take note of the port. By default this will be <strong>8081</strong>. Go ahead and click on <strong>OK</strong> to accept the defaults and proceed.</p>
+<p class="image-container"><img style="width: 337.50px" src="img/3f81ca63e2ca4602.png"></p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the Path field with the value <strong>/find.</strong></p>
+<p class="image-container"><img style="width: 425.00px" src="img/79edc833027cdb10.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the MongoDB Connector" duration="3">
+        <h2 is-upgraded>Add the MongoDB Connector</h2>
+<p>Back in the Mule Palette, we need to add the MongoDB Connector. Click on <strong>Search in Exchange</strong></p>
+<p class="image-container"><img style="width: 275.00px" src="img/3b83079c024880fe.png"></p>
+<p>In the <strong>Add Dependencies to Project</strong> window, type <strong>mongo</strong> in the search box to find the connector.</p>
+<p class="image-container"><img style="width: 438.50px" src="img/fb07b078d63a274c.png"></p>
+<p>Select <strong>MongoDB Connector - Mule 4</strong> and click on <strong>Add &gt;</strong></p>
+<p>When the module appears in the <strong>Selected modules</strong> section, change the version to <strong>6.1.1 </strong>and click on <strong>Finish.</strong></p>
+<p>From the list of operations for <strong>MongoDB</strong>, drag and drop the <strong>Find documents</strong> operation onto the canvas. Place it after the Listener module.</p>
+<p class="image-container"><img style="width: 236.00px" src="img/b5b9f1416d2ab009.png"></p>
+<h2 is-upgraded>Add MongoDB Configuration</h2>
+<p>Select the <strong>Find documents</strong> processor to open the <strong>Mule properties</strong> tab. Click on the green plus sign next to the <strong>Connector configuration</strong> field.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f607f12ba138325b.png"></p>
+<p><br>In the <strong>MongoDB Config</strong> window, click on <strong>Configure</strong> in the <strong>Required Libraries</strong> section to add the JDBC driver for MongoDB</p>
+<p class="image-container"><img style="width: 574.00px" src="img/b13361163f52df74.png"></p>
+<p>Next, click on the dropdown for <strong>Servers (host:port) </strong>and change it to <strong>Edit inline</strong></p>
+<p class="image-container"><img style="width: 566.00px" src="img/7e20f1a16cdd4075.png"></p>
+<p>Click on the green plus sign and add the server addresses for your MongoDB Atlas cluster servers. There should be three different hostnames. The port 27017, which is the default, should be the same for all three servers.<br><br>After adding adding each server address, click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/7b7df31c71af90ad.png"></p>
+<p>You can find your server host names by clicking on the cluster name in the Atlas dashboard for your Clusters.</p>
+<p class="image-container"><img style="width: 447.50px" src="img/f578c37100e0bec.png"></p>
+<p>Once you click on the cluster name, you&#39;ll see the list of server addresses that you need.</p>
+<p class="image-container"><img style="width: 376.50px" src="img/392d03541157d56c.png"></p>
+<p>The result should look like the following. </p>
+<p class="image-container"><img style="width: 544.50px" src="img/9c12d909d38ecfcd.png"></p>
+<p>Fill in the <strong>Database, Username, and Password</strong> fields next.</p>
+<p>You can find the database name under the <strong>Collections</strong> tab in Atlas. If you haven&#39;t created one yet, create one and give the collection a name as well. You&#39;ll need the collection name later.</p>
+<p class="image-container"><img style="width: 412.60px" src="img/288d5ce317976ee0.png"></p>
+<p>Next, click on the <strong>Security </strong>tab and change the <strong>Tls context</strong> dropdown to <strong>Edit inline.</strong> Check the checkbox that is labeled <strong>Insecure.</strong></p>
+<p class="image-container"><img style="width: 503.50px" src="img/790b0ed0c7316321.png"></p>
+<p>Click on the <strong>Advanced </strong>tab next. </p>
+<p class="image-container"><img style="width: 508.50px" src="img/85b1a93370ea88ed.png"></p>
+<p>Set the <strong>Authentication mechanism </strong>dropdown<strong> SCRAM_SHA_1</strong></p>
+<p class="image-container"><img style="width: 571.00px" src="img/532289f5fb78caf3.png"></p>
+<p>For the <strong>Replica set name</strong>, you can find that in the Atlas dashboard if drill down to any of the server details page of the cluster. </p>
+<p class="image-container"><img style="width: 418.50px" src="img/e0add8970f473ed3.png"></p>
+<p>Be sure to type the value of the name in lowercase.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1e2d98754ff1a1f0.png"></p>
+<p>Set the <strong>Authentication source </strong>to <strong>admin</strong></p>
+<p class="image-container"><img style="width: 592.00px" src="img/d00710bb221bdbe.png"></p>
+<p>And then check the <strong>Retry writes</strong> checkbox. The screen should look like the following.</p>
+<p class="image-container"><img style="width: 419.81px" src="img/f36312b0c33f2f7c.png"></p>
+<p>Next, click on the <strong>Advanced</strong> tab at the top of the configuration screen.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/89262fff49800b31.png"></p>
+<p>Set <strong>Read Concern </strong>to <strong>MAJORITY</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/157e94d0c80d05e3.png"></p>
+<p>Set <strong>Write concern acknowledgment</strong> to <strong>majority </strong>in the <strong>Write Concern Options </strong>section. Be sure to type this in versus using the dropdown. </p>
+<aside class="warning"><p><strong>Note:</strong> There&#39;s a bug in version 6.1.1 of the MongoDB connector that requires the value of this field to be in lowercase.</p>
+</aside>
+<p class="image-container"><img style="width: 624.00px" src="img/49c8c2dad99cef26.png"></p>
+<p>Click on <strong>Test Connection. </strong>If everything was configured correctly, you should see the following screen.</p>
+<p class="image-container"><img style="width: 466.50px" src="img/146c18bee86473d5.png"></p>
+<p>Click <strong>OK </strong>to close the window.</p>
+<p>Back in the Mule Properties tab, click on the refresh button next to the <strong>Collection name</strong> field.</p>
+<p class="image-container"><img style="width: 491.50px" src="img/6bee25e06fb66b57.png"></p>
+<p>This should load the names of the collections in your database. Pick one that has some data.</p>
+<p>Lastly, click on the <strong>Output</strong> tab and expand the <strong>Payload. DataSense</strong> will load the metadata for the collection and show the available fields. Pick some and type them into the <strong>Fields</strong> dropdown separated by commas.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/33e3008e73465e74.png"></p>
+<h2 is-upgraded><strong>Add Transform Message</strong></h2>
+<p>From the Mule Palette, drag and drop a <strong>Transform Message</strong> component and place it after the <strong>Find document</strong> operation.</p>
+<p class="image-container"><img style="width: 380.50px" src="img/56febc187fd500a6.png"></p>
+<p>In the DataWeave script window, paste the following script in</p>
+<pre><code>%dw 2.0
+output application/json
+---
+payload</code></pre>
+<p>The tab should look like this.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c04f287e51214c9c.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the Mule Application" duration="1">
+        <h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Our next step is to test the flow we&#39;ve built. In the <strong>Package Explorer</strong>, right click on the canvas and <strong>Run project mongodb-atlas</strong></p>
+<p class="image-container"><img style="width: 498.50px" src="img/cdccd5851749baba.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 566.50px" src="img/634c6bce81180de7.png"></p>
+<h2 is-upgraded><strong>Test Flow</strong></h2>
+<p>Let&#39;s test out our flow now. Switch to Google Chrome and enter the following URL from the table below. If everything was configured correctly, you should see the following result in your browser.</p>
+<pre><code>http://localhost:8081/find</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/6bfb0ec0969af7b0.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>There are some subtleties to configuring the MongoDB connector to connect with MongoDB Atlas as you can see. Our MongoDB connector will evolve overtime to address these little nuances to conform to various MongoDB services both in the cloud and on-premises. </p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://www.mongodb.com/cloud/atlas" target="_blank">MongoDB Atlas</a></li>
+<li><a href="https://docs.mulesoft.com/mongodb-connector/6.2/" target="_blank">MongoDB Connector Documentation</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

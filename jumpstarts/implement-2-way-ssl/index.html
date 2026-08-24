@@ -1,0 +1,316 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Implement 2-way SSL</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="implement-2-way-ssl"
+                  title="Implement 2-way SSL"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>Last Updated: 2020-08-26</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>In a typical invocation to a REST API, HTTPS is used and the client must trust the server in order for the call to be successful. On top of that, an additional trust can be implemented in the other direction, i.e., the server must also trust the client as well in order for the call to be successful. </p>
+<p class="image-container"><img alt="utual SSL Authentication - Click to enlarge image" style="width: 461.50px" src="img/ebffeb2a2e19d40a.png"></p>
+<p>This codelab contains the step-by-step procedures to implement both variations of HTTPS using MuleSoft.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to implement 2-way SSL in Anypoint Studio</li>
+<li>How to create a keystore</li>
+<li>How to create a truststore</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.6.x</li>
+<li>A tool to manage digital certificates. <code>keytool</code> is a great command-line tool for this purpose. However, there are so many command arguments, and it is hard to remember all of them. In this codelab, we use an open-source tool called <a href="https://sourceforge.net/projects/portecle/" target="_blank">Portecle</a> to execute the relevant digital certificate creation, management and CSR creation, etc.. Both tools are serving the same purposes, and the choice is purely based on personal preferences. </li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Tools" duration="1">
+        <p>Start Anypoint Studio and create a new project.</p>
+<p class="image-container"><img style="width: 511.54px" src="img/71e99ee8128205aa.png"> <br></p>
+<p>Next, open a Terminal window and go to the directory of where you unpacked <a href="https://sourceforge.net/projects/portecle/" target="_blank">Portecle</a>, and execute the following command to start the tool.</p>
+<pre><code>java -jar portecle.jar</code></pre>
+<p>You should see the following screen after running the command.</p>
+<p class="image-container"><img style="width: 431.50px" src="img/29879a6afdf0db25.png"></p>
+<p>In the next few steps of this codelab, we&#39;ll be creating the keystore for both the client and server side, and a single truststore that contains the client and server certificates.<br></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Keystore</strong></p>
+</td><td colspan="1" rowspan="1"><p>The keystore stores the identity of this server, and it contains the certificate and the private key of the identity of this server. <br><br>The certificate (less the private key) can be imported into the other end&#39;s trust store so that this end can be trusted by the other end.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Truststore</strong></p>
+</td><td colspan="1" rowspan="1"><p>The truststore stores all the certificates (less those private keys) which this server trusts. <br><br>The two-way (or mutual SSL) is established by establishing:</p>
+<ul>
+<li>the API server&#39;s trust in the API caller.</li>
+<li>the API caller&#39;s trust in the API server.</li>
+</ul>
+</td></tr>
+</table>
+<p>Again, you can use keytool or any digital certificate management tool that you are familiar instead of the <a href="http://portecle.sourceforge.net/" target="_blank">Portecle</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Server - Create Keystore and Certificates" duration="2">
+        <p>In Portecle, click on <code>File > New Keystore</code><br><br>Leave the default selection of &#34;JKS&#34; for keystore type.</p>
+<p class="image-container"><img style="width: 249.50px" src="img/418d0d048955eb6e.png"><br></p>
+<p>Click on <code>Tools > Generate Key Pair</code><br><br>Leave the default selection of &#34;RSA&#34; as Key Algorithm, and &#34;2048&#34; as Key Size.<br></p>
+<p class="image-container"><img style="width: 274.00px" src="img/1418e85a5b804314.png"></p>
+<p>Click OK, and enter the following values:</p>
+<p class="image-container"><img style="width: 441.50px" src="img/eb29203219019ec3.png"></p>
+<p>Click OK. Leave the given alias on the next dialog screen:</p>
+<p class="image-container"><img style="width: 431.50px" src="img/a40671a1cf446a5c.png"><br></p>
+<p>Click OK. On the next screen, use a password to protect this key pair. You should see a success message for the keystore creation.</p>
+<p class="image-container"><img style="width: 329.00px" src="img/59b8cb3e646bb684.png"></p>
+<p>Click OK and then click on <code>File > Save Keystore</code></p>
+<p class="image-container"><img style="width: 425.50px" src="img/3c1352ef6b1a2172.png"></p>
+<p>Use a password to protect this keystore. </p>
+<p class="image-container"><img style="width: 438.00px" src="img/6f871ea817f3e8e3.png"></p>
+<p>Enter the file name <code>server-keystore.jks</code> to save the new keystore file:</p>
+<p class="image-container"><img style="width: 401.50px" src="img/373fe27c5fefe54.png"></p>
+<p>Next we want to export the certificate. Right-click on the keystore you just created, and click on Export. </p>
+<p class="image-container"><img style="width: 386.50px" src="img/fb46225c82bd7ae5.png"></p>
+<p>Leave all default values:</p>
+<p class="image-container"><img style="width: 201.39px" src="img/ab5088ef4143ed2f.png"></p>
+<p>Click OK. Change the file name to server.cer and then click on Export. </p>
+<p class="image-container"><img style="width: 407.75px" src="img/45fcb3449ed66a52.png"></p>
+<p>Once you get the Export Successful message, click on OK</p>
+<p class="image-container"><img style="width: 415.50px" src="img/959d7311f3f7a23f.png"></p>
+<h2 is-upgraded><strong>Keytool Commands</strong></h2>
+<p>If you prefer to use keytool, you can run the following commands in the terminal to generate the same files. If you prefer to use keytool, you can run the following commands in the terminal to generate the same files. The password for these commands is currently set to <code>password</code>. Be sure to change them before running the commands.</p>
+<h3 is-upgraded><strong>Generate Keystore</strong></h3>
+<pre><code>keytool -genkeypair -keystore server-keystore.jks -dname &#34;CN=Salesforce, OU=MuleSoft, O=Sales, L=San Francisco, ST=CA, C=US&#34; -keypass password -storepass password -keyalg RSA -sigalg SHA256withRSA -keysize 2048 -alias salesforce -ext SAN=DNS:localhost,IP:127.0.0.1 -validity 365</code></pre>
+<h3 is-upgraded><strong>Export Server Certificate</strong></h3>
+<pre><code>keytool -export -alias salesforce -file server.crt -keystore server-keystore.jks</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Client - Create Keystore and Certificates" duration="2">
+        <p>So we&#39;ve created the keystore and certificate for the server side. We need to repeat the steps for the client side as well. Click on <code>File > New Keystore</code></p>
+<p class="image-container"><img style="width: 454.50px" src="img/bebc79d3d285941b.png"></p>
+<p>Leave the default selection of &#34;JKS&#34; for keystore type.</p>
+<p class="image-container"><img style="width: 191.59px" src="img/418d0d048955eb6e.png"><br></p>
+<p>Click on <code>Tools > Generate Key Pair</code></p>
+<p>Leave the default selection of &#34;RSA&#34; as Key Algorithm, and &#34;2048&#34; as Key Size.</p>
+<p class="image-container"><img style="width: 274.00px" src="img/1418e85a5b804314.png"></p>
+<p>Click OK, and enter the following values:</p>
+<p class="image-container"><img style="width: 441.50px" src="img/eb29203219019ec3.png"></p>
+<p>Click OK. Leave the given alias on the next dialog screen:</p>
+<p class="image-container"><img style="width: 431.50px" src="img/a40671a1cf446a5c.png"><br></p>
+<p>Click OK. On the next screen, use a password to protect this key pair. You should see a success message for the keystore creation.</p>
+<p class="image-container"><img style="width: 329.00px" src="img/59b8cb3e646bb684.png"></p>
+<p>Click OK and then click on <code>File > Save Keystore</code></p>
+<p class="image-container"><img style="width: 376.50px" src="img/3c1352ef6b1a2172.png"></p>
+<p>Use a password to protect this keystore. </p>
+<p class="image-container"><img style="width: 438.00px" src="img/6f871ea817f3e8e3.png"></p>
+<p>Enter the file name <code>client-keystore.jks</code> to save the new client keystore file:</p>
+<p class="image-container"><img style="width: 394.50px" src="img/10e8d5d77cf70610.png"></p>
+<p>Similar to what we did for the server, we want to export the certificate. Right-click on the keystore you just created, and click on <code>Export</code>. </p>
+<p class="image-container"><img style="width: 383.50px" src="img/74536cbfe3de493a.png"></p>
+<p>Leave all default values:</p>
+<p class="image-container"><img style="width: 201.39px" src="img/ab5088ef4143ed2f.png"></p>
+<p>Click OK. Change the file name to <code>client.cer</code> and then click on Export. </p>
+<p class="image-container"><img style="width: 433.50px" src="img/a0a66c862d71fe9d.png"></p>
+<p>Once you get the Export Successful message, click on OK</p>
+<p class="image-container"><img style="width: 441.00px" src="img/d2bb12584f810dab.png"></p>
+<h2 is-upgraded><strong>Keytool Commands</strong></h2>
+<p>If you prefer to use keytool, you can run the following commands in the terminal to generate the same files. The password for these commands is currently set to <code>password</code>. Be sure to change them before running the commands.</p>
+<h3 is-upgraded><strong>Generate Keystore</strong></h3>
+<pre><code>keytool -genkeypair -keystore client-keystore.jks -dname &#34;CN=Salesforce, OU=MuleSoft, O=Sales, L=San Francisco, ST=CA, C=US&#34; -keypass password -storepass password -keyalg RSA -sigalg SHA256withRSA -keysize 2048 -alias salesforce -ext SAN=DNS:localhost,IP:127.0.0.1 -validity 365</code></pre>
+<h3 is-upgraded><strong>Export Server Certificate</strong></h3>
+<pre><code>keytool -export -alias salesforce -file client.crt -keystore client-keystore.jks</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Truststore" duration="2">
+        <p>In this step, we&#39;ll create the truststore. The truststore will contain the certificates from the client and server that we generated earlier in the codelab. Click on <code>File > New Keystore</code></p>
+<p class="image-container"><img style="width: 442.50px" src="img/ca7aa4023777b458.png"></p>
+<p>Leave the default selection of &#34;JKS&#34; for the keystore type and click OK</p>
+<p class="image-container"><img style="width: 211.50px" src="img/418d0d048955eb6e.png"></p>
+<p>Click on <code>Tools > Import Trusted Certificate</code></p>
+<p class="image-container"><img style="width: 469.50px" src="img/bf12ca6c3a278eff.png"></p>
+<p>Select the client certificate you exported earlier <code>client.cer</code>, and click <code>Import</code>:</p>
+<p class="image-container"><img style="width: 418.50px" src="img/9b85d7c70edcb9c6.png"></p>
+<p>Since you are using a self-signed certificate, you will get a warning message like this:</p>
+<p class="image-container"><img style="width: 404.50px" src="img/be1c5100ad49c428.png"></p>
+<p>Click OK. Visually inspect the content of the imported certificate:</p>
+<p class="image-container"><img style="width: 451.50px" src="img/5cd7de1ae8cc90e5.png"></p>
+<p>Click OK. </p>
+<p class="image-container"><img style="width: 355.50px" src="img/86eda3ece52af3b2.png"></p>
+<p>Click Yes. Change the alias to <code>salesforce-client</code>, and Click OK</p>
+<p class="image-container"><img style="width: 423.50px" src="img/754487d606092a98.png"></p>
+<p>Now the client certificate is imported successfully into the truststore:</p>
+<p class="image-container"><img style="width: 435.50px" src="img/54ef34097fd66182.png"></p>
+<p>Next we&#39;re going to import the server certificate into the truststore. Click on <code>Tools > Import Trusted Certificate</code></p>
+<p class="image-container"><img style="width: 469.50px" src="img/bf12ca6c3a278eff.png"></p>
+<p>Select the server certificate you exported earlier <code>server.cer</code>, and click <code>Import</code>:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9d25423539a096f0.png"></p>
+<p>Since you are using a self-signed certificate, you will get a warning message like this:</p>
+<p class="image-container"><img style="width: 404.50px" src="img/be1c5100ad49c428.png"></p>
+<p>Click OK. Visually inspect the content of the imported certificate and then click on OK</p>
+<p class="image-container"><img style="width: 451.50px" src="img/5cd7de1ae8cc90e5.png"></p>
+<p>Click Yes. </p>
+<p class="image-container"><img style="width: 355.50px" src="img/86eda3ece52af3b2.png"></p>
+<p>Change the alias to <code>salesforce-client</code>, and Click OK</p>
+<p class="image-container"><img style="width: 427.50px" src="img/fb4f8fc5b178cdb.png"></p>
+<p>Click on <code>File > Save Keystore</code></p>
+<p class="image-container"><img style="width: 462.50px" src="img/b90f0ff954306585.png"></p>
+<p>Enter a password</p>
+<p class="image-container"><img style="width: 413.50px" src="img/9df9739c1c9e40cc.png"></p>
+<p>Save the truststore with the file name <code>truststore.jks</code> and click on <code>Save</code></p>
+<p class="image-container"><img style="width: 437.50px" src="img/8befa991d88fda6f.png"></p>
+<h2 is-upgraded><strong>Keytool Commands</strong></h2>
+<p>If you prefer to use keytool, you can run the following commands in the terminal to generate the same files.</p>
+<h3 is-upgraded><strong>Import Certificates into Truststore</strong></h3>
+<pre><code>keytool -import -file server.crt -alias salesforce-server -keystore truststore.jks
+
+keytool -import -file client.crt -alias salesforce-client -keystore truststore.jks</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Mule Project" duration="3">
+        <p>Now we have the keystore for the client and server, and the truststore that contains the certificates from both, we&#39;re ready to configure two-way SSL in an example project. <br><br>Copy the three files that we created into the  <code>src/main/resources</code> folder inside your project.</p>
+<p class="image-container"><img style="width: 380.50px" src="img/b18b841c9b103dad.png"></p>
+<p>Typically we would be creating two different Mule projects. One would be the server, and the other would be the client that makes a request to the server. But for the sake of simplicity, we&#39;re going to create one project with two flows.</p>
+<p class="image-container"><img style="width: 325.32px" src="img/c4fe0ecf5ca58813.png"></p>
+<p>The first flow will act as the server. The second will act as the client and have an HTTP Request operation that call the first flow.</p>
+<h2 is-upgraded><strong>Server Flow</strong></h2>
+<p>In the server flow, drag and drop the following components to build the flow so it looks like this: </p>
+<p class="image-container"><img style="width: 281.50px" src="img/af97f1efd677abd4.png"></p>
+<p>You&#39;ll have an HTTP Listener and a Transform Message component in the flow and that will receive the request from the client. The Transform Message component will return a simple JSON message.</p>
+<h3 is-upgraded><strong>HTTP Listener</strong></h3>
+<p>In the Mule properties window, fill in the Display Name and Path fields with the following</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Display Name</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>/server : 8082</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Path</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>/server</code></p>
+</td></tr>
+</table>
+<p>Then click on the green plus sign next to the Connector configuration.</p>
+<p class="image-container"><img style="width: 440.50px" src="img/6a9ae2c6bd9e0b42.png"></p>
+<p>Change the Protocol to HTTPS and set the port to 8082</p>
+<p class="image-container"><img style="width: 447.50px" src="img/8487c45c7dbb0dfd.png"></p>
+<p>Click on the TLS tab and change the TLS Configuration drop down to Edit inline.</p>
+<p>Fill in the fields to look like the corresponding screenshot below. Be sure to use the password that you used when you created the keystore and truststore earlier in the codelab.</p>
+<p class="image-container"><img style="width: 460.50px" src="img/ea77fa648147f30b.png"></p>
+<p>Click on OK</p>
+<h3 is-upgraded><strong>Transform Message</strong></h3>
+<p>If the call to the server is successful, the Transform Message component will return a simple JSON message. Configure the script to look like the following:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/22caa415a6255e74.png"></p>
+<pre><code>%dw 2.0
+output application/json
+---
+&#34;Server&#34;</code></pre>
+<h2 is-upgraded><strong>Client Flow</strong></h2>
+<p>The client flow is what you&#39;ll call from the browser to make the request to the server. Drag and drop in components to match the following flow.</p>
+<p class="image-container"><img style="width: 400.50px" src="img/6ec30943b4dc5a64.png"></p>
+<p>You&#39;ll have an HTTP Listener, an HTTP Request, and a Transform Message component in the flow. The HTTP Request will call the flow we just built for the server and the Transform Message component will return the response back from the server.</p>
+<h3 is-upgraded><strong>HTTP Listener</strong></h3>
+<p>In the Mule properties window, fill in the Display Name and Path fields with the following</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Display Name</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>/client : 8081</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Path</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>/client</code></p>
+</td></tr>
+</table>
+<p>Then click on the green plus sign next to the Connector configuration.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b780c95c52955c30.png"></p>
+<p>Leave the default values for this configuration (HTTP and 8081) and click on OK</p>
+<p class="image-container"><img style="width: 445.50px" src="img/fb0de52271f983c6.png"></p>
+<h3 is-upgraded><strong>HTTP Request</strong></h3>
+<p>In the Mule properties window for the HTTP Request, fill in the Display Name and set the Path and Method fields with the following</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Display Name</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>Call Server - :8082/server</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Request &gt; Path</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>/server</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Request &gt; Method</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>GET (Default)</code></p>
+</td></tr>
+</table>
+<p>Then click on the green plus sign next to the Connector configuration.</p>
+<p class="image-container"><img style="width: 515.50px" src="img/94e1c77ef5f74775.png"></p>
+<p>Under the configuration section, change the Protocol to <code>HTTPS</code> and set the Host and Port to <code>localhost</code> and <code>8082</code>. </p>
+<p class="image-container"><img style="width: 533.75px" src="img/3ec3702a0ed0bd89.png"></p>
+<p>Change the TLS Configuration field to Edit inline. Fill in the Trust Store Configuration and Key Store Configuration to match the screenshot below. Be sure to use the password that you used when you created the keystore and truststore earlier in the codelab. Click on OK when finished.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/63857f347006c794.png"></p>
+<h3 is-upgraded><strong>Transform Message</strong></h3>
+<p>If the call to the server is successful, the Transform Message component will return the response from the server. Configure the script to look like the following:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cfdb80f730d3d898.png"></p>
+<pre><code>%dw 2.0
+output application/json
+---
+payload</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run Mule Project" duration="1">
+        <p>Now that everything has been configured, let&#39;s run the project and see the 2-way SSL in action. Right-click on the canvas and click on <code>Run project</code></p>
+<p class="image-container"><img style="width: 471.50px" src="img/fbed47f17c7d9e83.png"></p>
+<p>When the project is successful deployed, switch to your browser and navigate to the following URL</p>
+<pre><code>http://localhost:8081/client</code></pre>
+<p>If everything was configured successfully, you&#39;ll see the following response in your window.</p>
+<p class="image-container"><img style="width: 483.00px" src="img/78d8005c90eef8c4.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>In this codelab, you learned how to create keystores and a truststore for 2-way SSL communication in Anypoint Studio. While we only created a single Mule project, generally you would split this into two projects. One would act as the server and contain the server keystore and truststore. The other would be the client and make the request to the server and it would contain the client keystore and truststore.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/http-connector/1.5/http-listener-ref" target="_blank">HTTP Listener Reference - Mule 4</a></li>
+<li><a href="https://docs.mulesoft.com/http-connector/1.5/http-request-ref" target="_blank">HTTP Request Reference - Mule 4</a></li>
+<li><a href="https://github.com/djuang1/two-way-ssl-example-mule4" target="_blank">Github - Example 2-way SSL Project for Mule 4</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

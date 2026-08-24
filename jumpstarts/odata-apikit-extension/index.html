@@ -1,0 +1,542 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Create an OData API in MuleSoft</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="odata-apikit-extension"
+                  title="Create an OData API in MuleSoft"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-14</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>The MuleSoft APIkit OData Extension supports OData (Open Data Protocol) Version 2 for creating HTTP-based data services. Through these services, you can query the underlying data sources using HTTP. </p>
+<aside class="warning"><p><strong>Note:</strong> This codelab assumes you have access to a MySQL database to create a table that will be used for the implementation step. If you don&#39;t have access, steps are included on how to run a local instance using Docker.</p>
+</aside>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>In this codelab, you&#39;re going to build an OData API using the APIKit OData Extension. The API will expose data from a MySQL database. Additionally, the lab will show you how to implement the OData 2.0 query filters using DataWeave.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to install the APIKit OData Extension</li>
+<li>How to create an Entity Data Model</li>
+<li>How to generate flows from the Entity Data Model</li>
+<li>How to use DataWeave to implement OData 2.0 query filters.</li>
+<li>How to use the OData API</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.5.x</li>
+<li>MySQL Server</li>
+<li><a href="https://www.docker.com/products/docker-desktop" target="_blank">Docker Desktop</a> - Optional if you have access to a MySQL server</li>
+<li>Database Tool - <a href="https://dbeaver.io/" target="_blank">DBeaver</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Install the APIKit OData Extension" duration="1">
+        <h2 is-upgraded><strong>Install New Software</strong></h2>
+<p>Open Anypoint Studio and click on <strong>Help</strong> and select <strong>Install New Software</strong></p>
+<p class="image-container"><img style="width: 405.50px" src="img/bc21dff05c322be3.png"></p>
+<p>Click <strong>Add</strong></p>
+<p class="image-container"><img style="width: 309.67px" src="img/48826c1e74e5b602.png"></p>
+<p>Fill in the <strong>Name </strong>and <strong>Location </strong> field with the following values</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Name</p>
+</td><td colspan="1" rowspan="1"><p><code>APIkit for ODATA</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Location</p>
+</td><td colspan="1" rowspan="1"><p><code>http://studio.mulesoft.org/s4/apikit-for-odata/</code></p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 508.50px" src="img/2968d8ee33a40bc2.png"></p>
+<p>Click <strong>Add</strong></p>
+<p>In the list of <strong>Available Software</strong>, check the checkboxes next to <strong>Anypoint ODATA Plugin</strong> and click on <strong>Next</strong></p>
+<p class="image-container"><img style="width: 579.50px" src="img/84cc376e0bef9d78.png"></p>
+<p>Click on <strong>Next </strong>in the <strong>Install Details</strong> window</p>
+<p class="image-container"><img style="width: 498.50px" src="img/b18624a431ad2958.png"></p>
+<p>Click <strong>I accept the terms of the license agreement </strong>and click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/493e5d0cfe368e3b.png"></p>
+<p>Click <strong>Restart Now </strong>to complete the installation of the plugin.</p>
+<p class="image-container"><img style="width: 516.00px" src="img/b8c810e3dbede2d0.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Entity Data Model" duration="3">
+        <h2 is-upgraded><strong>Create a new project</strong></h2>
+<p>Open <strong>Anypoint Studio</strong> and create a new <strong>Mule Project </strong>by going to <strong>File &gt; New &gt; Mule Project.</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/7b2270d151442f9d.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. <strong>odata-api-example</strong>), select the latest runtime, and then click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 453.50px" src="img/8c08b181b08f0adc.png"></p>
+<h2 is-upgraded><strong>Create odata.raml File</strong><br></h2>
+<p>Expand the project using the <strong>Package Explorer </strong>and navigate to the <strong>src/main/resources</strong> folder. Right-click on the <strong>api</strong> folder and select <strong>New &gt; RAML API Definition</strong></p>
+<p class="image-container"><img style="width: 477.50px" src="img/1943ec8079588a52.png"></p>
+<p>In the <strong>New RAML API Definition File</strong> window, give the file the name <strong>odata.raml</strong> in the <strong>File name:</strong> field and click on <strong>Finish.</strong></p>
+<p class="image-container"><img style="width: 446.18px" src="img/bd492f16f2759ed1.png"></p>
+<p>In the new file, paste the following RAML specification into the window. It should look like the screenshot below the specification. Don&#39;t worry about all the errors that pop-up in Studio, just save the file for now. Once you generate the OData API using the APIKit OData Extension, the errors will go away.</p>
+<pre><code>#%RAML 1.0 Library
+uses:
+ odata: libraries/odataLibrary.raml
+
+types:
+ customers:
+   (odata.remote): Customers
+   properties:
+     CustomerID:
+       type: string
+       (odata.key): true
+       (odata.nullable): false
+       maxLength: 5
+       required: true
+     CompanyName:
+       type: string
+       (odata.nullable): true
+       (odata.key): false
+       maxLength: 40
+       required: false
+     ContactName:
+       type: string
+       (odata.nullable): true
+       (odata.key): false
+       maxLength: 30
+       required: false
+     ContactTitle:
+       type: string
+       (odata.nullable): true
+       (odata.key): false
+       maxLength: 30
+       required: false</code></pre>
+<p class="image-container"><img style="width: 327.50px" src="img/f5c3369d24cd7a4.png"></p>
+<p>The <strong>odata.raml </strong>file is the Entity Data Model representation of a data source. In this case, we&#39;re defining a single collection called <strong>customers</strong>. The <strong>customers </strong>collection consists of four properties.  </p>
+<p>If you look at the diagram below, it shows the relationship between a relational database and a OData Entity Data Model.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/88efcd836a282e65.png"></p>
+<p>In the <strong>odata.raml</strong> file, you&#39;ll notice there are annotations that reference the <strong>odataLibrary.raml</strong> file. This file is automatically added to the project in the next step. It contains <strong>annotation</strong> types specific to OData properties and <strong>traits</strong> specific to OData query filters. We&#39;ll cover those more in detail later in the codelab.</p>
+<h2 is-upgraded><strong>Generate OData API</strong></h2>
+<p><br>In the <strong>Package Explorer, </strong>right-click on the <strong>odata.raml</strong> file and select <strong>Mule &gt; Generate OData API from RAML Types</strong>. If the option is missing, the <strong>APIKit OData Extension</strong> wasn&#39;t installed properly.</p>
+<p class="image-container"><img style="width: 529.90px" src="img/7bcc2f1255937610.png"></p>
+<p>Once the API is generated from the RAML types, you&#39;ll find 3 new files in your project.</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>src/main/mule/<strong>api.xml</strong></p>
+</td><td colspan="1" rowspan="1"><p>Auto-scaffolded API flows generated from the api.raml file.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>src/main/resources/api/<strong>api.raml</strong></p>
+</td><td colspan="1" rowspan="1"><p>RAML file generated from the odata.raml file and the defined RAML types.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>src/main/resources/api/<strong>libraries/odataLibrary.raml</strong></p>
+</td><td colspan="1" rowspan="1"><p>OData Entity Model RAML types used for annotations.</p>
+</td></tr>
+</table>
+<p>First, open the <strong>odataLibrary.raml</strong> file from <strong>src/main/resources/api/libraries. </strong>This file is auto-generated and included with every APIKit OData project. It contains the annotations that are used to define the Entity Data Model for the OData API.</p>
+<p class="image-container"><img style="width: 567.50px" src="img/c40521e9c8482fd3.png"></p>
+<p>Next, open the <strong>api.xml</strong> file under <strong>src/main/mule. </strong>You can see all the flows that were auto-generated by the APIKit for OData. Each entity, in this case the <strong>customers</strong>, has multiple flows generated to handle each operation: GET, PUT, POST, DELETE.</p>
+<p class="image-container"><img style="width: 478.50px" src="img/39d47282587ce973.png"></p>
+<p>In the next section, we&#39;ll implement the API by connecting the <strong>get:\customers</strong> flows to a MySQL database as the source.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Implement the OData API" duration="5">
+        <p>In order to implement and test the OData API, we need to setup the underlying data source. This can be from a single system or an orchestration of data from multiple sources. For the purpose of this codelab, we&#39;ll leverage a single table in a MySQL database. <br><br>As noted in the beginning, this codelab assumes you have access to a MySQL database. If you don&#39;t, you can follow the optional steps to setup Docker and a local instance of MySQL to test against. Otherwise you can skip the next section and proceed with setting up the Database Connector in your Mule project.</p>
+<h2 is-upgraded><strong>OPTIONAL - Install Docker and MySQL Locally</strong></h2>
+<p>Download and install Docker Desktop by following this link.</p>
+<pre><code>https://www.docker.com/products/docker-desktop</code></pre>
+<p>Once you have <a href="https://www.docker.com/products/docker-desktop" target="_blank">Docker</a> installed, you can quickly spin up a MySQL instance locally by running the following commands.</p>
+<pre><code>docker pull mysql</code></pre>
+<p>Next, run the docker instance with MySQL 5.7.31 listening on port 3306. Don&#39;t forget to change the <strong>container name</strong> and root <strong>password</strong> in the command before running it.</p>
+<pre><code>docker run --name &lt;container name&gt; -p3306:3306 -e MYSQL_ROOT_PASSWORD=&lt;password&gt; -d mysql:5.7.31</code></pre>
+<p>Once the container is up and running, you can use a database tool like <a href="https://dbeaver.io/" target="_blank">DBeaver</a> to connect to the local instance and set up a table.</p>
+<p class="image-container"><img style="width: 428.67px" src="img/e4038ea904888a01.png"></p>
+<p>Right-click on the <strong>Databases</strong> folder, and select <strong>Create New Database</strong></p>
+<p class="image-container"><img style="width: 467.00px" src="img/d965d9ae376ed5ce.png"></p>
+<p>Give the database a name (e.g. odata) and click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 276.00px" src="img/f366bcd5a8756a3e.png"></p>
+<p>Click on <strong>SQL Editor </strong>and select <strong>SQL Editor</strong></p>
+<p class="image-container"><img style="width: 437.00px" src="img/6f8199e6eabe5655.png"></p>
+<p>Make sure the SQL Editor window is pointing to the correct server (<strong>localhost</strong>) and correct database (<strong>odata</strong>)</p>
+<p class="image-container"><img style="width: 422.00px" src="img/33200ca929b8e83c.png"></p>
+<h2 is-upgraded>Setup Database Table </h2>
+<p>Copy, paste and run the following SQL script against your database to add a new table with some auto-generated data.</p>
+<p class="image-container"><img style="width: 476.00px" src="img/6f87f67547ae2b08.png"></p>
+<pre><code>DROP TABLE IF EXISTS `Customers`;
+CREATE TABLE `Customers` (
+ `CustomerID` int auto_increment NOT NULL,
+ `CompanyName` varchar(40) NOT NULL,
+ `ContactName` varchar(30) DEFAULT NULL,
+ `ContactTitle` varchar(30) DEFAULT NULL,
+ PRIMARY KEY (`CustomerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+LOCK TABLES `Customers` WRITE;
+INSERT INTO `Customers` (CompanyName, ContactName, ContactTitle) VALUES (&#39;Alfreds Futterkiste&#39;,&#39;Maria Anders&#39;,&#39;Sales Representative&#39;),(&#39;Ana Trujillo Emparedados y helados&#39;,&#39;Ana Trujillo&#39;,&#39;Owner&#39;),(&#39;Antonio Moreno Taquera&#39;,&#39;Antonio Moreno&#39;,&#39;Owner&#39;),(&#39;Around the Horn&#39;,&#39;Thomas Hardy&#39;,&#39;Sales Representative&#39;),(&#39;Berglunds snabbkp&#39;,&#39;Christina Berglund&#39;,&#39;Order Administrator&#39;);
+UNLOCK TABLES;</code></pre>
+<p>Your table should look like the following:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5acc2d92fc71fef1.png"></p>
+<h2 is-upgraded><strong>Setup Database Connector</strong></h2>
+<p>Switch back to <strong>Anypoint Studio</strong> and in the <strong>Mule Palette</strong>, click on <strong>Add Modules </strong></p>
+<p class="image-container"><img style="width: 263.00px" src="img/11fc01d95a10a3aa.png"></p>
+<p>Drag and drop the Database component into the left column to add it to the project. If it asks you to <strong>Select module version</strong>, choose the latest version you have and click on <strong>Add.</strong></p>
+<p class="image-container"><img style="width: 344.00px" src="img/55337d5d8a600fc4.png"></p>
+<p>For the list of available operations, drag and drop the <strong>Select</strong> operation into the canvas and place it in the <strong>get:\customers:api-config </strong>flow</p>
+<p class="image-container"><img style="width: 550.50px" src="img/3b8e47560f150eab.png"></p>
+<p>In the Mule Properties tab, click on the green plus sign to add the connector configuration for the MySQL database.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/83ea48a57c39d806.png"></p>
+<p>In the <strong>General</strong> tab, click on <strong>Connection </strong>and change the value to <strong>MySQL Connection</strong></p>
+<p class="image-container"><img style="width: 545.50px" src="img/c144370475abdca9.png"></p>
+<p>In the <strong>Required Libraries</strong> section, click on the <strong>Configure </strong>button and select <strong>Add recommended libraries</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/af12fbbf52d93af5.png"></p>
+<p>Click <strong>OK</strong> to accept the recommended libraries for MySQL.</p>
+<p class="image-container"><img style="width: 516.00px" src="img/45eb63dcec0c047d.png"></p>
+<p>Fill in the fields in the <strong>Connection</strong> section with the details for your MySQL database. If you followed the previous steps to create a local database using Docker, the settings should be the same below (except of course the password you used). Click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 448.50px" src="img/a4d7ad6eabb0584e.png"></p>
+<p>If you&#39;re using a local instance of MySQL running in Docker, you may need to run through the following steps. Click on the <strong>Advanced</strong> tab and change the <strong>Connection properties</strong> dropdown in the <strong>Connection</strong> setting to <strong>Edit inline </strong>and click on the green plus sign.</p>
+<p class="image-container"><img style="width: 576.00px" src="img/7de114a2d7d77d70.png"></p>
+<p>Fill in the <strong>Key </strong>and <strong>Value</strong> field with the following values and click on <strong>Finish</strong></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Key</p>
+</td><td colspan="1" rowspan="1"><p>useSSL</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Value</p>
+</td><td colspan="1" rowspan="1"><p>false</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/6140c802469169db.png"></p>
+<p>Click on <strong>OK</strong> and move on to the next step.</p>
+<h2 is-upgraded><strong>Configure Select Operation</strong></h2>
+<p>Back in the Mule Properties tab for the Select operation, copy and paste the following SQL script into the <strong>SQL Query Text</strong> box.</p>
+<pre><code>SELECT * FROM Customers</code></pre>
+<p class="image-container"><img style="width: 551.50px" src="img/2b91bc0cf0a41359.png"></p>
+<p>If everything was configured correctly, you should be able to see the metadata being pulled for Data Sense in the Output tab to the right.</p>
+<p class="image-container"><img style="width: 267.50px" src="img/c54be2c8c7404267.png"></p>
+<h2 is-upgraded><strong>Transform Message from Database</strong></h2>
+<p>We need to transform the response from the database to the format that we need for the OData API. Back in the <strong>Mule Palette</strong>, click on <strong>Core</strong> and drag and drop the <strong>Transform Message </strong>into the canvas and place it after the <strong>Select</strong> operation that we just configured.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c7f49bba33f5c9cc.png"></p>
+<p>In the Mule Properties tab for the <strong>Transform Message, </strong>the data doesn&#39;t need to be mapped for each individual field for the response returned by the OData API. As you can see in the screenshot below, the payload just needs to be mapped to the key, <strong>entries. </strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/be18225579e915cb.png"></p>
+<p>You can copy and paste the script below into your DataWeave script window.</p>
+<pre><code>%dw 2.0
+output application/json
+---
+{
+        entries: payload
+}</code></pre>
+<p>That completes the setup for one flow in your OData API. In the next section, we&#39;ll test out the API and run through some standard OData API requests.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the OData API" duration="2">
+        <h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Our next step is to test the flow we&#39;ve built. Right click on the canvas and click on <strong>Run project odata-api-example</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/aea19138750f63e3.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/10ec3991b9e10ea9.png"></p>
+<h2 is-upgraded><strong>Get Collections</strong></h2>
+<p>Let&#39;s test out our flow now to see the available collections from the OData API. Switch to your web browser and enter the following URL: </p>
+<pre><code>http://localhost:8081/api/odata.svc</code></pre>
+<p>If everything was configured correctly, you should see the following result in your browser. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/22392fc06befcb1a.png"></p>
+<p>You can see the <strong>customers</strong> collection matches the Entity Data Model that we defined with the <strong>customers</strong> type.</p>
+<h2 is-upgraded><strong>Get OData Service Metadata</strong></h2>
+<p>Additionally the OData API also exposes the structure of the OData service resources, operations, and entity data model. In the browser, change the URL to the following:</p>
+<pre><code>http://localhost:8081/api/odata.svc$metadata</code></pre>
+<p>The response will look like the following screenshot.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/4fdb2afed8414374.png"></p>
+<h2 is-upgraded><strong>Query Data Source</strong></h2>
+<p>Lastly we can query the data source to get the list of customers in either XML or JSON. You can navigate to either of the following URLs to see the data returned from the OData API.</p>
+<pre><code>http://localhost:8081/api/odata.svc/customers
+http://localhost:8081/api/odata.svc/customers?$format=json</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/3ee704174fc2423a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="OData 2.0 Query Strings" duration="5">
+        <p>When creating an OData API using the APIKit OData Extension, there are additional capabilities that need to be configured in the Mule flows to support the OData protocol query filters. This is handled by composing the request that will be run against the data source. </p>
+<p>In this next section, I&#39;ll walk you through the process of building a DataWeave script to select data from our database based on specific filters. One thing to note is that this script is specific to a MySQL database table. If you&#39;re hitting another source, you&#39;ll need to configure the script accordingly.</p>
+<p>First, let&#39;s talk about the OData queries before jumping into the actual script.</p>
+<h2 is-upgraded><strong>OData Version 2.0 Query Strings</strong></h2>
+<p>All OData APIs provide a standard set of query filters. The table below shows these standard filters and what is available out of the box with the APIKit OData Extension. </p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Query</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Description</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Out-of-the-box</strong></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$format</code></p>
+</td><td colspan="1" rowspan="1"><p>By default you would have noticed that the data returned is in an XML feed. This query allows us to change the format of data to JSON. (e.g. $format=json)</p>
+</td><td colspan="1" rowspan="1"><p>Yes</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$top</code></p>
+</td><td colspan="1" rowspan="1"><p>This query option helps to limit the data returned by the service. </p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$skip</code></p>
+</td><td colspan="1" rowspan="1"><p>This can be treated as the opposite of $top. The skip queries can be used to skip records. </p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$inlinecount</code></p>
+</td><td colspan="1" rowspan="1"><p>This will return the total number of records as part of the response payload. We can extract the number from the field &lt;count&gt;&lt;/count&gt;. </p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$orderby</code></p>
+</td><td colspan="1" rowspan="1"><p>Use this to sort the records returned by the service. </p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$expand</code></p>
+</td><td colspan="1" rowspan="1"><p>Query to reduce the number of calls we need to make to access a particular set of data. </p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$filter</code></p>
+</td><td colspan="1" rowspan="1"><p>This can be compared to the ‘where&#39; query in SQL. Please refer this <a href="https://www.odata.org/documentation/odata-version-2-0/uri-conventions/" target="_blank">link</a> for the extensive list that you can use.</p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>$select</code></p>
+</td><td colspan="1" rowspan="1"><p>As in any SQL query, this query option can be used to Select specific or all fields of an Entity set or entity.</p>
+</td><td colspan="1" rowspan="1"><p>No</p>
+</td></tr>
+</table>
+<p>You can read more details about these query filters by following this <a href="https://www.odata.org/documentation/odata-version-2-0/uri-conventions/" target="_blank">link</a>.</p>
+<h2 is-upgraded><strong>SELECT Query - GET</strong></h2>
+<p>Now that we know about the standard OData query strings, let&#39;s jump into the DataWeave script that builds the MySQL database select query based on the filters. <br><br>If we look at the SQL select query below, there are specific strings that need to be dynamically generated. <code>ContactName</code>, <code>Customers</code>, <code>WHERE CustomerId = 1</code>, <code>ORDERBY ContactName</code>, and  <code>LIMIT 5</code> all need to be generated based on the filters that are passed in the request.</p>
+<pre><code>SELECT ContactName FROM Customers WHERE CustomerId = 1 ORDERBY ContactName LIMIT 5</code></pre>
+<p>So replacing those with DataWeave functions that we&#39;ll build, this is what the final SQL Query text will look like. As we walk through the next steps, I&#39;ll show you what each of those functions will look like.</p>
+<pre><code>&#34;SELECT &#34; ++ generateSqlFields(select) ++ &#34; FROM $remoteEntityName&#34;
+ ++ ( 
+         (toSQLWhere(filter)) ++
+         (toSQLOrderBy(orderby)) ++
+         (toSQLSkipAndTop(top,skip))
+ ) </code></pre>
+<h2 is-upgraded>APIKit OData Extension Variables and Query Parameters</h2>
+<p>If you run your OData API in Debug mode in Anypoint Studio and put a breakpoint at the start of the flow, you can introspect and see the variables that are generated by the APIKit OData Extension. See a screenshot of those below.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c84b90bc1ca0f076.png"></p>
+<p>In the DataWeave, each of these are stored into variables that will be used to compose the request. In the code below, we create 3 variables, <strong><code>entityFields</code></strong>, <strong><code>keys</code></strong>, and <strong><code>remoteEntityName</code></strong></p>
+<pre><code>// Variable that contains the fields of your entity. It&#39;s a list of string (List&lt;String&gt;)
+var entityFields : Array&lt;String&gt; = vars.odata.fields match {
+        case fields is Array&lt;String&gt; -&gt; fields
+        else -&gt; []
+}
+
+// Variable that contains the keys of your entity
+var keys : String = vars.odata.keyNames match {
+        case keyNames is String -&gt; keyNames
+        else -&gt; &#34;&#34;
+}
+
+// Variable that contains the table&#39;s name 
+var remoteEntityName = vars.odata.remoteEntityName match {
+        case remoteEntityName is String -&gt; remoteEntityName
+        else -&gt; &#34;&#34;        
+}</code></pre>
+<p>Additionally, we need to determine which query filter parameters are passed in the request. Going back to the Mule Debugger, you can see those stored in <strong><code>attributes.queryParams.</code></strong> In this case, I&#39;m just passing in <strong><code>$top=5</code></strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ac04c16d221d524e.png"></p>
+<p>In DataWeave, we&#39;ll store and filter each of the OData query filters. If it was passed in the request in the query parameters, we&#39;ll store those, otherwise we&#39;ll store a blank string.</p>
+<pre><code>// APIkit Odata Service puts your oData filters into the queryParams
+var filters = attributes.queryParams
+
+var top : String = filters.top match {
+    case top is String -&gt; top
+    else -&gt; &#34;&#34;
+} 
+
+var skip : String = filters.skip match {
+    case skip is String -&gt; skip
+    else -&gt; &#34;&#34;
+} 
+
+var select : String = filters.select match {
+        case select is String -&gt; select
+        else -&gt; &#34;&#34;
+}
+
+var filter : String = filters.filter match {
+        case filter is String -&gt; filter
+        else -&gt; &#34;&#34;
+}
+
+var orderby : String = filters.orderby match {
+        case orderby is String -&gt; orderby
+        else -&gt; &#34;&#34;
+}</code></pre>
+<h2 is-upgraded><strong>Generate Fields for Query</strong></h2>
+<p>Next we need to create a variable that determines and stores the specific fields that need to be returned in the query. If the  <strong>$</strong></p>
+<p><strong><code>select</code></strong> operation is passed in, we need to filter those fields, otherwise we return all the fields which are represented by the <strong><code>entityFields</code></strong> variable that we created earlier.</p>
+<pre><code>// It checks for a select filter in case you need less fields than you&#39;re actually exposing. If there is no select present, it just returns your fields defined in your metadata.
+var generateSqlFields = (select) -&gt; ((if (select != &#34;&#34; )( (select splitBy &#34;,&#34;) -- (keys splitBy &#34;,&#34;) ++ (keys splitBy &#34;,&#34;)) else entityFields)  map &#34;`$`&#34; ) joinBy &#34;, &#34;</code></pre>
+<h2 is-upgraded>WHERE part of Query</h2>
+<p>If the user passes in the <strong><code>$filter</code></strong> operation, this will generate the WHERE part of the SQL query. </p>
+<pre><code>// Transform oDataFilters into MySQL Filters
+var odataFilterToSQLFilter = (odataFilter) -&gt; 
+          
+         odataFilter replace &#34;eq null&#34; with &#34;is null&#34; 
+         replace &#34;ne null&#34; with &#34;is not null&#34; 
+         replace &#34; eq &#34; with &#34; = &#34; 
+         replace &#34; ne &#34; with &#34; != &#34; 
+         replace &#34; gt &#34; with &#34; &gt; &#34; 
+         replace &#34; lt &#34; with &#34; &lt; &#34; 
+         replace &#34; ge &#34; with &#34; &gt;= &#34; 
+         replace &#34; le &#34; with &#34; &lt;= &#34; 
+         replace &#34; and &#34; with &#34; AND &#34; 
+         replace &#34; or &#34; with &#34; OR &#34; 
+
+// Generate the where part of your query.
+var toSQLWhere = (odataFilter) -&gt; if(odataFilter !=  &#34;&#34;) &#34; WHERE &#34; ++ odataFilterToSQLFilter(odataFilter) else &#34;&#34;</code></pre>
+<h2 is-upgraded><strong>ORDER BY part of Query</strong></h2>
+<p>For the ORDER BY part of the query, if <code>$orderby</code> is passed in, this will create the string needed for the SQL Script text.</p>
+<pre><code>// This function transforms your orderby oData filters into the MySQL Order by format. 
+// Transforms something like orderby=myField, ASC into ORDER BY myField, ASC
+// If no orderby is present, it just returns an empty string
+var toSQLOrderBy = (orderby ) -&gt; if(orderby != &#34;&#34;) (&#34; ORDER BY &#34; ++ (orderby replace &#34;=&#34; with &#34; &#34;)) else &#34;&#34;</code></pre>
+<h2 is-upgraded><strong>LIMIT and TOP part of Query</strong></h2>
+<p>For the LIMIT and OFFSET part of the SQL query, these correspond to the the <strong><code>$top</code></strong> and <strong><code>$skip</code></strong> query filters respectively. </p>
+<pre><code>// This function transforms your skip and top oData filters into MySQL LIMIT format. 
+var toSQLSkipAndTop = (top, skip) -&gt; if(top != &#34;&#34; and skip != &#34;&#34;) &#34; LIMIT $top OFFSET $skip&#34; else if (top == &#34;&#34; and skip != &#34;&#34;) &#34; LIMIT 2147483647 OFFSET $skip&#34; else if (top != &#34;&#34; and skip == &#34;&#34;) &#34; LIMIT $top&#34;  else &#34;&#34;</code></pre>
+<h2 is-upgraded>Build and Use<strong> DataWeave Script</strong></h2>
+<p>Combining all of the DataWeave into one script, the following is what we&#39;ll use in our OData API. </p>
+<pre><code>%dw 2.0
+output application/java
+
+var entityFields : Array&lt;String&gt; = vars.odata.fields match {
+        case fields is Array&lt;String&gt; -&gt; fields
+        else -&gt; []
+}
+
+var keys : String = vars.odata.keyNames match {
+        case keyNames is String -&gt; keyNames
+        else -&gt; &#34;&#34;
+}
+
+var remoteEntityName = vars.odata.remoteEntityName match {
+        case remoteEntityName is String -&gt; remoteEntityName
+        else -&gt; &#34;&#34;        
+}
+
+var generateSqlFields = (select) -&gt; ((if (select != &#34;&#34; )( (select splitBy &#34;,&#34;) -- (keys splitBy &#34;,&#34;) ++ (keys splitBy &#34;,&#34;)) else entityFields)  map &#34;`$`&#34; ) joinBy &#34;, &#34;
+
+var odataFilterToSQLFilter = (odataFilter) -&gt; 
+          
+         odataFilter replace &#34;eq null&#34; with &#34;is null&#34; 
+         replace &#34;ne null&#34; with &#34;is not null&#34; 
+         replace &#34; eq &#34; with &#34; = &#34; 
+         replace &#34; ne &#34; with &#34; != &#34; 
+         replace &#34; gt &#34; with &#34; &gt; &#34; 
+         replace &#34; lt &#34; with &#34; &lt; &#34; 
+         replace &#34; ge &#34; with &#34; &gt;= &#34; 
+         replace &#34; le &#34; with &#34; &lt;= &#34; 
+         replace &#34; and &#34; with &#34; AND &#34; 
+         replace &#34; or &#34; with &#34; OR &#34; 
+
+var filters = attributes.queryParams
+
+var top : String = filters.top match {
+    case top is String -&gt; top
+    else -&gt; &#34;&#34;
+} 
+
+var skip : String = filters.skip match {
+    case skip is String -&gt; skip
+    else -&gt; &#34;&#34;
+} 
+
+var select : String = filters.select match {
+        case select is String -&gt; select
+        else -&gt; &#34;&#34;
+}
+
+var filter : String = filters.filter match {
+        case filter is String -&gt; filter
+        else -&gt; &#34;&#34;
+}
+
+var orderby : String = filters.orderby match {
+        case orderby is String -&gt; orderby
+        else -&gt; &#34;&#34;
+}
+
+var toSQLOrderBy = (orderby ) -&gt; if(orderby != &#34;&#34;) (&#34; ORDER BY &#34; ++ (orderby replace &#34;=&#34; with &#34; &#34;)) else &#34;&#34;
+ 
+var toSQLSkipAndTop = (top, skip) -&gt; if(top != &#34;&#34; and skip != &#34;&#34;) &#34; LIMIT $top OFFSET $skip&#34; else if (top == &#34;&#34; and skip != &#34;&#34;) &#34; LIMIT 2147483647 OFFSET $skip&#34; else if (top != &#34;&#34; and skip == &#34;&#34;) &#34; LIMIT $top&#34;  else &#34;&#34;
+
+var toSQLWhere = (odataFilter) -&gt; if(odataFilter !=  &#34;&#34;) &#34; WHERE &#34; ++ odataFilterToSQLFilter(odataFilter) else &#34;&#34;
+
+---
+
+&#34;SELECT &#34; ++ generateSqlFields(select) ++ &#34; FROM $remoteEntityName&#34;
+ ++ ( 
+         (toSQLWhere(filter)) ++
+         (toSQLOrderBy(orderby)) ++
+         (toSQLSkipAndTop(top,skip))
+ ) </code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the OData 2.0 Query Strings" duration="3">
+        <h2 is-upgraded><strong>Re-Configure Database Connector</strong></h2>
+<p>Back in Anypoint Studio in our project, click on the <strong>Select</strong> operation in the flow and change the SQL Query text to the following.</p>
+<pre><code>#[payload]</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/155cb8681613020d.png"></p>
+<h2 is-upgraded><strong>Add New DataWeave Script</strong></h2>
+<p>From the <strong>Mule Palette</strong>, drag and drop a <strong>Transform Message </strong>component into the flow and place it before the <strong>Select</strong> operation.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7cab10a3a8cf9847.png"></p>
+<p>Copy and paste the script above into the DataWeave script window of the <strong>Transform Message</strong> component.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/545325d84f44275a.png"></p>
+<h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Let&#39;s test out the new changes and see the query strings in action. Right click on the canvas and click on <strong>Run project odata-api-example</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/50c5e57db6b283b3.png"></p>
+<p>When the application is successfully deployed, switch to your browser and open the following URL.</p>
+<pre><code>http://localhost:8081/api/odata.svc/customers?$top=5&amp;$skip=2&amp;$select=ContactName&amp;$format=json</code></pre>
+<p>If everything was configured correctly, you should see the following response from the OData API.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5d5826ee6213ec23.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>Congratulations, you&#39;ve successfully built an OData API using the APIKit OData Extension. You learned about creating an Entity Data Model using RAML to describe a data source. You&#39;ve taken that entity data model and auto-generated an API in Anypoint Studio. And you&#39;ve implemented the connection to a MySQL database. Lastly, you learned about how to implement the OData 2.0 query strings using DataWeave.</p>
+<p>Building an OData API in MuleSoft does require some additional configuration to handle the standard OData 2.0 query strings. You can find a complete OData API example for Mule 4 <a href="https://github.com/djuang1/odata-api-mule4" target="_blank">here</a>. </p>
+<p>You do need to configure the project to point to your own MySQL instance but it provides some additional DataWeave script examples that are needed for the PUT, DELETE, and POST operations against a MySQL database. </p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://www.odata.org/documentation/odata-version-2-0/" target="_blank">OData Version 2.0 Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/apikit/4.x/creating-an-odata-api-with-apikit" target="_blank">Creating an OData-Enabled API</a></li>
+<li><a href="https://docs.mulesoft.com/apikit/4.x/apikit-odata-extension-reference" target="_blank">APIKit OData Extension Reference</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,724 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Build a CICD Solution with Azure Pipelines</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  codelab-ga4id=""
+                  id="build-a-cicd-solution-with-azure-pipelines"
+                  title="Build a CICD Solution with Azure Pipelines"
+                  environment="web"
+                  feedback-link="https://mulesoft.slack.com/archives/CKL3K8Q5P">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>Azure Pipelines is a cloud service that you can use to automatically build and test your code project and make it available to other users. It works with just about any language or project type.</p>
+<p>Azure Pipelines combines continuous integration (CI) and continuous delivery (CD) to constantly and consistently test and build your code and ship it to any target.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/efa187903d13e408.png"></p>
+<h2 is-upgraded>What you&#39;ll build</h2>
+<p>In this codelab, you&#39;re going to build an Azure pipeline to automate the continuous integration and continuous delivery.</p>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<ul class="checklist">
+<li>How to create an Azure Organization</li>
+<li>how to create an Azure Project</li>
+<li>how to create an Azure Pipeline</li>
+<li>how to automate the building process </li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li><a href="https://dev.azure.com/" target="_blank">Azure</a></li>
+<li><a href="http://anypoint.mulesoft.com" target="_blank">Anypoint Platform</a></li>
+</ul>
+<p>You can create an instance of each system in Cloud Services</p>
+<google-codelab-survey survey-id="build-a-cicd-solution-with-azure-pipelines-1">
+<h4>How will you use use this tutorial?</h4>
+<paper-radio-group>
+<paper-radio-button>Read it through only</paper-radio-button>
+<paper-radio-button>Read it and complete the exercises</paper-radio-button>
+</paper-radio-group>
+<h4>How would you rate your experience with Git?</h4>
+<paper-radio-group>
+<paper-radio-button>Novice</paper-radio-button>
+<paper-radio-button>Intermediate</paper-radio-button>
+<paper-radio-button>Proficient</paper-radio-button>
+</paper-radio-group>
+<h4>How would you rate your experience with Maven?</h4>
+<paper-radio-group>
+<paper-radio-button>Novice</paper-radio-button>
+<paper-radio-button>Intermediate</paper-radio-button>
+<paper-radio-button>Proficient</paper-radio-button>
+</paper-radio-group>
+<h4>How would you rate your experience with Jenkins pipeline?</h4>
+<paper-radio-group>
+<paper-radio-button>Novice</paper-radio-button>
+<paper-radio-button>Intermediate</paper-radio-button>
+<paper-radio-button>Proficient</paper-radio-button>
+</paper-radio-group>
+</google-codelab-survey>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Mule Project" duration="2">
+        <p>For this Lab we are going to use the <strong>Hello World </strong>example that is an example that is in <a href="https://anypoint.mulesoft.com/exchange/org.mule.examples/hello-world/minor/2.1/" target="_blank">Exchange</a>. Please feel free to use this lab with any other project and import it into Studio.</p>
+<h2 is-upgraded>Download the project form Exchange</h2>
+<ol type="1" start="1">
+<li>Open Studio</li>
+<li>Press the Exchange Button</li>
+<li>Search for Hello World</li>
+<li>Import the project into your Studio by pressing the Open button</li>
+</ol>
+<p>At the end you should see something similar to this:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cbe68f08c9958434.png"></p>
+<h2 is-upgraded>Update Module Dependencies</h2>
+<p>This project may have old dependencies, what we are going to do now is to update them.</p>
+<ol type="1" start="1">
+<li>On the project name do a right click and select Manage Dependencies -&gt; Manage Modules</li>
+</ol>
+<p class="image-container"><img style="width: 282.49px" src="img/9b3f2a30409690df.png"></p>
+<ol type="1" start="2">
+<li>Check all the dependencies and press Apply and Close</li>
+</ol>
+<p class="image-container"><img style="width: 371.50px" src="img/28b423045eb0b15e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Azure Organization" duration="1">
+        <h2 is-upgraded>Login to Azure</h2>
+<p>First login to <a href="https://dev.azure.com/" target="_blank">Azure DevOps Services</a></p>
+<aside class="special"><p>If you don&#39;t have an account. Create one.</p>
+</aside>
+<h2 is-upgraded>Create a new Organization</h2>
+<p>Once you login, you will see the following screen</p>
+<p class="image-container"><img style="width: 624.00px" src="img/24ae21fd12fb5e8.png"></p>
+<ol type="1" start="1">
+<li>Press the <em>Create new organization</em> button</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/acb1b9371927e791.png"></p>
+<ol type="1" start="2">
+<li>Create the name of the organization and choose the region where you want to host the code and press <em>Continue</em></li>
+</ol>
+<p class="image-container"><img style="width: 463.00px" src="img/3a231e7062deab16.png"></p>
+<p>Now you are ready to create a new project</p>
+<p class="image-container"><img style="width: 624.00px" src="img/208ee8ce285fdaf7.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a new Project" duration="1">
+        <h2 is-upgraded>Create a project</h2>
+<p>We created the Organization, now we need to create a new project.</p>
+<ol type="1" start="1">
+<li>Complete the field with the project name. Press <em>Create Project </em>when finished. </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/334517d2e01a1d64.png"></p>
+<p>This is going to be part of the git url. I would recommend to not use spaces. Also notice that we decided to make this project private.</p>
+<p>Once you create the project, you will see the following screen</p>
+<p class="image-container"><img style="width: 624.00px" src="img/50af403a98ff2e1.png"></p>
+<ol type="1" start="1">
+<li>On the left side you will see a Menu with the different components that a Project has.</li>
+<li>The central panel, describe the projects and the different options you may have.</li>
+<li>This panel shows the statistics</li>
+<li>Shows the members of this project. You can invite other developers to this project by pressing the blue  Invite button on the upper right corner.</li>
+</ol>
+<p>Be careful when you invite a user. By default they are invited with the <strong>stakeholder </strong>role. They won&#39;t have access to any repo unless you change her profile. More information can be found <a href="https://docs.microsoft.com/en-us/azure/devops/organizations/billing/buy-basic-access-add-users?view=azure-devops#select-the-default-access-level-for-new-users" target="_blank">here</a>. You can also go to the appendix to learn how to change the profile.</p>
+<h2 is-upgraded>Generate Credentials </h2>
+<p>This step is needed if you login to Azure using a corporate user.</p>
+<ol type="1" start="1">
+<li>Go to <em>Repos</em>. You will see the URL. </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/856fccb65298710f.png"></p>
+<ol type="1" start="2">
+<li>Click <em>Generate Git Credentials</em> to get the username and password</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/478fa9576d3de4b9.png"></p>
+<p>Take note of the URL, user and password. You are going to need it in the next section.</p>
+<p>Great!!! In the next section we are going to configure the Studio Project to use this repo</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Initialize the Studio project" duration="2">
+        <p>In this section we are going to initialize our mule project to the Git repository. We will be using EGit that comes with Studio. But feel free to choose any tool you want.</p>
+<h2 is-upgraded>Create a local repository</h2>
+<ol type="1" start="1">
+<li>To create a local repository, In the Package Explorer, right-click the name of your project --&gt; select Team --&gt; select Share Project </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/980156a032e6a878.png"></p>
+<ol type="1" start="2">
+<li>In the Configure Git repository window, Select the checkbox for <strong>Use or Create a repository in the parent folder of the project</strong>. (Note: Using this method you will make sure that the .git folder is created in your project root and not your parent folder.) </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/23332afaa704a967.png"></p>
+<ol type="1" start="3">
+<li>Press <strong>Create Repository</strong> and finally Click <strong>Finish</strong>.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/ff218b1373c17742.png"></p>
+<ol type="1" start="4">
+<li>In the Anypoint Studio package explorer, we can see the arrow mark and questions mark symbols for our studio files. This icon indicates that we have created a Git repository for the project on the local drive, but we have not yet registered it and are not yet tracking changes to the project.</li>
+</ol>
+<p class="image-container"><img style="width: 302.00px" src="img/57fa75fab2e1d1a0.png"></p>
+<ol type="1" start="5">
+<li>Now we need to register the local repository and track changes. To do this go to the package explorer, right click to the name of the project --&gt; Team --&gt;  Commit </li>
+</ol>
+<p class="image-container"><img style="width: 637.16px" src="img/3b16a0989efb150f.png"></p>
+<ol type="1" start="6">
+<li>Once we have clicked on the <strong>Commit</strong> button. We will see the <strong>Git Staging</strong> tab opened up. Select all the files that we want to check-in in Git then right-click on the selected files and click on <strong>Add to index</strong>. </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/53d95ceef6ca0832.png"></p>
+<ol type="1" start="7">
+<li>Add a commit message to the text box on the right and click on the <strong>Commit</strong> button. Our changes will be stored in the local git repository. </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/d8796207faa216ab.png"></p>
+<ol type="1" start="8">
+<li>In the package explorer, we can now notice that there is a yellow barrel icon which indicates that the changes have been committed to our local git repo. Also, there is no more arrow icon next to the project name. </li>
+</ol>
+<p class="image-container"><img style="width: 310.00px" src="img/caab115a8cd40a77.png"></p>
+<h2 is-upgraded>Push Changes into the Remote Repository</h2>
+<p>Now that we have everything in our local repository. We want to push the changes in the remote one.</p>
+<ol type="1" start="1">
+<li>In the Package Explorer, right-click the name of your project navigate to Team --&gt; Remote --&gt; Push </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/1d0938519aae9243.png"></p>
+<ol type="1" start="2">
+<li>Complete the URL of the repository created in Azure and push the changes. Don&#39;t forget to configure username and password. </li>
+</ol>
+<p class="image-container"><img style="width: 530.00px" src="img/25ec426c96d5f151.png"></p>
+<ol type="1" start="3">
+<li>Select the Specification for Push from the Source ref and Destination ref and then Click on Add Spec, then Click on <strong>Finish</strong>.</li>
+</ol>
+<p class="image-container"><img style="width: 530.00px" src="img/289dab2121895062.png"></p>
+<ol type="1" start="4">
+<li>You can go back to Azure and see the committed changes. </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/4a2d6f5ff368fd4d.png"></p>
+<p>A complete guide on how to use Git with Studio can be found<a href="https://developer.mulesoft.com/tutorials-and-howtos/quick-start/how-to-setup-git-anypoint-studio-egit-plugin" target="_blank">here</a></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Mule Project" duration="2">
+        <p>To do the deployment we are going to use the maven plugin. Information about the Mule Maven Plugin can be found<a href="https://docs.mulesoft.com/mule-runtime/4.3/mmp-concept" target="_blank">here</a>.</p>
+<p>In the next section we will configure the pom.xml file.</p>
+<h2 is-upgraded>Configure POM File</h2>
+<ol type="1" start="1">
+<li>Go to Studio and open the pom.xml file.</li>
+<li>Find the section where the plugin is.</li>
+</ol>
+<pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;org.mule.tools.maven&lt;/groupId&gt;
+    &lt;artifactId&gt;mule-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;${mule.maven.plugin.version}&lt;/version&gt;
+    &lt;extensions&gt;true&lt;/extensions&gt;
+    &lt;configuration&gt;
+        &lt;classifier&gt;mule-application&lt;/classifier&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+<ol type="1" start="3">
+<li>We are going to add the <strong>cloudhubDeployment </strong>configuration</li>
+<li>Add the following configuration in the <strong>configuration</strong> tag </li>
+</ol>
+<pre><code>&lt;cloudHubDeployment&gt;
+    &lt;uri&gt;https://anypoint.mulesoft.com&lt;/uri&gt;            (1)
+    &lt;muleVersion&gt;4.3.0&lt;/muleVersion&gt;                    (2)
+    &lt;username&gt;${anypoint.username}&lt;/username&gt;           (3)
+    &lt;password&gt;${anypoint.password}&lt;/password&gt;           (4)
+    &lt;environment&gt;${cloudhub.environment}&lt;/environment&gt;  (5)
+    &lt;applicationName&gt;${cloudhub.app}&lt;/applicationName&gt;  (6)
+    &lt;workerType&gt;Micro&lt;/workerType&gt;                      (7)
+&lt;/cloudHubDeployment&gt;</code></pre>
+<p>These are all parameters that can be hardcoded inside the POM or injected when you do the deployment. The description of each parameter can be found here:</p>
+<ol type="1" start="1">
+<li>Define anypoint platform (US or EU).</li>
+<li>Define Runtime Version</li>
+<li>Define anypoint deployment username</li>
+<li>Define anypoint deployment password</li>
+<li>Define anypoint environment (Sandbox, Production)</li>
+<li>Define application name</li>
+<li>Define worker type (Micro, Small, Medium)</li>
+</ol>
+<p>If you want to test it, you can deploy manually from your computer. Try to execute the following command:</p>
+<pre>mvn -V -e -DskipTests deploy -DmuleDeploy \
+-Danypoint.username=&lt;username&gt; -Danypoint.password=&lt;password&gt; \
+-Dcloudhub.app=dev-hello-world -Dcloudhub.environment=Sandbox</pre>
+<aside class="special"><p>Notice that we are injecting the deployment username and password, the application name and the environment when we do the deployment. This is something we are going to be doing in the Jenkins pipeline</p>
+</aside>
+<ol type="1" start="5">
+<li>Commit the changes into the repo.</li>
+</ol>
+<h2 is-upgraded>Add dependencies</h2>
+<p>Azure doesn&#39;t have a global settings.xml for maven. Everything needs to be in the POM. That&#39;s why we are going to add some repositories to the file.</p>
+<ol type="1" start="1">
+<li>Go to the repository section in the pom.xml file.</li>
+<li>Copy the following values:</li>
+</ol>
+<pre><code>&lt;repository&gt;
+    &lt;id&gt;mulesoft-public&lt;/id&gt;
+    &lt;url&gt;https://repository.mulesoft.org/nexus/content/repositories/public/&lt;/url&gt;
+    &lt;layout&gt;default&lt;/layout&gt;
+&lt;/repository&gt; </code></pre>
+<ol type="1" start="3">
+<li>In line 15, update the munit.version to 2.2.1. </li>
+</ol>
+<aside class="special"><p>This Lab was tested using MUnit 2.2.1. You can use a later version, but I can&#39;t confirm that is going to work.</p>
+</aside>
+<ol type="1" start="4">
+<li>Commit the changes and let&#39;s create a new pipeline.</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a pipeline" duration="2">
+        <p>In this section, we are going to create an Azure pipeline to automate the deployment to cloudhub.</p>
+<ol type="1" start="1">
+<li>Go to Azure and click in the <em>Pipelines </em>Section.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/4066a503bd5cf7f8.png"></p>
+<ol type="1" start="2">
+<li>Press the <em>Create Pipeline </em>button. </li>
+<li>Where is your code? Select Azure Repos Git</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/1c3e5e4be9fe9d09.png"></p>
+<ol type="1" start="4">
+<li>Select the repo we created before</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/2ca9b4f97f741aa4.png"></p>
+<ol type="1" start="5">
+<li>Choose <em>Maven </em>option</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/1230ae1e037c8b8b.png"></p>
+<ol type="1" start="6">
+<li>Once you select the configuration pipeline, you will see the yaml file with an example.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/5d78d2919fddb10e.png"></p>
+<ol type="1" start="7">
+<li>Press <em>Save and run</em></li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/dc165c4ba5af32c5.png"></p>
+<ol type="1" start="8">
+<li>Leave all the values as default and press <em>Save and run</em>. Again</li>
+</ol>
+<p class="image-container"><img style="width: 480.00px" src="img/2230f374d21239e6.png"></p>
+<ol type="1" start="9">
+<li>After you clock the button, the pipeline will be executed. Doing a click, you can see the logs being executed.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/4095bbb94a5f8857.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/b2e57ce4da9db1a6.png"></p>
+<aside class="warning"><p>If the job fails, you need to add the Mulesoft Enterprise Repository. This is going to be covered in the next section. You need to have Nexus enterprise credentials. More info about the Mulesoft Enterprise Repository can be found <a href="https://docs.mulesoft.com/mule-runtime/4.3/maven-reference#acquire-access-to-enterprise-repositories" target="_blank">here</a>. </p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure MuleSoft Enterprise Repository" duration="2">
+        <p>Azure provides access to the public repositories by default, but if you need access to the Enterprise Repository, you need to follow these steps. </p>
+<aside class="warning"><p>To add access to the enterprise repository to your project, you must obtain and install an Enterprise license, acquire access to the repository, and configure the repository in your project. More information can be found <a href="https://docs.mulesoft.com/mule-runtime/4.3/maven-reference#obtain-and-install-an-enterprise-license" target="_blank">here</a>. If you don&#39;t have one, you can skip this section and go to the next section.</p>
+</aside>
+<ol type="1" start="1">
+<li>First you need to go to the <em>Project Settings.</em></li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/42c2f1fea20d44d8.png"></p>
+<ol type="1" start="2">
+<li>Select <em>Service connections</em></li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/ce68f8cf7e15c336.png"></p>
+<ol type="1" start="3">
+<li>Press <em>Create a service connection</em></li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/383f7a46e63dc100.png"></p>
+<ol type="1" start="4">
+<li>Select <em>Maven </em>in the menu that appear on the right, and press <em>Next.</em></li>
+</ol>
+<p class="image-container"><img style="width: 484.00px" src="img/df524d045d0f93d5.png"></p>
+<ol type="1" start="5">
+<li>Configure the details with the following information:</li>
+</ol>
+<ul>
+<li><strong>Repository Url: </strong><a href="https://repository.mulesoft.org/nexus-ee/content/repositories/releases-ee/" target="_blank">https://repository.mulesoft.org/nexus-ee/content/repositories/releases-ee/</a></li>
+<li><strong>Repository Id</strong>: MuleRepository </li>
+<li><strong>Username: &lt;</strong>YOUR_ID&gt;</li>
+<li><strong>Password: </strong>&lt;YOUR_PASSWORD&gt;</li>
+<li><strong>Details: </strong>Mulesoft Enterprise (Optional)</li>
+</ul>
+<p class="image-container"><img style="width: 486.00px" src="img/13730308d946b312.png"></p>
+<ol type="1" start="6">
+<li>Press Save when finished</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/5bf31fa0d869a247.png"></p>
+<p>Now we need to update the pom.xml file. We will add some libraries needed by the MUnit plugin to run.</p>
+<ol type="1" start="7">
+<li>Go to your project and open the pom.xml file.</li>
+<li>At the end copy the following lines</li>
+</ol>
+<pre><code>&lt;pluginRepositories&gt;
+    &lt;pluginRepository&gt;
+        &lt;id&gt;mulesoft-release&lt;/id&gt;
+        &lt;name&gt;mulesoft release repository&lt;/name&gt;
+        &lt;layout&gt;default&lt;/layout&gt;
+        &lt;url&gt;http://repository.mulesoft.org/releases/&lt;/url&gt;
+        &lt;snapshots&gt;
+            &lt;enabled&gt;false&lt;/enabled&gt;
+        &lt;/snapshots&gt;
+    &lt;/pluginRepository&gt;
+    &lt;pluginRepository&gt;
+        &lt;id&gt;mule-public&lt;/id&gt;
+        &lt;url&gt;https://repository.mulesoft.org/nexus/content/repositories/releases&lt;/url&gt;
+    &lt;/pluginRepository&gt;
+    &lt;pluginRepository&gt;
+        &lt;id&gt;MuleRepository&lt;/id&gt;
+        &lt;name&gt;MuleRepository&lt;/name&gt;
+        &lt;url&gt;https://repository.mulesoft.org/nexus-ee/content/repositories/releases-ee/&lt;/url&gt;
+        &lt;layout&gt;default&lt;/layout&gt;
+        &lt;releases&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/releases&gt;
+        &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/snapshots&gt;
+    &lt;/pluginRepository&gt;
+    &lt;pluginRepository&gt;
+        &lt;id&gt;mulesoft-public-plugin&lt;/id&gt;
+        &lt;name&gt;MuleSoft Public Repository&lt;/name&gt;
+        &lt;url&gt;https://repository.mulesoft.org/nexus/content/repositories/public/&lt;/url&gt;
+        &lt;layout&gt;default&lt;/layout&gt;
+    &lt;/pluginRepository&gt;
+&lt;/pluginRepositories&gt;
+</code></pre>
+<aside class="special"><p>See that the name of the id needs to be with the same name you configured as the <strong>Repository id</strong></p>
+</aside>
+<p>Great, you configure the Mulesoft Enterprise Repository in Azure.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the pipeline" duration="5">
+        <p>In this section we are going to add two more steps to the pipeline.</p>
+<p>The first step will build the package. The second one will test the application and the third one will deploy the application to cloudhub.</p>
+<p>We need to update the <strong><em>azure-pipelines.yml</em></strong>. This file is in the repo now. You can do a git pull and edit the file in Studio. </p>
+<p>In this lab we are going to do in Azure</p>
+<h2 is-upgraded>Build Step</h2>
+<p>This is the step where the jar is going to be created. This step is created when you create a new pipeline. We are going to make some changes to this step.</p>
+<ol type="1" start="1">
+<li>Go to the pipelines section and press edit</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/fd9611ea3d84e832.png"></p>
+<ol type="1" start="2">
+<li>Add a <strong><em>displayName</em></strong> parameter, so it&#39;s easy to identify the step.</li>
+</ol>
+<pre><code>- task: Maven@3
+  displayName: Build
+  inputs:
+    mavenPomFile: &#39;pom.xml&#39;
+    mavenOptions: &#39;-Xmx3072m&#39;
+    javaHomeOption: &#39;JDKVersion&#39;
+    jdkVersionOption: &#39;1.8&#39;
+    jdkArchitectureOption: &#39;x64&#39;
+    publishJUnitResults: true
+    testResultsFiles: &#39;**/surefire-reports/TEST-*.xml&#39;
+    goals: &#39;package&#39;</code></pre>
+<ol type="1" start="3">
+<li>Add a maven option parameter to not execute the unit test. step </li>
+</ol>
+<pre><code>- task: Maven@3
+  displayName: Build
+  inputs:
+    options: &#39;-DskipTests&#39;
+    mavenPomFile: &#39;pom.xml&#39;
+    mavenOptions: &#39;-Xmx3072m&#39;
+    javaHomeOption: &#39;JDKVersion&#39;
+    jdkVersionOption: &#39;1.8&#39;
+    jdkArchitectureOption: &#39;x64&#39;
+    publishJUnitResults: true
+    testResultsFiles: &#39;**/surefire-reports/TEST-*.xml&#39;
+    goals: &#39;package&#39;
+</code></pre>
+<ol type="1" start="3">
+<li>Remove <strong><em>publishJUnitResult </em></strong>and <strong><em>testResultsFiles </em></strong>parameters.The final version of the task should look like this.</li>
+</ol>
+<pre><code>- task: Maven@3
+  displayName: Build
+  inputs:
+    options: &#39;-DskipTests&#39;
+    mavenPomFile: &#39;pom.xml&#39;
+    mavenOptions: &#39;-Xmx3072m&#39;
+    javaHomeOption: &#39;JDKVersion&#39;
+    jdkVersionOption: &#39;1.8&#39;
+    jdkArchitectureOption: &#39;x64&#39;
+    goals: &#39;package&#39;</code></pre>
+<h2 is-upgraded>Test Step</h2>
+<p>In this step we are going to run the MUnit tests. To execute this step, you need a Nexus user to access the Enterprise Mulesoft Repository. If you don&#39;t have one, you can check <a href="https://docs.mulesoft.com/mule-runtime/4.3/maven-reference#acquire-access-to-enterprise-repositories" target="_blank">here</a> to see how to request one. If you aren&#39;t a customer and you can&#39;t get these credentials, you can skip this step and move to the next one.</p>
+<p>As I mentioned before, we are required to configure a private repository. So first go to the appendix to add the Mulesoft Enterprise Repository credentials to the project. </p>
+<h3 is-upgraded>Maven Authentication</h3>
+<p>Azure doesn&#39;t have a global settings.xml where you can configure all the repositories, profiles and credentials. Instead it has a step where you can add the server credentials into the settings.xml installed in the image. That&#39;s why we are going to create a Maven Authentication step to add the credentials we created in the appendix.</p>
+<ol type="1" start="1">
+<li>Stand the cursor on line bejor the <code>goals: 'package'</code> line.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/2d510ef951bd17c1.png"></p>
+<ol type="1" start="2">
+<li>On the right side of the screen you can see a menu with tasks. In the search bar type <strong><em>maven. </em></strong>Choose <strong><em>Maven Authenticate</em></strong></li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/b6750c4ade615469.png"></p>
+<ol type="1" start="3">
+<li>On the next screen choose <strong><em>MuleRepository</em></strong> from the second combo</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/4d78b1d4c2703a37.png"></p>
+<ol type="1" start="4">
+<li>Press <strong><em>Add</em></strong></li>
+</ol>
+<p>The step should look like this:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c4774643666a20c.png"></p>
+<h3 is-upgraded>Maven Test</h3>
+<p>Here we are going to create the maven test task.</p>
+<ol type="1" start="1">
+<li>Stand the cursor after the maven authenticate step</li>
+<li>On the right side of the screen you can see a menu with tasks. In the search bar type <strong><em>maven. </em></strong>Choose <strong><em>Maven</em></strong>. </li>
+<li>Configure the following parameters:</li>
+</ol>
+<ul>
+<li><strong>Maven POM file: </strong><em>pom.xml</em></li>
+<li><strong>Goal(s): </strong><em>test</em></li>
+<li><strong>Publish to Azure pipelines: </strong><em>checked</em></li>
+<li><strong>Test Results File: </strong><em>./target/surefire-reports/TEST-*.xml</em></li>
+<li><strong>Test run title: </strong><em>Hello World Example Report</em></li>
+</ul>
+<p>Leave the rest as default. Press add when finished.</p>
+<p class="image-container"><img style="width: 377.00px" src="img/2668ce19bf8cd46.png"></p>
+<p>At the end you should see something like this</p>
+<p class="image-container"><img style="width: 624.00px" src="img/4edb9cd0f5b52122.png"></p>
+<h2 is-upgraded>Deploy Step</h2>
+<p>The last step will deploy the package into Cloudhub. </p>
+<p>In the pom.xml file we declared 4 variables. </p>
+<ul>
+<li>anypoint.username</li>
+<li>anypoint.password</li>
+<li>cloudhub.environment</li>
+<li>cloudhub.app</li>
+</ul>
+<h3 is-upgraded>Define Variables</h3>
+<p>In Azure, we can declare variables to be used in the pipeline. We are going to define one variable to be replaced in the pipeline we deploy.</p>
+<h4 is-upgraded>Define Username Variable</h4>
+<ol type="1" start="1">
+<li>Press the <strong><em>Variables</em></strong> button located on the right top side of the screen</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/d866a932a9538b18.png"></p>
+<ol type="1" start="2">
+<li>Press <strong><em>New Variable</em></strong>. </li>
+<li>Complete with the following:</li>
+</ol>
+<ul>
+<li><strong>Name: </strong><em>mule.username</em></li>
+<li><strong>Value: </strong>&lt;CLOUDHUB_USERNAME&gt;</li>
+</ul>
+<p class="image-container"><img style="width: 483.00px" src="img/ce734d5054ebb7cc.png"></p>
+<ol type="1" start="4">
+<li>Press <strong><em>OK</em></strong>.</li>
+</ol>
+<h4 is-upgraded>Define Password Variable</h4>
+<ol type="1" start="1">
+<li>Press the <strong><em>(+)</em></strong> button.</li>
+<li>Complete with the following:</li>
+</ol>
+<ul>
+<li><strong>Name: </strong><em>mule.password</em></li>
+<li><strong>Value: </strong>&lt;CLOUDHUB_password&gt;</li>
+<li><strong>Keep this value secret: </strong><em>checked.</em></li>
+</ul>
+<p class="image-container"><img style="width: 482.00px" src="img/c3f4592c83f78222.png"></p>
+<ol type="1" start="3">
+<li>Press <strong><em>OK</em></strong>. </li>
+</ol>
+<h4 is-upgraded>Define Environment Variable </h4>
+<ol type="1" start="1">
+<li>Press the <strong><em>(+)</em></strong> button.</li>
+<li>Complete with the following:</li>
+</ol>
+<ul>
+<li><strong>Name: </strong><em>mule.environment</em></li>
+<li><strong>Value: </strong><em>Sandbox</em></li>
+</ul>
+<p class="image-container"><img style="width: 483.00px" src="img/58052a0d66317f1.png"></p>
+<ol type="1" start="3">
+<li>Press <strong><em>OK</em></strong></li>
+</ol>
+<h4 is-upgraded>Define Application Name Variable</h4>
+<ol type="1" start="1">
+<li>Press the <strong><em>(+)</em></strong> button.</li>
+<li>Complete with the following:</li>
+</ol>
+<ul>
+<li><strong>Name: </strong><em>mule.app</em></li>
+<li><strong>Value: </strong><em>&lt;Unique Applicaton Name&gt;</em></li>
+</ul>
+<p class="image-container"><img style="width: 482.00px" src="img/4d2197bc937d94b1.png"></p>
+<ol type="1" start="4">
+<li>Press <strong><em>OK</em></strong></li>
+</ol>
+<p>Once finished you will see all the variables listed. Press <strong><em>Save</em></strong> to Continue.</p>
+<p class="image-container"><img style="width: 479.00px" src="img/1dc4f40f74a4802b.png"></p>
+<h3 is-upgraded>Maven Deploy</h3>
+<p>We declared the variables, now it&#39;s time to create the deployment task.</p>
+<ol type="1" start="1">
+<li>Stand the cursor after the maven test step.</li>
+<li>Copy and paste the following code:</li>
+</ol>
+<pre><code>- task: Maven@3
+  displayName: Deploy
+  inputs:
+    mavenPomFile: &#39;pom.xml&#39;
+    goals: &#39;deploy&#39;
+    options: &#39;-DskipTests -DmuleDeploy -Danypoint.username=$(mule.username)-Danypoint.password=$(mule.password) -Dcloudhub.environment=$(mule.environment)-Dcloudhub.app=$(mule.app)&#39;
+    publishJUnitResults: false
+    javaHomeOption: &#39;JDKVersion&#39;
+    mavenVersionOption: &#39;Default&#39;
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: false</code></pre>
+<aside class="special"><p>Look how the variables are being replaced.</p>
+</aside>
+<p>At the end you should see something like this</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f3bdeb3ebc8c376c.png"></p>
+<h3 is-upgraded>Save the Pipeline</h3>
+<p>We are going to save the pipeline and this is going to be a new commit.</p>
+<ol type="1" start="1">
+<li>Press the <strong><em>Save</em></strong> button besides the <strong><em>Variable</em></strong> button.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/f135604769b5b929.png"></p>
+<ol type="1" start="2">
+<li>Add a commit message and description</li>
+</ol>
+<p class="image-container"><img style="width: 478.00px" src="img/606fa8577db7e6bd.png"></p>
+<ol type="1" start="3">
+<li>Press <strong><em>Save </em></strong>to commit the changes.</li>
+</ol>
+<p>Congratulations!!! You have the Yaml file with the pipeline.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the Pipeline" duration="2">
+        <p>We created the pipeline, in this section we are going to run it</p>
+<ol type="1" start="1">
+<li>Press the <strong><em>Run </em></strong>button.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/2be835ddde852bd6.png"></p>
+<ol type="1" start="2">
+<li>Leave all the values as default and press the <strong><em>Run </em></strong>button again, located at the end of the menu.</li>
+</ol>
+<p class="image-container"><img style="width: 480.00px" src="img/1bd9bbc632c09309.png"></p>
+<p>After you press run you will see a screen showing the pipeline information.</p>
+<ol type="1" start="3">
+<li>Go to the <strong>Job</strong> panel and press the link</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/b327b059bb1cbb4f.png"></p>
+<p>When you press the link a live window will appear. It shows the steps and logs of the current step running. Let&#39;s wait the process to finish to continue.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e5d238c70c60cb3f.png"></p>
+<ol type="1" start="4">
+<li>Once it&#39;s finished you will see a green check mark. You can browse for each step and see the logs. </li>
+<li>Go to Cloudhub and check that the app is deployed and running.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/9528037aef8825e4.png"></p>
+<ol type="1" start="6">
+<li>You can also see the test report that was created during the run. For that go to the <strong><em>Test Plans</em></strong></li>
+</ol>
+<p class="image-container"><img style="width: 267.00px" src="img/42bf71fb350a654.png"></p>
+<ol type="1" start="7">
+<li>Go to Runs. You will find a list of reports. </li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/84499fe4c9554c4a.png"></p>
+<ol type="1" start="8">
+<li>Double click on one of them and you will see the detail of that test.</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/d79dacfe151700b5.png"></p>
+<p>By running the pipeline, we:</p>
+<ul>
+<li> Build the Package</li>
+<li>Run the MUnit Tests</li>
+<li>Deploy the application in Cloudhub</li>
+<li>Get MUnit reports.</li>
+</ul>
+<p>In the next section we are going to automate the build process, so each time you push a change, the pipeline starts automatically.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Automate Build Process" duration="1">
+        <p>To automate the process is really simple. We just need to update the <strong>trigger </strong>section in the pipeline file.</p>
+<ol type="1" start="1">
+<li>Open the pipeline.</li>
+<li>Identify the trigger section</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/be5ccadca4793664.png"></p>
+<ol type="1" start="3">
+<li>Change the file with the following:</li>
+</ol>
+<pre><code>trigger:
+  batch: true
+  branches:
+    include:
+      - releases/*</code></pre>
+<p>With this command all the branches are going to be triggered automatically. Also we are setting the batch property to true, If you have many team members uploading changes often, you may want to reduce the number of runs you start. If you set batch to true, when a pipeline is running, the system waits until the run is completed, then starts another run with all changes that have not yet been built.</p>
+<ol type="1" start="4">
+<li>Save the pipeline to finish.</li>
+</ol>
+<p>If you want to get more information around this subject you can check <a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/azure-repos-git?view=azure-devops&tabs=yaml#ci-triggers" target="_blank">here</a></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Let&#39;s test the automate process" duration="2">
+        <p>Now we are going to do a change in the project, push the changes and see how the build process starts automatically</p>
+<aside class="warning"><p>Do a <code>git pull</code> to get all the changes we&#39;ve been doing in the repo building the pipeline from the Azure UI</p>
+</aside>
+<ol type="1" start="1">
+<li>First go to Studio and select the logger component</li>
+<li>Replace the message field with this one <em>&#34;New Change: &#34; ++ (attributes.requestPath default &#34;NONE&#34;)</em></li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/2235b5f39a4c0799.png"></p>
+<ol type="1" start="3">
+<li>Commit the change</li>
+<li>If you go to Azure, you should see the new job running</li>
+<li>Once the deployment is finished, you can make a call to <strong>http://&lt;hostname&gt;/helloWorld</strong> and check the logs to see the changes.</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="0">
+        <p>In this codelab, you learned how to implement a CICD solution using Azure Pipeline. Please take a look at the Resources to learn more about Azure and the Mule Maven Plugin</p>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/get-started/pipelines-get-started?view=azure-devops" target="_blank">Azure Pipelines</a></li>
+<li><a href="https://docs.mulesoft.com/mule-runtime/4.3/mmp-concept" target="_blank">Mule Maven Plugin</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

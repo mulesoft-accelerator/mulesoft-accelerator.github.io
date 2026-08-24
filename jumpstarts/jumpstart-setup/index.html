@@ -1,0 +1,191 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Getting started with Codelab</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="codelab-setup"
+                  title="Getting started with Codelab"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-17</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>Codelabs are interactive instructional tutorials, which can be authored in Google Docs using some simple formatting conventions. You can also author codelabs using markdown syntax. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/7692301c71b96522.png"></p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>In this codelab, you&#39;re going to setup your environment to allow you to generate Codelabs from your Google Docs.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to install Go</li>
+<li>How to install Node using Homebrew</li>
+<li>How to install the Google Codelabs CLI (claat)</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li><a href="https://golang.org/dl/" target="_blank">Go</a></li>
+<li><a href="https://brew.sh/" target="_blank">Homebrew</a></li>
+<li>Node.js and NPM</li>
+<li>Google Codelabs CLI</li>
+<li><a href="https://github.com/googlecodelabs/tools/blob/master/FORMAT-GUIDE.md" target="_blank">Codelab Formatting Guide</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Install Go" duration="2">
+        <p>The Google Codelab CLI is written in Go and requires Go to be installed in your environment.<br></p>
+<h2 is-upgraded><strong>Download and Install Go</strong></h2>
+<p>Navigate to <a href="https://golang.org/dl/" target="_blank">https://golang.org/dl/</a> and click and download the latest stable release for Apple macOS</p>
+<p class="image-container"><img style="width: 495.50px" src="img/62ae8cee5f308506.png"> </p>
+<p>Find the downloaded <strong>*.pkg</strong> file and double click to open it, and follow the prompts to install the Go tools. The package installs the Go distribution to <code>/usr/local/go</code>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d35f15b70874d691.png"></p>
+<p>The package should put the /usr/local/go/bin directory in your PATH environment variable. You may need to restart any open Terminal sessions for the change to take effect.</p>
+<p>You can verify the installation was successful by running the following command</p>
+<pre><code>go version</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/cf358504f3fd8e0.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Install Node" duration="2">
+        <h2 is-upgraded><strong>Install Homebrew</strong></h2>
+<p><a href="https://brew.sh/" target="_blank">Homebrew</a> is a free and open-source software package management system that simplifies the installation of software on macOS. If you don&#39;t have Homebrew installed yet, open a terminal and run the following command.</p>
+<pre><code>/bin/bash -c &#34;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)&#34;</code></pre>
+<p><br>Then run the following command to make sure Homebrew is up to date.<br></p>
+<pre><code>brew update</code></pre>
+<h2 is-upgraded><strong>Install Node</strong></h2>
+<p>Next, install Node (npm will be installed with Node)</p>
+<pre><code>brew install node</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Install Claat (Codelabs as a Thing)" duration="2">
+        <h2 is-upgraded><strong>Create Directory</strong></h2>
+<p>Run the following command to create a directory where you&#39;ll install claat</p>
+<pre><code>cd ~/
+mkdir go
+cd go</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/6f574b07989f6801.png"></p>
+<h2 is-upgraded><strong>Install claat</strong></h2>
+<p>Next run the following command to install <code>claat</code> to the newly created directory. It&#39;ll run silently in the background and download the tool. </p>
+<pre><code>go get github.com/googlecodelabs/tools/claat</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/a1428fa5e0fcfcca.png"></p>
+<h2 is-upgraded><strong>Configure PATH</strong></h2>
+<p>Next we need to configure the <code>$PATH</code> variable in your <code>.zshrc</code> or <code>.bash_profile</code> file</p>
+<p>Run the following command to see which one you have.</p>
+<pre><code>echo $SHELL</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/af7a559e681e245d.png"></p>
+<p>Open a terminal window and run the following command depending on the shell you have. Type in your password when it prompts you.</p>
+<h3 is-upgraded><strong>Z Shell</strong></h3>
+<pre><code>cd ~/
+sudo nano .zshrc</code></pre>
+<h3 is-upgraded><strong>Bash</strong></h3>
+<pre><code>cd ~/
+sudo nano .bash_profile</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/f1ef080a13219f0d.png"></p>
+<p>Copy and paste the following to the top and then save the file.</p>
+<pre><code>export PATH=$PATH:$HOME/go/bin</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/eb68195650fcb5b1.png"></p>
+<h2 is-upgraded><strong>Test claat</strong></h2>
+<p>Let&#39;s test to see if claat was installed correctly. Run the following command.</p>
+<pre><code>claat help</code></pre>
+<p>If everything was configured correctly, you should see the help manual for the tool.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b840ce97a488b44d.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Install Chrome Preview Codelab Plugin" duration="1">
+        <h2 is-upgraded><strong>Add Plugin to Chrome</strong></h2>
+<p>Open the following <a href="https://chrome.google.com/webstore/detail/preview-codelab/lhojjnijnkiglhkggagbapfonpdlinji" target="_blank">link</a> and click on the <strong>Add to Chrome</strong> button to install the Preview Codelab plugin to Chrome.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d6e8f5c5fe5d4d53.png"></p>
+<p>Once installed, the plugin allows you to preview your Google Doc as a Codelab site. </p>
+<h2 is-upgraded><strong>Test Plugin</strong></h2>
+<p>Let&#39;s test out the plugin. Go ahead and open this <a href="https://docs.google.com/document/d/1E6XMcdTexh5O8JwGy42SY3Ehzi8gOfUGiqTiUX6N04o/" target="_blank">example Google doc</a>.</p>
+<p class="image-container"><img style="width: 400.50px" src="img/11d9c366d8a4b972.png"> </p>
+<p>You can read more about the format of this example doc in the <a href="https://github.com/googlecodelabs/tools/blob/master/FORMAT-GUIDE.md" target="_blank">Codelab Formatting Guide</a>. It provides details on the formatting needed when creating a codelab. You&#39;ll notice that the table at the top of the document describes the metadata required for the <code>claat</code> tool to generate the Codelab.</p>
+<p>With the tab to the document open, in the top right corner of Chrome, click on the <strong>Extensions</strong> icon and then click on <strong>Preview Codelab</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/d4d4d6a5b81590b7.png"></p>
+<p>A new tab will pop up with the auto-generated Codelab site.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c1632d8456eb4a81.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Generate a Codelab" duration="1">
+        <p>Lastly, let&#39;s test out the <code>claat</code> tool and learn how to generate a Codelab from a Google Doc. Using the example doc from the previous section, copy down the Google Doc ID in the URL</p>
+<pre><code>1E6XMcdTexh5O8JwGy42SY3Ehzi8gOfUGiqTiUX6N04o</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/77bbb76661fb8946.png"></p>
+<p>Switch to a macOS terminal window and run the following command to navigate back to your home directory, create a Codelab folder, and open that folder.</p>
+<pre><code>cd ~/
+mkdir codelab
+cd codelab</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/de4045122ce1b3c1.png"></p>
+<p>Run the claat command below to generate the Codelab for the document.</p>
+<pre><code>claat export 1E6XMcdTexh5O8JwGy42SY3Ehzi8gOfUGiqTiUX6N04o</code></pre>
+<p>If this is the first time running the <code>claat</code> command against a Google Doc, you&#39;ll need to authorize the user. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/23e3d3b69ed9c4b2.png"></p>
+<p>Copy and paste the URL into your browser and select the account you want to give Codelabs Preview access to.</p>
+<p class="image-container"><img style="width: 415.85px" src="img/60f8a28c148aa426.png"></p>
+<p>Copy the code from the following screen and paste the code back into the terminal window.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/562ee2fd9667b1bb.png"></p>
+<p>If <code>claat</code> is installed correctly, and the user is authorized, the next line after running the command will be</p>
+<pre><code>ok  your-first-pwapp</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/d1ab015fe7474041.png"></p>
+<p><code>claat</code> also provides the ability serve the page up locally. You can run the following command:</p>
+<p>claat serve</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c831262c7d10b3b5.png"></p>
+<p>Chrome will open a new tab showing a link to the Codelab.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/70eb911ac549f1b9.png"></p>
+<p>Click on the link to see the Codelab and walk through to examine the formatting.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>Congratulations, you&#39;re environment is setup to start developing Codelabs. You have the tool installed locally to generate a Codelab and you have a plugin installed in Chrome to see a preview before you generate the Codelab from your environment.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://github.com/googlecodelabs/tools" target="_blank">Codelab Tools (Github)</a></li>
+<li><a href="https://github.com/googlecodelabs/tools/blob/master/FORMAT-GUIDE.md" target="_blank">Codelab Formatting Guide</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

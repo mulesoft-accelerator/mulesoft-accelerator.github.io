@@ -1,0 +1,147 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Insert data into Snowflake using MuleSoft Composer</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="connect-snowflake-using-mulesoft-composer"
+                  title="Insert data into Snowflake using MuleSoft Composer"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=connect-snowflake-using-mulesoft-composer">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>MuleSoft Composer makes it easy to build process automation for data, using clicks instead of code. When you create a secure process to connect the information stored in different systems, you build a real-time, unified view of your customers and your business. One of these systems, Snowflake, has become a popular option recently for customers to store data and run analytics without the need for an on-premise solution. For this Codelab, you&#39;ll learn how to move data from Salesforce into Snowflake. </p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>MuleSoft Composer</li>
+<li>Salesforce</li>
+<li>Snowflake</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Set Up a Table in Snowflake" duration="1">
+        <p>Login into Snowflake and run the following script to create a table that we&#39;ll use for this Codelab</p>
+<pre><code>create table customers (
+        first_name varchar,
+        last_name varchar,
+        email varchar,
+        phone varchar
+);</code></pre>
+<p>We&#39;ll take Contact records from Salesforce and insert them into this table for learning purposes.</p>
+<p class="image-container"><img style="width: 538.50px" src="img/7e2bc54918221d7a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Get Salesforce Contacts" duration="1">
+        <p>Switch over to <strong>MuleSoft Composer</strong> and login. Navigate to the <strong>Flows</strong> section</p>
+<p class="image-container"><img style="width: 455.10px" src="img/84f667974628594a.png"></p>
+<p>Click on <strong>Create new flow</strong> and select <strong>Create Flow from Scratch</strong></p>
+<p class="image-container"><img style="width: 414.50px" src="img/39bb3b4497ec1d8a.png"></p>
+<p>Click on <strong>Scheduler</strong></p>
+<p class="image-container"><img style="width: 438.50px" src="img/c1ce70c1b8008cca.png"></p>
+<p>Leave the interval at 15 minutes and click on the + sign to add the next step.</p>
+<p class="image-container"><img style="width: 459.50px" src="img/9c207c8bd0778a85.png"></p>
+<p>Select <strong>System Action</strong></p>
+<p class="image-container"><img style="width: 435.50px" src="img/e982f1a6208a7c80.png"></p>
+<p>Select <strong>Salesforce</strong></p>
+<p class="image-container"><img style="width: 405.50px" src="img/3c900c99b798fc64.png"></p>
+<p>Either select an existing connection or create a new one for Salesforce</p>
+<p class="image-container"><img style="width: 512.50px" src="img/b24b115fc016abfe.png"></p>
+<p>Select <strong>Get Records</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/528ffe314b68d513.png"></p>
+<p>Select <strong>Contact</strong> for the <strong>Object Type </strong>field</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8ebbd312e11615c7.png"></p>
+<p>Leave the other fields with their default values and go on to the next step. </p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Connect to Snowflake" duration="1">
+        <p>We&#39;re going to iterate through each Contact record next and insert them into Snowflake. Click <strong>Next Step</strong> and select <strong>For Each</strong></p>
+<p class="image-container"><img style="width: 481.42px" src="img/68f07655b2ada900.png"></p>
+<p>For the <strong>Input list</strong> field, select <strong>List of Contact</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d062887d17573c8e.png"></p>
+<p>Click the + sign inside the <strong>For Each </strong>section and select <strong>System Action</strong>.</p>
+<p class="image-container"><img style="width: 501.50px" src="img/cb6029b6caa576a8.png"></p>
+<p>Select <strong>Snowflake</strong></p>
+<p class="image-container"><img style="width: 420.50px" src="img/4292b4660ac0e29a.png"></p>
+<p>Give the connection a display name</p>
+<p class="image-container"><img style="width: 466.50px" src="img/5b769057f88727f0.png"></p>
+<p>Fill in the <strong>Role, User, Schema, Database, and Password. </strong>You can see the mapping of those fields in the screenshot below. Make sure the Role has access to the database you&#39;re working with.</p>
+<p class="image-container"><img style="width: 561.50px" src="img/c42b501151733f76.png"></p>
+<p>For the <strong>Warehouse</strong> field, that should correspond to one you have configured in Snowflake. You can find that under <strong>Admin &gt; Warehouse.</strong></p>
+<p>You can find the <strong>Account Name</strong> by clicking on the menu on the bottom left in Snowflake. It consists of two strings with a hyphen (e.g. UYGKJF-LKHDLK).</p>
+<p>Click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 526.50px" src="img/6b943e1cb3628ae0.png"></p>
+<p>If configured correctly, you&#39;ll be presented with the list of Actions you can perform on Snowflake. Select <strong>Insert</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/65bf69cf58a6735d.png"></p>
+<p>Click on <strong>Edit SQL String</strong></p>
+<p class="image-container"><img style="width: 416.50px" src="img/c342823c0713f326.png"></p>
+<p>Paste the following SQL string into the window and click on <strong>Save</strong></p>
+<pre><code>insert into customers (first_name, last_name, email, phone)
+    values (:first_name, :last_name, :email, :phone);</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/41fbd30dbd2fbe7b.png"></p>
+<p>Composer will parse the SQL string and pull out the parameters that need to be passed in from the previous step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/dfeefa13a00eeb6e.png"></p>
+<p>Fill in each field from the Salesforce Contact object</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1fee964a2ab2fed2.png"></p>
+<p>Let&#39;s go ahead and test the flow now to see the data from Salesforce be inserted into Snowflake.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Flow" duration="1">
+        <p>In the top right, click on <strong>Test</strong></p>
+<p class="image-container"><img style="width: 504.23px" src="img/34f1f5b424e7132a.png"></p>
+<p>Name your flow and click on <strong>Apply</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/a099e773f66bbcec.png"></p>
+<p>When you see <strong>The test finished.</strong> message, switch to Snowflake</p>
+<p class="image-container"><img style="width: 624.00px" src="img/31ee427ea60f9ab5.png"></p>
+<p>View the table and you should see Contacts from Salesforce in Snowflake now.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9bc44848506637ef.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>In this Codelab you saw how easy it is to move data from Salesforce into Snowflake using MuleSoft Composer. </p>
+<ul>
+<li>Documentation - <a href="https://docs.mulesoft.com/composer/ms_composer_about_flows" target="_blank">How Composer Works</a></li>
+<li>Documentation - <a href="https://docs.mulesoft.com/composer/ms_composer_snowflake_reference" target="_blank">Snowflake Connector Reference</a></li>
+<li><a href="https://docs.mulesoft.com/composer/ms_composer_ms_release_notes" target="_blank">Release Notes</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

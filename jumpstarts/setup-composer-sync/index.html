@@ -1,0 +1,123 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup Composer Sync</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="setup-composer-sync"
+                  title="Setup Composer Sync"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=setup-composer-sync">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p class="image-container"><img style="width: 541.50px" src="img/72486df93f129f0e.png"></p>
+<p>Organizations that use both MuleSoft Composer and Anypoint Platform can now connect the two products. Once connected, customers can share externally available APIs managed in Anypoint Platform with business users for consumption in a MuleSoft Composer flow. In this Codelab, you&#39;ll learn how to set up Composer Sync and leverage a shared API in a Composer flow.</p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>MuleSoft Anypoint Platform</li>
+<li>MuleSoft Composer</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Composer - Settings" duration="1">
+        <p>We&#39;ll start with MuleSoft Composer first and get the Organization ID of your Composer instance. Login and click on <strong>Settings &gt; Account</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/304cf12ee00c0db7.png"></p>
+<p>Next, click on <strong>Copy</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/963ecbf07926177a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Anypoint Platform - Access Management" duration="1">
+        <p>Switch over to Anypoint Platform and login and navigate to <strong>Access Management</strong>. To see <strong>Composer Sync</strong>, you&#39;ll need to change Access Management to see the new features. Click on <strong>Try New Features </strong>on the bottom left.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/71284d697f31f1cc.png"></p>
+<p>Once you enable New Features, you&#39;ll see <strong>Composer Sync </strong>on the left hand navigation bar. Click on <strong>Composer Sync</strong> and then click on <strong>Add Composer Org</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/7c0a083b79699549.png"></p>
+<p>In the modal window that pops up, past the Org ID that you copied from MuleSoft Composer. Click on <strong>Add.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/c33b222e8fc4a697.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Composer - Confirm Request" duration="1">
+        <p>Switch back to Composer and click on <strong>Review and Confirm</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/fe7a392c8d6e6402.png"></p>
+<p>Keep all the boxes checked and click on <strong>Confirm</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/e0eaadc262127239.png"></p>
+<p>You should see a green checkmark next to <strong>Linked Organizations. </strong>In the <strong>Shared APIs, </strong>click on <strong>Authenticate in Anypoint</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f4f95e70748258c9.png"></p>
+<p>Click on <strong>Grant access to &lt;username&gt;</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/1862de3c8e05a7bc.png"></p>
+<p>Anypoint Platform will add a new Client App called <strong>Composer</strong></p>
+<p class="image-container"><img style="width: 526.96px" src="img/4c4fad7c4a2ff445.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Anypoint Platform - Request Access" duration="1">
+        <p>Composer and Anypoint Platform are now linked. Before you can call an API from Anypoint Platform, you need to share access in Exchange. Find and click on the API that you would like to use. Click on <strong>Request Access</strong></p>
+<p class="image-container"><img style="width: 465.50px" src="img/57b98b15febd9817.png"></p>
+<p>Select the API Instance you want to use and for the <strong>Application</strong> field, select <strong>Composer. </strong>Click on <strong>Request Access</strong></p>
+<p class="image-container"><img style="width: 386.73px" src="img/11face47a1499ece.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Composer - Call API" duration="1">
+        <p>Let&#39;s see the API in a Composer Flow now. Switch back to Composer and create a new flow. Select <strong>Scheduler</strong> to start the flow.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e13faa5b57d8470e.png"></p>
+<p>For the next step, click on <strong>System Action.</strong></p>
+<p class="image-container"><img style="width: 511.29px" src="img/9e0a07bb5a703979.png"></p>
+<p>Under the <strong>Shared APIs </strong>section, you&#39;ll see the newly shared API. Click on that API.</p>
+<p class="image-container"><img style="width: 480.50px" src="img/ddc4c92df9467d53.png"></p>
+<p>Fill in the connection details for that API and click on <strong>Next</strong>.</p>
+<p class="image-container"><img style="width: 426.50px" src="img/ae716eb39b171201.png"></p>
+<p>Fill in the <strong>Request Path</strong> field and click on <strong>Connect</strong> to test the connection.</p>
+<p class="image-container"><img style="width: 402.50px" src="img/a689dd2fcf76d946.png"></p>
+<p>Once you&#39;ve configured the connection, you&#39;ll see all the available operations under the <strong>Operation</strong> field.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d74f49b231f33c9.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>With Composer and Anypoint Platform connected, your business teams are able to enrich your 360-degree customer view even further. They can quickly unlock data, connect apps, and automate integration workflows to boost productivity.</p>
+<p>Follow the links below to learn more about Composer.</p>
+<ul>
+<li>Documentation - <a href="https://docs.mulesoft.com/composer/ms_composer_about_flows" target="_blank">How Composer Works</a></li>
+<li><a href="https://docs.mulesoft.com/composer/ms_composer_ms_release_notes" target="_blank">Release Notes</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

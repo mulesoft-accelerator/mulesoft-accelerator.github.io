@@ -1,0 +1,281 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Load 10M records into Snowflake in under 20 seconds</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="load-snowflakedb-copy"
+                  title="Load 10M records into Snowflake in under 20 seconds"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-24</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>Snowflake is an analytic data warehouse provided as Software-as-a-Service (SaaS). Snowflake provides a data warehouse that is faster, easier to use, and more flexible than traditional data warehouse offerings.</p>
+<p class="image-container"><img style="width: 538.50px" src="img/7aee9e59f1fcd59a.png"></p>
+<p>As enterprises begin moving their data into Snowflake, they need ways to connect and integrate large volumes of data from their systems quickly and efficiently. </p>
+<p>Instead of using traditional insert/update SQL commands you can use MuleSoft to drive data into Snowflake with new integration patterns using capabilities not found in traditional data warehouses. </p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>In this codelab, you&#39;re going to learn how to create a Mule application that will load 10 millions records into a Snowflake table in under 20 seconds. Instead of using the traditional INSERT, we&#39;ll be leveraging the COPY INTO command to quickly load large amounts of data into a table. </p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to create an external S3 stage</li>
+<li>How to create a file format</li>
+<li>How to call COPY INTO to load data into Snowflake</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li><a href="https://www.snowflake.com/" target="_blank">Snowflake</a></li>
+<li>Anypoint Studio 7.5.x</li>
+<li>Database Connector</li>
+<li>Snowflake JDBC driver</li>
+<li>Access to Amazon S3 along with your AWS Key and Secret</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Snowflake Table" duration="2">
+        <p>Before we start creating the Mule application, we need to set up a database and table in Snowflake to hold the data.. If you don&#39;t have access to Snowflake internally, you can <a href="https://www.snowflake.com/" target="_blank">sign up</a> for a free 30 day account.</p>
+<h2 is-upgraded><strong>Create Database</strong></h2>
+<p>Login to Snowflake and navigate to the <strong>Databases</strong> section. Click on <strong>Create...</strong></p>
+<p class="image-container"><img style="width: 414.50px" src="img/5c103e2d58a00c74.png"></p>
+<p>Give your database a name (e.g. MULESOFT) and click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 403.50px" src="img/cca12b89dfedd026.png"></p>
+<h2 is-upgraded><strong>Create Table</strong></h2>
+<p>In the new database, click on <strong>Create a Table</strong></p>
+<p class="image-container"><img style="width: 516.50px" src="img/d11143704ec29b9b.png"></p>
+<p>Type in <strong>PRICE</strong> for the name of the table in the <strong>Table Name* </strong>field. Next click on <strong>Add</strong> to add two columns. </p>
+<p class="image-container"><img style="width: 456.50px" src="img/63834b6a47b94f26.png"></p>
+<p>Change the names of the columns to <strong>ID</strong> and <strong>PRICE </strong>and click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 378.36px" src="img/912d4ed8220bed65.png"></p>
+<p>You can also run the following SQL script in the <strong>Worksheets</strong> section.</p>
+<pre><code>CREATE TABLE &#34;MULESOFT&#34;.&#34;PUBLIC&#34;.&#34;PRICE&#34; (&#34;ID&#34; STRING, &#34;PRICE&#34; STRING);</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Upload CSV files to AWS S3" duration="2">
+        <p>Next we need to upload the data that we want to use for the codelab to AWS S3. You can use the files provided below which have 10 million records or you can use our own files. Be sure that the columns in the files correspond to the table that you created in the first section.</p>
+<p>The table below is an example of the data from the CSV file that we plan to load.</p>
+<pre><code>1|711.56
+2|121.65
+3|7498.12
+4|2866.83
+5|794.47
+.
+.</code></pre>
+<h2 is-upgraded><strong>Download CSV Files</strong></h2>
+<p>You can click and download the CSV files with the following buttons:</p>
+<p><a href="https://dejim.s3.us-east-1.amazonaws.com/snowflake/file2019-12-08T21%3A11%3A07.706Z.csv" target="_blank"><paper-button class="colored" raised>File 1 - CSV File</paper-button></a></p>
+<p><a href="https://dejim.s3.us-east-1.amazonaws.com/snowflake/file2019-12-08T21%3A34%3A36.411Z.csv" target="_blank"><paper-button class="colored" raised>File 2 - CSV FIle</paper-button></a></p>
+<h2 is-upgraded><strong>Upload CSV Files to AWS S3 </strong></h2>
+<p>Once you have the files downloaded, switch to AWS S3. You can use any tool you have or just use the AWS Console to upload the files to one of your buckets.</p>
+<p class="image-container"><img style="width: 458.50px" src="img/9fc1c313b0eb260e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup HTTP Connector" duration="2">
+        <p>Now that you have a database and table setup in Snowflake, and you have the files uploaded to S3, you can switch to Anypoint Studio to create the Mule application.</p>
+<h2 is-upgraded><strong>Create a new project</strong></h2>
+<p>Click on <strong>File &gt; New &gt; Mule Project </strong>to create a new project.</p>
+<p class="image-container"><img style="width: 519.50px" src="img/7b2270d151442f9d.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. snowflake-copy), select a Runtime, and then click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 498.50px" src="img/b9071f927dc0c1dd.png"></p>
+<p>Once the new project is created, you&#39;ll be presented with a blank canvas. In the <strong>Mule Palette</strong> on the right, click on <strong>HTTP</strong> and then drag and drop the <strong>Listener</strong> into the canvas.</p>
+<p class="image-container"><img style="width: 437.67px" src="img/92822fa2ee894f5a.png"></p>
+<h2 is-upgraded><br><br><strong>Add HTTP Listener Configuration</strong></h2>
+<p>If the Mule Properties tab doesn&#39;t open, click the <strong>Listener</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 520.50px" src="img/a92d8f87223b0327.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, take note of the port. By default this will be <strong>8081</strong>. Go ahead and click on <strong>OK</strong> to accept the defaults and proceed.</p>
+<p class="image-container"><img style="width: 428.50px" src="img/efbd849ba705f3b8.png"></p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the Path field with the value <strong>/copy.</strong></p>
+<p class="image-container"><img style="width: 530.20px" src="img/dd0803671084bd65.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Database Connector" duration="2">
+        <p>Next, we need to connect to Snowflake using the Database Connector. In the <strong>Mule Palette</strong>, click on <strong>Add Modules</strong></p>
+<p class="image-container"><img style="width: 333.50px" src="img/dc03a1b246f6d0b.png"></p>
+<p>Drag and drop the <strong>Database</strong> module to where it says <strong>Drag and drop here to add to project</strong></p>
+<p class="image-container"><img style="width: 418.50px" src="img/ac10f88d457c4aa.png"></p>
+<p>If it prompts you to select a module version, select the latest version and click on <strong>Add</strong></p>
+<p class="image-container"><img style="width: 550.50px" src="img/c1c709a0cd65631e.png"></p>
+<h2 is-upgraded><strong>Add Database Configuration</strong></h2>
+<p>From the <strong>Mule Palette</strong>, select the Database module and drag and drop in 3 <strong>Execute DDL</strong> operations.</p>
+<p class="image-container"><img style="width: 521.50px" src="img/d8a333fb183bcd01.png"></p>
+<p>Click and select the first <strong>Execute DDL</strong> processor to open the Mule Properties tab. Click on the green plus sign next to the <strong>Connector configuration</strong> field in the <strong>Basic Settings </strong>section.</p>
+<p class="image-container"><img style="width: 589.50px" src="img/6437da64432cd6f7.png"></p>
+<p>In the <strong>Database Config </strong>window, change the <strong>Connection </strong>dropdown to <strong>Generic Connection</strong></p>
+<p class="image-container"><img style="width: 392.50px" src="img/26932be8f17562a1.png"></p>
+<p>In the <strong>Required Libraries</strong> section, click on <strong>Configure</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/addc0c6309ad7945.png"></p>
+<p>Click on <strong>Add Maven dependency</strong></p>
+<p class="image-container"><img style="width: 332.50px" src="img/152b1b8410ddd6ca.png"></p>
+<p>Copy and paste the following Maven dependency snippet into the box on the right of the window and click on <strong>Finish</strong></p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;net.snowflake&lt;/groupId&gt;
+    &lt;artifactId&gt;snowflake-jdbc&lt;/artifactId&gt;
+    &lt;version&gt;3.12.9&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+<p class="image-container"><img style="width: 440.50px" src="img/2079c1fb50556b69.png"></p>
+<p>Back in the <strong>Database Config</strong> window, paste the following into the <strong>URL</strong> field in the <strong>Connection</strong> section. </p>
+<pre><code>jdbc:snowflake://&lt;Account Name&gt;.snowflakecomputing.com/?db=MULESOFT&amp;schema=PUBLIC</code></pre>
+<p>Be sure to replace the <strong><code>Account Name</code></strong> field with your corresponding Snowflake instance. </p>
+<aside class="warning"><p><strong>Note:</strong> If you&#39;re using AWS for your instance, be sure to include your region in the URL (e.g. <code>mule123456.us-east-1.snowflakecomputing.com</code>). </p>
+</aside>
+<p>You can find your account name in the URL of your Snowflake instance URL.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/271ab2f875287b4b.png"></p>
+<p>Next, copy and paste the following in to <strong>Driver class name</strong></p>
+<pre><code>net.snowflake.client.jdbc.SnowflakeDriver</code></pre>
+<p>And fill in the <strong>User </strong>and <strong>Password </strong>field with credentials for your Snowflake instance.</p>
+<p>The connection section will look like this:</p>
+<p class="image-container"><img style="width: 575.50px" src="img/d2e5e15c3faf494b.png"></p>
+<p>Click on <strong>Test Connection...</strong></p>
+<p class="image-container"><img style="width: 485.50px" src="img/87989bb33a9dda3e.png"></p>
+<p>If everything was configured correctly, you&#39;ll see <strong>Test connection successful</strong>, if not, go back and check your credentials and settings. </p>
+<p>Otherwise, click on <strong>OK</strong> to continue.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Execute DDL - Create Stage" duration="1">
+        <p>Instead of the standard way of looping through and inserting records in bulk, we&#39;re going to be calling the Snowflake <a href="https://docs.snowflake.com/en/sql-reference/sql/copy-into-table.html" target="_blank">COPY INTO</a> command to load data from a set of CSV files in AWS S3.. </p>
+<p>But before we can call COPY INTO, we need to let Snowflake know where and how to grab these files from a staging area. Snowflake provides a command called <strong>CREATE STAGE</strong> to handle this. The stage can be in AWS S3, Azure, or Google Cloud Storage. You can learn more about the <strong>CREATE STAGE </strong>command by following this <a href="https://docs.snowflake.com/en/sql-reference/sql/create-stage.html" target="_blank">link</a>. </p>
+<p>Back in the Mule canvas, click on the first <strong>Execute DDL</strong> processor to open the Mule properties tab.</p>
+<p>For readability, change the <strong>Display Name</strong> to <strong>Create Stage</strong></p>
+<p class="image-container"><img style="width: 377.50px" src="img/d23d00f2d701598c.png"></p>
+<p>Next, copy and paste the following SQL query text into the <strong>SQL Query Text</strong> field. </p>
+<pre><code>CREATE OR REPLACE STAGE 
+S3_EXT_STAGE URL=&#39;&lt;S3 BUCKET URL&gt;&#39; 
+CREDENTIALS=(aws_key_id=&#39;&lt;AWS KEY&gt;&#39; aws_secret_key=&#39;&lt;AWS SECRET&gt;&#39;);</code></pre>
+<p>The <code><S3 BUCKET URL></code> should be in the format <code>s3://<bucket name>/<OPTIONAL key></code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/c06205bb5feb23fd.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Execute DDL - File Format" duration="1">
+        <p>The next operation defines the format of the file being used for the COPY INTO command. Snowflake provides support for CSV, JSON, XML, AVRO, ORC, and PARQUET. Additional parameters can be found by following this link for the <a href="https://docs.snowflake.com/en/sql-reference/sql/create-file-format.html#" target="_blank">CREATE FILE FORMAT</a> command.</p>
+<p>Back in the Mule canvas, click on the second <strong>Execute DDL</strong> processor to open the Mule properties tab. Change the <strong>Display Name </strong>field to <strong>Create Format</strong> and change the <strong>Connector configuration </strong>dropdown to <strong>Database_Config</strong></p>
+<p class="image-container"><img style="width: 420.50px" src="img/c471428016f5c2b6.png"></p>
+<p>Under the <strong>General</strong> section, copy and paste the following SQL query text into the <strong>SQL Query Text</strong> field. </p>
+<pre><code>CREATE OR REPLACE FILE FORMAT MY_CSV_FORMAT
+TYPE = csv
+FIELD_DELIMITER = &#39;|&#39;
+ERROR_ON_COLUMN_COUNT_MISMATCH=false </code></pre>
+<p>The tab should look like the following:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8a95733d56f8d5c3.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Execute DDL - Copy Into" duration="1">
+        <p>The last <strong>Execute DDL</strong> operation will run the <strong>COPY INTO</strong> command. This will read the files from the external S3 stage and leverage the file format that we defined for the CSV file that we&#39;ll be using. You can read more about the COPY INTO command by following this <a href="https://docs.snowflake.com/en/sql-reference/sql/copy-into-table.html" target="_blank">link</a>. </p>
+<p>Click on the 3rd Execute DDL operation and change the <strong>Connector configuration </strong>dropdown to <strong>Database_Config</strong></p>
+<p class="image-container"><img style="width: 420.50px" src="img/c471428016f5c2b6.png"></p>
+<p>Change the <strong>Display Name </strong>field to <strong>Copy Into</strong></p>
+<p class="image-container"><img style="width: 405.50px" src="img/f2c4d508090cfa0.png"></p>
+<p>Lastly, under the <strong>General</strong> section, copy and paste the following SQL query text into the <strong>SQL Query Text</strong> field. </p>
+<pre><code>COPY INTO PRICE 
+FROM @S3_EXT_STAGE 
+FILE_FORMAT = (FORMAT_NAME = &#39;MY_CSV_FORMAT&#39;) 
+PATTERN=&#39;.*.csv&#39; 
+ON_ERROR = &#39;SKIP_FILE&#39;;</code></pre>
+<p>The tab should look like the following:</p>
+<p class="image-container"><img style="width: 471.50px" src="img/3bf05afb1a6d786e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Transform Database Response" duration="1">
+        <h2 is-upgraded><strong>Create DataWeave Script</strong></h2>
+<p>Once the Database Connector processes the SQL scripts, it returns the number of records processed. Let&#39;s go ahead and transform that and output the result as JSON data.</p>
+<p>From the Mule Palette drag and drop a Transform Message module into the canvas. Place it after the <strong>Execute DDL - Copy Into</strong> operation.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b5f5d0b9fb48c5fc.png"></p>
+<p>In the <strong>Mule Properties</strong> tab for the <strong>Transform Message</strong> component, modify the DataWeave script and paste the following:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3ed25a6296c3ea3.png"></p>
+<pre><code>%dw 2.0
+output application/json
+---
+{
+        &#34;RecordsProcessed&#34;: payload
+}</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the Application" duration="1">
+        <h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Our next step is to test the flow we&#39;ve built. Right click on the canvas and click on <strong>Run project snowflake-copy</strong></p>
+<p class="image-container"><img style="width: 353.50px" src="img/9081fd494b64d3a.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 487.50px" src="img/9b398dba58003fa9.png"></p>
+<h2 is-upgraded><strong>Test Flow</strong></h2>
+<p>Let&#39;s test out our flow now. Switch to your web browser or Postman and enter the following URL: </p>
+<pre><code>http://localhost:8081/copy</code></pre>
+<p>If everything was configured correctly, you should see the following response in your browser or Postman:</p>
+<p class="image-container"><img style="width: 491.50px" src="img/649994fa550dce03.png"></p>
+<p>Switch back to Snowflake and click on <strong>History</strong></p>
+<p class="image-container"><img style="width: 448.50px" src="img/87e97513267bc1f8.png"></p>
+<p>In the table below, you can see the results of the COPY INTO command. The total duration will vary of course but should be under 20 seconds for the 10 million records. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/d3fdda29c1efa48.png"></p>
+<p>Click on the <strong>Query ID</strong> for the row to see more details.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e722d88173f582d.png"></p>
+<p>You can see that it loaded the two CSV files from the S3 bucket and the corresponding SQL text that was used to run the operation.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>Congratulations, you&#39;ve successfully loaded 10 million records in Snowflake in under 20 seconds. While this is a very basic example, you can extend this application further and harness the power and flexibility of Anypoint Platform. </p>
+<p>If you have data that resides in another system, you can use DataWeave to generate CSV files and also leverage the AWS S3 connector to upload the files into the bucket that the applications reads from.</p>
+<p class="image-container"><img style="width: 452.50px" src="img/9412a308abcfebc3.png"><br></p>
+<p>This pattern gives you the ability to transform, enrich, and orchestrate data from multiple sources before loading the data into Snowflake. The end result is the separation of ETL between MuleSoft and Snowflake. MuleSoft can easily handle the extraction and transformation of data and then Snowflake can handle the loading of the data.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://docs.snowflake.com/en/sql-reference/sql/create-file-format.html#" target="_blank">Snowflake - CREATE FILE FORMAT</a></li>
+<li><a href="https://docs.snowflake.com/en/sql-reference/sql/copy-into-table.html" target="_blank">Snowflake - COPY INTO &lt;table&gt;</a></li>
+<li><a href="https://docs.snowflake.com/en/sql-reference/sql/create-stage.html" target="_blank">Snowflake - CREATE STAGE</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

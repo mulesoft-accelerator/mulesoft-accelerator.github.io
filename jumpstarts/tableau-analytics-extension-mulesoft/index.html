@@ -1,0 +1,197 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup a Tableau Analytics Extension with MuleSoft</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="tableau-analytics-extension-mulesoft"
+                  title="Setup a Tableau Analytics Extension with MuleSoft"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>Last Updated: 2021-01-13</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>Tableau provides the ability to perform calculations on the data within reports and dashboards. These calculations can also be dynamic and call external services using <a href="https://tableau.github.io/analytics-extensions-api/#" target="_blank">Analytics Extensions</a>. Analytic Extensions can receive data from Tableau in real time and return it back after it has been scored, transformed, or enriched by another service. </p>
+<p>Typically these Analytic Extensions are built using custom code (e.g. Node.js, Python, etc..) but MuleSoft provides a way to quickly build and extend this capability to hundreds of other services and endpoints. You can easily build and deploy an Analytics Extension in a matter of minutes that allows you to connect your Tableau data with MuleSoft connectors to services like Salesforce, SAP, ServiceNow, etc...</p>
+<p class="image-container"><img style="width: 624.00px" src="img/adc5833bf1b4dd6a.png"></p>
+<p>In this codelab, I&#39;ll walk you through the processes of setting up a MuleSoft API as a Tableau Analytics Extension from a template. We&#39;ll be using a template that provides the ability to calculate currency conversions. </p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to implement a Tableau Analytics Extension using MuleSoft</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.7.x</li>
+<li>Mule EE 4.3.0</li>
+<li><a href="https://github.com/djuang1/tableau-analytics-extension-example-mule4" target="_blank">Tableau Analytics Extension Template</a></li>
+<li>Tableau Desktop</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Download and Import the Template" duration="2">
+        <p>To get started, navigate to the Github repository <a href="https://github.com/djuang1/tableau-analytics-extension-example-mule4" target="_blank">here</a> and either clone the project locally or download the project by clicking on <code>Code</code> and then <code>Download ZIP</code>. If you downloaded the *.zip file, uncompress the file before proceeding.</p>
+<p class="image-container"><img style="width: 531.50px" src="img/11553fcb253377fd.png"></p>
+<p>Switch to Anypoint Studio and click on <code>File > Import</code>. Expand the Anypoint Studio node and click on <code>Anypoint Studio project from File System</code> and click on <code>Next ></code></p>
+<p class="image-container"><img style="width: 393.50px" src="img/b257e1aa6c37dc8b.png"></p>
+<p>In the next screen, navigate to the project to populate the <code>Project Root</code> field. Click on <code>Finish</code> to complete the import of the project. </p>
+<p class="image-container"><img style="width: 430.50px" src="img/1ac7aea34893224c.png"></p>
+<p>Let&#39;s take a look at the project to understand what the template provides. Navigate to the <code>src/main/mule</code> folder and double-click on the <code>tableau-analytics-extensions-api.xml</code> file to open it if it is not already open.</p>
+<p>The template leverages the RAML specification for the Tableau Analytics Extension API that can be found in this Github repository <a href="https://github.com/djuang1/tableau-analytics-extensions-api" target="_blank">here</a>. The specifications are based on the API Reference documentation found <a href="https://tableau.github.io/analytics-extensions-api/docs/ae_api_ref.html" target="_blank">here</a>. There are two flows that correspond to methods required for Analytics Extensions and we&#39;ll cover those in the next two sections.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Endpoint - GET /info" duration="1">
+        <p>Scroll down and find the flow with the name <code>get:\info:tableau-analytics-extensions-api-config</code></p>
+<p class="image-container"><img style="width: 378.50px" src="img/a538a26eb892d075.png"></p>
+<p>This flow allows Tableau to get information about the server. This is used to help understand how the analytics extension is configured such as whether authentication is required. </p>
+<h3 is-upgraded><strong>Transform Message </strong></h3>
+<p>You can easily modify the DataWeave to dynamically return different information based on the request or what the backend is pointing to.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/837a4f7f415a3c07.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Endpoint - POST /evaluate" duration="2">
+        <p>Scroll down and find the flow with the name <code>post:\evaluate:application\json:tableau-analytics-extensions-api-config</code> to see where all of the analysis using the service is done. <br><br>With MuleSoft, instead of writing custom code that looks like the following:</p>
+<pre><code>// -------------------- CURRENCY CONVERSION --------------------
+exports.convert = async (data, callback) =&gt; {
+  let from = data._arg2[0];
+  let to = data._arg3[0];
+  let url = `https://openexchangerates.org/api/latest.json?symbols=${from},${to}&amp;app_id=${process.env.CURRENCY_KEY}`;
+
+  // Get the exchange rate and convert
+  const response = await fetch(url);
+  const body = await response.json();
+  if (body.error) return callback([0], null);
+  let rate = body.rates[to] / body.rates[from];
+  let output = data._arg1.map(money =&gt; money * rate);
+  callback(null, output);
+};</code></pre>
+<p>the tooling allows you to simply drag and drop components from the Mule Palette to build logic that handles the the transformation and calculation of data being passed from Tableau.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8b59a43c765736af.png"></p>
+<p>Let&#39;s walk through the flow to understand the design. The request from Tableau will always look like the following below.</p>
+<h3 is-upgraded><strong>Example Request</strong></h3>
+<pre><code>POST /evaluate HTTP/1.1
+Host: localhost:8081
+Authorization: Basic dGVzdDp0ZXN0
+Accept: */*
+Accept-Encoding: gzip, deflate
+User-Agent: Tableau Desktop 20201.20.0721.1350; pro; libcurl-client; 64-bit; en_US; Mac OS X 10.15.7;
+TabPy-Client: Tableau Desktop Pro2020.1
+Content-Type: application/json
+Connection: Keep-Alive
+Content-Length: 80
+
+{&#34;script&#34;:&#34;currency&#34;,&#34;data&#34;:{&#34;_arg1&#34;:[56756.0],&#34;_arg2&#34;:[&#34;GBP&#34;],&#34;_arg3&#34;:[&#34;USD&#34;]}}</code></pre>
+<p>The <code>"script"</code> key tells the Analytics Extension what function to call. In this case, Tableau is passing in <code>"currency"</code>. <br><br>The <code>"data"</code> key will pass in values that will be used for the calculation or lookup. The example shows that Tableau is passing in 3 arguments: <code>56756.0, GBP, and USD</code></p>
+<p>The required format of what the response will look like is detailed below. This is an actual response from the template that has taken the currency in GBP and converted it to USD using the Open Exchange Rates web service.<br></p>
+<h3 is-upgraded><strong>Example Response</strong></h3>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: application/json; charset=UTF-8
+Content-Length: 41
+Date: Thu, 14 Jan 2021 17:54:31 GMT
+
+[
+  77694.09149274612391958450717721687
+]</code></pre>
+<p>The response needs to match the data type that the calling function from Tableau requires. There are 4 types available: <code>Boolean, Integer, Real, and String</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/5a0d552f5a74598f.png"></p>
+<p>In the screenshot above, this is the script that generates the example request we talked about earlier.</p>
+<pre><code>SCRIPT_REAL(&#34;currency&#34;,ATTR([Balance]),ATTR([Currency]),&#34;USD&#34; )</code></pre>
+<p>So going back to the flow in MuleSoft, the first <code>When</code> in the Choice router is required if authentication is enabled on the service. This is detailed <a href="https://tableau.github.io/analytics-extensions-api/docs/ae_known_issues.html" target="_blank">here</a>. When a SCRIPT_X function is evaluated, Tableau will make a dummy <code>POST /evaluate</code> call to the Analytics Extension with the following request:</p>
+<pre><code>{‘script&#39;: ‘return int(1)&#39;, ‘data&#39;: {‘_arg1&#39;: [4]}}</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/22e444ac83bb7cc0.png"></p>
+<p>The response is required to be the integer <code>1</code> in order to successful validate the call.</p>
+<h3 is-upgraded><strong>HTTP Request</strong></h3>
+<p>The second <code>When</code> checks to see if the <code>"script"</code> value equals <code>"currency"</code>. If true, this is where the extension calls the external service, in this case <a href="https://openexchangerates.org/" target="_blank">https://openexchangerates.org/</a>, to pass in the data from Tableau to convert the currency.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5577e9f38532f3a8.png"></p>
+<p>Clicking on the <code>HTTP Request</code> will open the Mule Properties window.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8671b002fef8bf0f.png"></p>
+<p>This component calls the <code>GET /latest.json</code> from <a href="https://docs.openexchangerates.org/docs/latest-json" target="_blank">Open Exchange Rates</a> to convert the currency based on the arguments passed in as well as an App ID to grant access to the API. You can see how that is configured in the <code>Query Parameters</code> tab.</p>
+<h3 is-upgraded><strong>Transform Message</strong></h3>
+<p>Lastly, the <code>Transform Message</code> component, after the <code>HTTP Request</code>, will perform the conversion using the data that is returned from the service.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f9e142f037aca10b.png"></p>
+<p>In the next section we&#39;re going to run the project in Studio.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run Mule Project" duration="1">
+        <p>Before we run the project, you&#39;ll need to sign up for an App ID in order to call the Exchange Rate API. Switch to your browser and go to <a href="https://openexchangerates.org/" target="_blank">https://openexchangerates.org/</a> to sign up for a free account and generate an App ID.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cadedfdfa8fd0e2a.png"></p>
+<p>Once you have an App ID, go back to Anypoint Studio and expand the <code>src/main/resources</code> folder. Find and open the <code>config.dev.yaml</code> file. Fill in the <code>app_id</code> property in order for you to call the API from the project.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7c576479d882f972.png"></p>
+<p>Switch back to the <code>tableau-analytics-extensions-api</code> tab and right-click on the canvas and click on <code>Run project tableau-analytics-extensions-api</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/93ac2f32e24f0e77.png"></p>
+<p>When the project is successful deployed, switch to your browser and navigate to the following URL</p>
+<pre><code>http://localhost:8081/api/console</code></pre>
+<p>If everything was configured successfully, you&#39;ll see the following screen.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/81841377aebf0d4e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Tableau Desktop" duration="1">
+        <p>Assuming you having an existing project with some data already in Tableau Desktop, I&#39;ll show you how to set it up to use the Analytics Extension and configure a measure to call a SCRIPT_X function.</p>
+<p>Navigate to <code>Help > Settings and Performance > Manage Analytics Extension Connection...</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/3770937292d217d7.png"></p>
+<p>Change the dropdown to <code>TabPy/External API</code>. Set the Server to <code>localhost</code> and the Port to <code>8081</code>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7f1c2cdb967c4be2.png"></p>
+<p>The Analytics Extension is setup with authentication so check the <code>Sign in with a username and password</code> checkbox and fill in the Username and Password with <code>test</code> and <code>test</code>. </p>
+<p>Click on <strong>Test Connection </strong>and you should see a Successfully connected to the analytics extension dialog box.</p>
+<p>Back in a Sheet, right-click in the Measures section and click on Create Calculated Field...</p>
+<p class="image-container"><img style="width: 277.50px" src="img/e621dc6945b90391.png"></p>
+<p>Give the measure a name (e.g. Currency Calc) and paste the following script in:</p>
+<pre><code>SCRIPT_REAL(&#34;currency&#34;,ATTR([Balance]),ATTR([Currency]),&#34;USD&#34; )</code></pre>
+<p>Change the 2nd and 3rd arguments to match the data and fields in your project. You can also hard code the 3rd argument to be another currency like &#34;GBP&#34; but the 2nd arguments needs to be a real number that represents the currency value.</p>
+<p>Again, this will differ based on the data in your project but if everything is configured correctly, you&#39;ll see the currency conversion in your report.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8aca6fcd63919cf0.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>In this codelab, you learned how to setup a Tableau Analytics Extension using MuleSoft that can easily be configured. The template provided in this codelab is just an example of a single function that provides the ability to handle currency conversions. The extensibility of MuleSoft though allows you to add in multiple <code>When</code> blocks that can call other APIs and services to extend and make reports in Tableau more dynamic.</p>
+<p>The Analytics Extension can be deployed into CloudHub and made available in your Application Network. Other systems and services can re-use the API as long as they follow the documented request format in the API specifications.</p>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://tableau.github.io/analytics-extensions-api/" target="_blank">Tableau Analytics Extensions API Documentation</a></li>
+<li><a href="https://github.com/djuang1/tableau-analytics-extension-example-mule4" target="_blank">Analytics Extension Template</a></li>
+<li><a href="https://github.com/djuang1/tableau-analytics-extensions-api" target="_blank">RAML and OAS 2.0 specifications for the Tableau Analytics Extensions API</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

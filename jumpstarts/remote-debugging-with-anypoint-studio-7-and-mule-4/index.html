@@ -1,0 +1,130 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Remote Debugging with Anypoint Studio 7 and Mule 4</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="remote-debugging-with-anypoint-studio-7-and-mule-4"
+                  title="Remote Debugging with Anypoint Studio 7 and Mule 4"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>Last Updated: 2021-05-12</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b63ee987f0e11092.png"></p>
+<p>The Visual Debugger in Anypoint Studio is a unique capability of the Anypoint Platform that differentiates us from other integration solutions. It allows developers to quickly debug their Mule applications by stopping execution to check the contents of a message at previously-specified building blocks through the use of breakpoints. If you&#39;re a Java or .NET developer, this is similar to the line-by-line debugging offered in Eclipse/IntelliJ or Visual Studio but from a component-to-component perspective in a Mule application in Anypoint Studio.<br><br>In addition to debugging applications that are deployed to the embedded Mule Runtime in Studio, developers can also debug applications that are deployed to remote standalone Mule Runtime environments. In this codelab, you&#39;ll learn how to set up Mule and Anypoint Studio for remote debugging.</p>
+<h2 is-upgraded>Pre-requisites</h2>
+<ul>
+<li>Mule Runtime registered with Runtime Manager</li>
+<li>Mule Application deployed to Runtime and open in Studio</li>
+</ul>
+<h2 is-upgraded>Requirements</h2>
+<ul>
+<li>Anypoint Studio 7.8+</li>
+<li>Mule Runtime 4.3.x</li>
+<li>Anypoint Platform - Runtime Manager</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Mule Runtime" duration="2">
+        <p>Before you connect to a standalone Mule Runtime for remote debugging, you need to add a plugin that allows Studio to connect to the runtime. Make sure you stop the Mule Runtime and close and quit Anypoint Studio before you begin these steps.</p>
+<p>The plugin you need to add to the Mule Runtime is found with Anypoint Studio and it requires a little digging to get to the file. Again, be sure to close and quit Studio before grabbing the file otherwise it will be expanded in the <code>server-plugins</code> folder</p>
+<p>If you are on macOS, navigate to the following directory:</p>
+<pre><code>&lt;AnypointStudio_App_Location&gt;/Contents/Eclipse/plugins/org.mule.tooling.server.4.3.0.&lt;Latest_Version&gt;/mule/server-plugins/mule-debugger-5.0.x-mule-server-plugin.jar</code></pre>
+<p>You may have installed multiple Mule Runtimes in Studio so choose the latest <code>org.mule.tooling.server</code> directory and grab the latest *.jar version. </p>
+<p class="image-container"><img style="width: 554.50px" src="img/43eef81f2aceed6f.png"></p>
+<p>Switch to your Mule Runtime installation folder and paste the file into the following directory:</p>
+<pre><code>&lt;Mule_Runtime_Location&gt;/server-plugins</code></pre>
+<p class="image-container"><img style="width: 429.50px" src="img/bbb80c3872e5fe02.png"></p>
+<p>Now open a Terminal or PowerShell window and navigate to the Mule Runtime folder to start the runtime. We&#39;re going to start the Mule Runtime in debug mode.</p>
+<p>Run the following command:</p>
+<pre><code>./mule -M-Dmule.debug.enable=true -M-Dmule.debug.port=1234</code></pre>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Parameter</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Description</strong></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>-M-Dmule.debug.enable=true</code></p>
+</td><td colspan="1" rowspan="1"><p>Mandatory. Sets debugging mode in Mule. Issue this parameter first.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>-M-Dmule.debug.port=<port number></code></p>
+</td><td colspan="1" rowspan="1"><p>Optional. Sets the listening port for incoming connections from Studio. If unset, the listening port will be 6666.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>-M-Dmule.debug.suspend=true</code></p>
+</td><td colspan="1" rowspan="1"><p>Optional. Sets &#34;suspend&#34; mode in Mule. In suspend mode, Mule will start, then immediately suspend application execution until it receives a connection on the debug port.</p>
+</td></tr>
+</table>
+<p>Once Mule is started and running, you can run the following command to make sure debug mode is running:</p>
+<pre><code>lsof -iTCP -n -P | egrep LISTEN</code></pre>
+<p>In the screenshot below, you&#39;ll see port that you set when you started Mule (e.g. 1234)</p>
+<p class="image-container"><img style="width: 624.00px" src="img/184ec5e7114568be.png"></p>
+<p>Now that the Mule Runtime is up and running, let&#39;s switch to Anypoint Studio to connect to the remote runtime and debug an application.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Anypoint Studio" duration="1">
+        <p>Before accessing and debugging your application on a remote server, you must first export and deploy your application to the desired Mule server and then proceed with this step.</p>
+<p>Open up Studio and open the project that you have deployed to the remote Mule Runtime. Right click on the project in the Package Explorer and select <code>Debug As > Debug Configurations</code></p>
+<p>Select <code>Remote Mule Application</code> and click on <code>New Configuration</code></p>
+<p class="image-container"><img style="width: 441.50px" src="img/bf1172d97490b008.png"></p>
+<p>Give the configuration a name and then set the host and port where the Mule Runtime is running. The port should match the port that you used in the previous step. Once you&#39;ve made those changes, click on <code>Apply</code> and then <code>Debug</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/af4a50ee8e17fd40.png"></p>
+<p>If the Mule Runtime was configured correctly, you should see the <code>Confirm Perspective Switch</code> window. Go ahead and click on <code>Yes</code> to change to the Visual Debug perspective.</p>
+<p class="image-container"><img style="width: 403.50px" src="img/7d1cfa00cdac8014.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Start Remote Debugging" duration="1">
+        <p>If you&#39;ve used the Visual Debug before these next steps should be familiar. Right click on any component in your flow and click on <code>Add Breakpoint</code></p>
+<p class="image-container"><img style="width: 296.50px" src="img/843b1530c97fbb58.png"></p>
+<p>Switch to your web browser and navigate to the URL to kick off the flow. In the case of the application I used, I navigated to <a href="http://localhost:8081/hello" target="_blank">http://localhost:8081/hello</a> on the same machine where the Mule Runtime was deployed to.</p>
+<p class="image-container"><img style="width: 471.00px" src="img/6bd704105c146893.png"></p>
+<p>Back in Studio, Visual Debugger should have been kicked off. You can step through the flow like usual.</p>
+<p class="image-container"><img style="width: 524.62px" src="img/973968cf9ee9daa8.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>As you can see, Studio gives you the ability to visually debug your Mule application either locally or remote. There are some items to note though.</p>
+<ul>
+<li>Remote debugging does not work with clusters</li>
+<li>Remote debugging does not work with Cloudhub instances</li>
+<li>All applications running on the Mule Runtime run in debug mode</li>
+</ul>
+<p>Visual Debugger is a powerful tool for debugging that helps Mule developers quickly test, troubleshoot, and debug issues with your application.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,339 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Add Flex Gateway to Kubernetes</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="add-flex-gateway-to-kubernetes"
+                  title="Add Flex Gateway to Kubernetes"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=add-flex-gateway-to-kubernetes">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p class="image-container"><img style="width: 276.00px" src="img/c648f1d8bfa9aa88.png"></p>
+<p>This Codelab provides additional supporting documentation for installing Anypoint Flex Gateway as an ingress controller on a generic Kubernetes cluster (i.e., not cloud-platform specific). This Codelab aims to complement the documentation MuleSoft publishes and not replace it. Furthermore, we authored the content herein based on input, feedback, comment, questions, etc., we received from actual customers.</p>
+<h2 is-upgraded>Flex Gateway Introduction</h2>
+<p>Flex Gateway is an ultrafast API gateway designed to manage and secure APIs running anywhere. It can secure both Mule and non-Mule APIs, and run anywhere — e.g., your cloud, on-premises, containerized environments, and hybrid</p>
+<p>Flex Gateway supports two operating modes:</p>
+<ol type="1" start="1">
+<li>In Local mode, Flex Gateway operates mostly disconnected from the Anypoint Control Plane. You manage Flex Gateway instances via locally stored declarative configuration files (YAML). In Local mode, network traffic is one-way, from Flex Gateway to the Anypoint Control Plane, and occurs:</li>
+</ol>
+<ul>
+<li>When registering and starting an instance for licensing and metering/billing purposes.</li>
+<li>When sending logs and metrics.</li>
+</ul>
+<ol type="1" start="2">
+<li>In Connected mode, Flex Gateway is fully connected to the Anypoint control plane, which provides a single pane of glass for centralized management, observability, and security. In Connected mode, network traffic between Flex Gateway and the Anypoint Control Plane is bidirectional. For example, you can manage Flex Gateway instances and all APIs from the Anypoint Control Plane instead of maintaining YAML configuration files.</li>
+</ol>
+<p>In this Codelab, we are using the default settings and Flex Gateway will run in connected mode.</p>
+<aside class="special"><p><strong>Note:</strong> We tested and authored this content using Flex Gateway version 1.3.</p>
+</aside>
+<h2 is-upgraded>Requirements</h2>
+<p>In this Codelab, you will need the following: </p>
+<ul>
+<li>An Anypoint Platform account,</li>
+<li>Docker Desktop on macOS or Windows, or Docker CE on Linux, and</li>
+<li>A Kubernetes cluster.</li>
+</ul>
+<h2 is-upgraded>MuleSoft Relevant Documentation</h2>
+<p>This Codelab complements the following MuleSoft documentation:</p>
+<ul>
+<li><a href="https://docs.mulesoft.com/gateway/1.3/flex-gateway-getting-started" target="_blank">Getting Started with Flex Gateway</a></li>
+<li><a href="https://docs.mulesoft.com/gateway/1.3/flex-review-prerequisites" target="_blank">Flex Gateway Prerequisites</a></li>
+<li><a href="https://docs.mulesoft.com/gateway/1.3/flex-install#install-kubernetes" target="_blank">Install Flex Gateway as a Kubernetes Ingress Controller</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review Flex Gateway Prerequisites" duration="0">
+        <p>Ensure you review and satisfy the following prerequisites before installing Anypoint Flex Gateway version 1.3 to a generic Kubernetes cluster.</p>
+<h2 is-upgraded>Permission Requirements</h2>
+<p>In <strong>Anypoint Platform</strong>, in <strong>Access Management</strong> more specifically, ensure your user account has the following permissions for Runtime Manager and the environment where you will install Flex Gateway:</p>
+<ul>
+<li>Manage Servers</li>
+<li>Read Servers</li>
+</ul>
+<aside class="special"><p><strong>Note:</strong> The role <code>Cloudhub Admin</code> grants both permissions by default. For example, in the following screen capture, the user has the role <code>Cloudhub Admin</code> for the Prod, Sandbox, and Design environments.</p>
+</aside>
+<p class="image-container"><img style="width: 2048.00px" src="img/2e65c406471c4839.png"></p>
+<h2 is-upgraded>Software Requirements</h2>
+<p>Running Flex Gateway version 1.3 on Kubernetes requires the following:</p>
+<ul>
+<li>A minimum Kubernetes version of 1.21.</li>
+<li>Ingress v1 (stable), which requires specifying <code>apiVersion: networking.k8s.io/v1</code> as the API version in your configuration resources.</li>
+<li>A minimum Helm version of 3.0.0.</li>
+</ul>
+<h2 is-upgraded>Hardware Requirements</h2>
+<p>Flex Gateway requires the following minimum hardware configuration:</p>
+<ul>
+<li>CPU: 0.2 vCPU</li>
+<li>Memory: 200 MB</li>
+</ul>
+<h2 is-upgraded>Ports, IPs, and Hostnames Allow list Requirements</h2>
+<p>Flex Gateway must communicate with the Anypoint Platform control plane. As relevant, ensure you add the following hostnames and ports to the allowlist.</p>
+<h3 is-upgraded>US Control Plane</h3>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Host</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Port</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Description</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Protocol</strong></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>anypoint.mulesoft.com</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to connect with the control plane, push internal metrics, and download custom policy binaries</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>arm-mcm2-service.kprod.msap.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to communicate with the transport layer</p>
+</td><td colspan="1" rowspan="1"><p>mTLS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>logging.ingestion.us-east-1.prod.cloudhub.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to send analytics data to the control plane</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>metering.ingestion.us-east-1.prod.cloudhub.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to send analytics data to the control plane</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>monitoring.ingestion.us-east-1.prod.cloudhub.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to send analytics data to the control plane</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>exchange-files.anypoint.mulesoft.com</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to download policies</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>exchange2-asset-manager-kprod.s3.amazonaws.com</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to download policies</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>configuration-resolver.prod.cloudhub.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to download policies</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+</table>
+<h3 is-upgraded>EU Control Plane</h3>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Host</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Port</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Description</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Protocol</strong></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>eu1.anypoint.mulesoft.com</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to connect with the control plane, push internal metrics, and download custom policy binaries</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>arm-mcm2-service.kprod-eu.msap.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to communicate with the transport layer</p>
+</td><td colspan="1" rowspan="1"><p>mTLS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>logging.ingestion.eu-central-1.prod-eu.msap.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to send analytics data to the control plane</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>metering.ingestion.eu-central-1.prod-eu.msap.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to send analytics data to the control plane</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>monitoring.ingestion.eu-central-1.prod-eu.msap.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to send analytics data to the control plane</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>configuration-resolver.prod-eu.msap.io</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to download policies</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>exchange-files.eu1.anypoint.mulesoft.com</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to download policies</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>exchange2-asset-manager-kprod-eu.s3.eu-central-1.amazonaws.com</p>
+</td><td colspan="1" rowspan="1"><p>443</p>
+</td><td colspan="1" rowspan="1"><p>Required to download policies</p>
+</td><td colspan="1" rowspan="1"><p>HTTPS</p>
+</td></tr>
+</table>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Installation Overview" duration="0">
+        <p>When adding Flex Gateway to Kubernetes, the recommended approach is to follow the generic instructions Anypoint Runtime Manager provides. More specifically, the organization id and registration token are prepopulated in step 2 (Register your gateway) and are specific to 1) the business group and 2) the environment selected. For example, we selected the Sales business group and the Prod environment in the following screen capture, and the prepopulated values reflect those selections.</p>
+<p class="image-container"><img style="width: 1806.00px" src="img/cb248a140c39420f.png"></p>
+<p>In this Codelab, we review those generic instructions but more importantly, we add additional details to complement them.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Step 1 – Pull the image" duration="0">
+        <p>Step 1 of the Anypoint Runtime Manager generic instructions consists of downloading the Docker image of Flex Gateway from Docker Hub, which we use to register a new instance of Flex Gateway in the next step. The generic instructions imply completing this step on our computer using Docker Desktop on macOS or Windows, or Docker CE on Linux, as examples.</p>
+<ol type="1" start="1">
+<li>Ensure Docker is running on your computer.</li>
+<li>Open a command line window (Windows) or a terminal (Linux or Mac), and run the following command:</li>
+</ol>
+<pre>docker pull mulesoft/flex-gateway</pre>
+<p class="image-container"><img style="width: 875.00px" src="img/9a3878ccad583a06.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Step 2 – Register your gateway" duration="0">
+        <p>Step 2 of the Anypoint Runtime Manager generic instructions involves running the Docker image to register a Flex Gateway instance with the Anypoint Platform control plane. To do so, we suggest leveraging the command generated in Anypoint Runtime Manager, as it is prepopulated based on the business group and environment selected.</p>
+<ol type="1" start="1">
+<li>First, open a web browser and log in to the Anypoint Platform (<a href="https://anypoint.mulesoft.com" target="_blank">https://anypoint.mulesoft.com</a>).</li>
+<li>On the landing page, select <strong>Runtime Manager</strong> in the <strong>Management Center</strong> section on the right.</li>
+<li>In <strong>Runtime Manager</strong>, if applicable, first select the appropriate business group (top right corner) and then the correct environment (top left corner).</li>
+</ol>
+<p class="image-container"><img style="width: 2048.00px" src="img/789445bf09995b7c.png"></p>
+<ol type="1" start="4">
+<li>Next, select the <strong>Flex Gateways</strong> option in the left menu</li>
+<li>On the <strong>Flex Gateways</strong> page, click the <strong>Add Gateway</strong> button and click the <strong>Kubernetes</strong> logo.</li>
+<li>Locate <strong>step 2 (Register your gateway)</strong> in the high-level instructions displayed and and notice the command. As stated before, this command is prepopulated and require one minor edit. More specifically:</li>
+</ol>
+<ul>
+<li>The <code>--organization</code> option represents the organization id of the business group selected, and</li>
+<li>The <code>--token</code> option represents the registration token specific to the environment selected.</li>
+</ul>
+<p class="image-container"><img style="width: 2048.00px" src="img/9829c2ac56ae10fe.png"></p>
+<ol type="1" start="7">
+<li>Copy the entire <code>docker run</code> command and paste it into a text editor to alter it before running it. As the changes are minor, you can paste it to the command line window (Windows) or the terminal (Linux or Mac) you opened in the previous step, <strong>but do not run the command yet</strong>. We pasted the generic command here for convenience.</li>
+</ol>
+<pre>docker run --entrypoint flexctl -u $UID \
+  -v &#34;$(pwd)&#34;:/registration mulesoft/flex-gateway \
+  register --organization=&lt;organization-id&gt; \
+  --token=&lt;registration-token&gt; \
+  --output-directory=/registration \
+  --connected=true \
+  &lt;gateway-name&gt;</pre>
+<aside class="warning"><p><strong>Remark:</strong> You should treat organization ids and registration tokens as confidential information, which is why those values are omitted in this Codelab and blurred in screen captures.</p>
+</aside>
+<ol type="1" start="8">
+<li>Edit the <code>docker run</code> command and replace the placeholder with the name of your Flex Gateway instance.</li>
+<li>Optionally, add the <code>--rm</code> flag before the <code>--entrypoint</code> flag (i.e., <code>docker run --rm --entrypoint</code> ...) to dispose of the container automatically once the registration completes, as it is no longer required.</li>
+<li>Finally, paste <code>docker run</code> command to the command line window (Windows) or the terminal (Linux or Mac) and execute it.</li>
+</ol>
+<p class="image-container"><img style="width: 875.00px" src="img/a4dda890a9bde863.png"></p>
+<ol type="1" start="11">
+<li>This command registers a new instance of Flex Gateway to the Anypoint Platform control plane, and when successful, it creates a registration file in the current directory named <code>registration.yaml</code>.</li>
+</ol>
+<p class="image-container"><img style="width: 875.00px" src="img/b0e16fc8b1ec64f5.png"></p>
+<aside class="special"><p><strong>Tip:</strong> The registration file just created is specific to the business group and the environment selected, and the gateway name specified. If we update the gateway name, we can rerun the same command to register another Flex Gateway instance. However, this will overwrite the registration file without warning. For that reason, you should rename the registration file and save it somewhere safe. A suggested naming convention is <code>registration-<gateway-name>.yaml</code> (e.g., <code>registration-flex-sales-01.yaml</code>).</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Step 3 – Add Flex Gateway helm chart" duration="0">
+        <p>Step 3 of the Anypoint Runtime Manager generic instructions involves connecting to the Kubernetes cluster to add the Helm chart repository for Flex Gateway.</p>
+<ol type="1" start="1">
+<li>Connect to your Kubernetes cluster using the command-line interface, for example.</li>
+<li>First, add the Helm chart repository for Flex Gateway using the following command:</li>
+</ol>
+<pre>helm repo add flex-gateway https://flex-packages.anypoint.mulesoft.com/helm</pre>
+<p class="image-container"><img style="width: 875.00px" src="img/4a82e6e035ed46d.png"></p>
+<ol type="1" start="3">
+<li>Then, update information locally on available charts from the newly added Flex Gateway chart repository using the following command:</li>
+</ol>
+<pre>helm repo update</pre>
+<p class="image-container"><img style="width: 875.00px" src="img/433d5f280ca43be6.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Step 4 – Deploy the gateway" duration="0">
+        <p>Step 4 of the Anypoint Runtime Manager generic instructions consists of deploying a Flex Gateway instance to the Kubernetes cluster using Helm and the registration file from step 2.</p>
+<ol type="1" start="1">
+<li>If you disconnected, reconnect to your Kubernetes cluster using the command-line interface, for example.</li>
+<li>Copy the following command, adjust and update it as needed.</li>
+</ol>
+<pre>helm upgrade &lt;release-name&gt; flex-gateway/flex-gateway \
+  --install \
+  --namespace &lt;namespace-name&gt; --create-namespace \
+  --set-file registration.content=&lt;registration-file-name&gt; \
+  --wait</pre>
+<aside class="special"><p><strong>Notes:</strong></p>
+<p>For convenience, the Runtime Manager general instructions:</p>
+<ul>
+<li>Propose the <code>helm upgrade</code> command with the <code>--install</code> flag to upgrade the Flex Gateway instance if it exists, and install it if it does not.</li>
+<li>Include the <code>--create-namespace</code> flag to create the namespace if it does not exist.</li>
+</ul>
+<p>Furthermore, in the command above:</p>
+<ul>
+<li><code><release-name></code> represents the Helm release you are about to install or upgrade. The default used in the Runtime Manager general instructions is <code>ingress</code>. In the screen capture below, we used <code>flex-sales-01</code>, which is the name we used for our Flex Gateway instance.</li>
+<li><code><namespace-name></code> obliviously denotes the Kubernetes namespace where the Flex Gateway instance will be deployed. The default used in the Runtime Manager general instructions is <code>gateway</code>. In the screen capture below, we somewhat arbitrarily used <code>ingress-flex-01</code>.</li>
+<li><code><registration-file-name></code> obviously represents the registration file&#39;s name. The default name is <code>registration.yaml</code> if you did not rename it in step 2.</li>
+</ul>
+</aside>
+<p class="image-container"><img style="width: 875.00px" src="img/8a64f7c26250ea4a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Step 5 – View in Anypoint Platform" duration="0">
+        <p>Finally, step 5 of the Anypoint Runtime Manager generic instructions consists of verifying that the Flex Gateway instance connected successfully to the Anypoint Platform control plane.</p>
+<ol type="1" start="1">
+<li>If you close it, open a web browser and log in to the Anypoint Platform (<a href="https://anypoint.mulesoft.com" target="_blank">https://anypoint.mulesoft.com</a>).</li>
+<li>On the landing page, select <strong>Runtime Manager</strong> in the <strong>Management Center</strong> section on the right.</li>
+<li>In <strong>Runtime Manager</strong>, if applicable, first select the appropriate business group (top right corner) and then the correct environment (top left corner).</li>
+</ol>
+<p class="image-container"><img style="width: 2048.00px" src="img/789445bf09995b7c.png"></p>
+<ol type="1" start="4">
+<li>Next, select the <strong>Flex Gateways</strong> option in the left menu</li>
+<li>You should now see your Flex Gateway instance connected to the Anypoint Platform control plane.</li>
+</ol>
+<p class="image-container"><img style="width: 1806.00px" src="img/8f53eed4e95e18f4.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Conclusion" duration="0">
+        <p>In this Codelab, you install Anypoint Flex Gateway as an ingress controller on a generic Kubernetes cluster (i.e., not cloud-platform specific). This Codelab uses the default settings, which means that your Flex Gateway instance runs in connected mode.</p>
+<aside class="special"><p><strong>Stay Tuned!</strong> We will soon publish additional Codelabs that will cover how to change and apply different settings and how to run Flex Gateway in local mode.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
