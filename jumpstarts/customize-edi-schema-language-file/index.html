@@ -1,0 +1,208 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Customize an EDI X12 Schema Language File</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="customize-edi-schema-language-file"
+                  title="Customize an EDI X12 Schema Language File"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>Last Updated: 2021-05-17</p>
+<p class="image-container"><img style="width: 624.00px" src="img/221a44cf1f280e59.png"></p>
+<p>MuleSoft provides support for a large set of <a href="https://docs.mulesoft.com/x12-edi-connector/2.5/x12-edi-versions-x12" target="_blank">documents types</a> for the Anypoint B2B. While it would be optimal that all customers and their partners stick to these document type standards, that is generally not the case. The Anypoint B2B Connectors use a YAML format called EDI Schema Language (ESL) to represent EDI schemas.<br><br>This codelab walks you through the process of adding a new segment to an EDI schema language file in MuleSoft. Specifically for an 855 document. In my example EDI 855 document, you can see there is a segment called <code>MULE</code> that is not standard in an 855 document. We&#39;ll copy and create a new <code>*.esl</code> file and add the definition for that new segment and it&#39;s corresponding elements.</p>
+<p>This guide assumes you have working knowledge of Anypoint Studio and that you have the X12 EDI component installed and added to your Mule project canvas.</p>
+<h2 is-upgraded>Pre-requisites</h2>
+<ul>
+<li>Understanding of EDI X12</li>
+<li>Read the <a href="https://docs.mulesoft.com/x12-edi-connector/2.5/x12-edi-schema-language-reference" target="_blank">EDI Schema Language Reference</a> </li>
+</ul>
+<h2 is-upgraded>Requirements</h2>
+<ul>
+<li>Anypoint Studio 7.8+</li>
+<li>Mule Runtime 4.3.x</li>
+<li><a href="https://docs.mulesoft.com/x12-edi-connector/2.5/" target="_blank">EDI X12 Connector</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create ESL Files" duration="2">
+        <p>First determine the version and document type from the EDI file that you will be adding the new segment for. The version is the last element in the GS segment. The document type is the first element in the ST segment. In this case it is version 004010 and an 855 document.</p>
+<p class="image-container"><img style="width: 552.82px" src="img/d787adf82f4008d9.png"></p>
+<p>Next we need to grab the <code>*.esl</code> files and make a copy of those so we can modify them to match the custom EDI file. Within your Mule project, when you add the X12 EDI component, it adds the X12 EDI library to your project. The EDI libraries include the out-of-the-box schemas.</p>
+<p>In the Package Explorer, expand that library and navigate to the following folder:</p>
+<pre><code>X12 EDI [v#.#.#] &gt; x12-schemas-[v#.#.#].jar &gt; x12 &gt; [Version] &gt; [Document Type]</code></pre>
+<p class="image-container"><img style="width: 476.50px" src="img/a8af1884a62186d6.png"></p>
+<p>In this folder, for my example, I copy and paste two files: <code>855.esl</code> and  <code>basedefs.esl</code> from the <code>004010</code> folder to a new folder under <code>src/main/resources</code> called <code>schemas</code>.</p>
+<p>To copy the file, the easiest way is to right-click on the file and select <code>Copy</code></p>
+<p class="image-container"><img style="width: 352.68px" src="img/216f5ed914cf6cff.png"></p>
+<p>Under <code>src/main/resources</code>, create a new folder called <code>schemas</code> and paste the two files into that folder. It should look like the screenshot below.<br></p>
+<p class="image-container"><img style="width: 361.50px" src="img/7d2c5ba5736577c5.png"></p>
+<p>Now that we have the custom schema files ready, we can go and customize them to add new structures, segments, and elements.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Define Structure" duration="2">
+        <p>Let&#39;s learn how to customize the schema files and add a new structure. We&#39;ll start with the X12 ESL file which is <code>855.esl</code></p>
+<p>Open the <code>855.esl</code> file that you just copied and modify the third line to change where the <code>basedefs.esl</code> file is located. Because the file is in the same folder, it should look like this:</p>
+<pre><code>imports: [‘basedefs.esl&#39;]</code></pre>
+<p class="image-container"><img style="width: 611.86px" src="img/a974e55e719673d8.png"></p>
+<p>The screenshot above shows the version from the library on the left and what it should look like once you modify it on the right. We&#39;ll modify the <code>basedefs.esl</code> file in the next section.</p>
+<p>Next we need to add a new line for the custom segment in the heading section of the message structure. In the EDI file, the new segment looks like the following:</p>
+<pre><code>MULE*472532914~</code></pre>
+<p>So in the <code>855.esl</code> file, we need to add a new line that looks like this in the <code>heading</code> section</p>
+<pre><code>- { idRef: &#39;MULE&#39;, position: &#39;045&#39;, usage: O }</code></pre>
+<p>I&#39;ll go through and describe what each parameter is used for and what they mean.</p>
+<p class="image-container"><img style="width: 622.18px" src="img/cdc7b86ba7fc38b2.png"></p>
+<h2 is-upgraded>heading</h2>
+<table>
+<tr><td colspan="1" rowspan="1"><p>idRef</p>
+</td><td colspan="1" rowspan="1"><p>The <strong>idRef</strong> field matches the segment name which is <code>MULE</code> which is pretty self explanatory. In the EDI file, you will find lines that start with this segment name. </p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>position</p>
+</td><td colspan="1" rowspan="1"><p>The <strong>position</strong> is a numerical value that signifies the relation of this segment to the segments around it. In the EDI file, you can see that the preceding segment is <strong>BAK</strong>  and the next segment is <strong>REF</strong>. </p>
+<p><img style="width: 484.12px" src="img/4169f6b4639ddc14.png"><br>In the <strong><code>*.esl</code></strong> file, you can see there is a segment called <strong>CUR</strong> but that doesn&#39;t exist in the provided EDI file because it can be optional. So the <strong>position</strong> of the <strong>MULE</strong> segment needs to be between <strong>020</strong> and <strong>050</strong>, but after <strong>040</strong>. Therefore, it can be any number between <strong>041</strong> and <strong>049</strong> so we&#39;ll set it to <strong>045</strong>.<br><br><img style="width: 487.91px" src="img/3cb9ec49abcd09a0.png"></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>usage</p>
+</td><td colspan="1" rowspan="1"><p>I set the usage to ‘O&#39; since this segment is optional. Here are some other options for that definition:</p>
+<ul>
+<li><code>C</code> for Conditional</li>
+<li><code>M</code> for Mandatory</li>
+<li><code>O</code> for Optional</li>
+<li><code>U</code> for Unused, the item should not appear at all in the data.</li>
+<li><code>I</code> for Ignored, this can be present in data, as in the case of the HL segments it must be present, but is not visible for the user in metadata.</li>
+</ul>
+</td></tr>
+</table>
+<p>There are some additional tags that can be used. More information about those tags and the structure can be found by following this <a href="https://docs.mulesoft.com/x12-edi-connector/2.5/x12-edi-schema-language-reference" target="_blank">link</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Define Segments and Elements" duration="2">
+        <p>Now that we&#39;ve defined the structure, we need to go and define the segments and elements that make up the <code>MULE</code> segment in the <code>basedefs.esl</code> file. The <code>basedefs.esl</code> file provides the standard segment, composite, and element definitions shared among the *.esl files for a version.</p>
+<h2 is-upgraded>segments</h2>
+<p>We&#39;re going to add the following to the <code>basedefs.esl</code> file to the segments section:</p>
+<pre><code>- id: &#39;MULE&#39;
+  name: &#39;MuleSoft ID&#39;
+  values: 
+  - { idRef: &#39;I65&#39;, usage: O }</code></pre>
+<p class="image-container"><img style="width: 392.50px" src="img/dc4c3bc24971a4ff.png"></p>
+<p>Let&#39;s break down the different parts. <br></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>id</strong></p>
+</td><td colspan="1" rowspan="1"><p>The <strong>id</strong> corresponds to the segment that we&#39;re defining. In this lab, that is <code>MULE</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>name</strong></p>
+</td><td colspan="1" rowspan="1"><p>This is just the description of the segment. In this case, we set this to  <code>MuleSoft ID</code>.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>values</strong></p>
+</td><td colspan="1" rowspan="1"><p>The <strong>values</strong> equal the number of elements after the segment in the EDI file. For the purposes of this codelab, we&#39;re just going to define one element.</p>
+<p>The <strong>idRef</strong> value here will correspond to the <strong>id</strong> that we define in the elements section.</p>
+</td></tr>
+</table>
+<h2 is-upgraded>elements</h2>
+<p>At the bottom of the <code>basedefs.esl</code> file, you can find the element definitions. </p>
+<p class="image-container"><img style="width: 537.50px" src="img/4c10217ecc88299e.png"></p>
+<p>Let&#39;s add a new line for the single element that we&#39;re adding to the MULE segment. Paste the following line in the file.</p>
+<pre><code>  - { id: &#39;I65&#39;, name: &#39;MuleSoft ID&#39;, type: AN, minLength: 2, maxLength: 9 }</code></pre>
+<p>Below is a table that breaks down the different values we use in the element definition.</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>id</strong></p>
+</td><td colspan="1" rowspan="1"><p>Set the <strong>id</strong> to be a unique value that doesn&#39;t match another other ids in the file. </p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>name</strong></p>
+</td><td colspan="1" rowspan="1"><p>Name of the element. We&#39;ll use <code>MuleSoft ID</code> for this codelab.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>type</strong></p>
+</td><td colspan="1" rowspan="1"><p>This is the value data type which we set to <code>AN</code>. A list of available options is below.</p>
+<ul>
+<li><code>N</code> for an integer number</li>
+<li><code>N0-N9</code> for a number with an implied decimal point at the indicated position (N0 is equivalent to N)</li>
+<li><code>R</code> for a decimal number</li>
+<li><code>ID</code> for an identifier</li>
+<li><code>AN</code> for an alphanumeric string</li>
+<li><code>DT</code> for a date</li>
+<li><code>TM</code> for a time</li>
+</ul>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>minLength and maxLength</strong></p>
+</td><td colspan="1" rowspan="1"><p>Additionally you need to set the min and max length of the element which is an alphanumeric string. In this case, the minimum length is 2 and the maximum length should be 9.</p>
+<p class="image-container"><img style="width: 502.31px" src="img/122ae3538af1d850.png"></p>
+</td></tr>
+</table>
+<p>More information around defining segments and elements can be found at this <a href="https://docs.mulesoft.com/x12-edi-connector/2.5/x12-edi-schema-language-reference" target="_blank">link</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the X12 EDI Component" duration="1">
+        <p>Once you setup the new <code>*.esl</code> files, you configure the X12 EDI components to reference the new schema files. </p>
+<p>In Anypoint Studio, select the X12 Read component from your canvas and click on the configuration button for the <strong>Connector Configuration</strong> field.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f4b1ea82e3f492b1.png"></p>
+<p>Make sure the <code>Identity</code> tab is filled in to match the EDI document identity values.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/4a0a7d7fb611b2b7.png"></p>
+<p>Back on the general tab, scroll down the the <code>Document</code> section, and change the <code>Schema definitions</code> drop-down to <code>Edit inline</code> and then click on the green plus sign to add the location of the <code>855.esl</code> file.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/832b2e95ff6ff6cb.png"></p>
+<p>Paste in the following string into the <code>Value</code> field and click on <code>Finish</code></p>
+<pre><code>${app.home}/schemas/855.esl</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/9850e30c6e10ac9.png"></p>
+<p>Back in the <code>Global Element Properties</code>, click on <strong><code>OK</code></strong> to close the dialog window. You don&#39;t need to point it at the <code>basedefs.esl</code> file because that is referenced directly from the <code>855.esl</code> file.<br></p>
+<p>I&#39;ve included an example Mule XML configuration snippet below.</p>
+<pre><code>&lt;x12:config name=&#34;X12_EDI_Config&#34; doc:name=&#34;X12 EDI Config&#34; groupIdSelf=&#34;7345910000&#34; interchangeIdQualifierSelf=&#34;08&#34; 
+    interchangeIdSelf=&#34;7345910000&#34; groupIdPartner=&#34;XYZFOO&#34; interchangeIdPartner=&#34;XYZFOO&#34; interchangeIdQualifierPartner=&#34;08&#34;&gt;
+        &lt;x12:schemas &gt;
+                &lt;x12:schema value=&#34;${app.home}/schemas/855.esl&#34; /&gt;
+        &lt;/x12:schemas&gt;
+&lt;/x12:config&gt;</code></pre>
+<p>You may need some other settings to match your EDI file but that&#39;s all you have to do to add a new structure and segment to your ESL files.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>The process of adding new segments and elements to the schema is relatively straightforward. Now that you have an understanding of how to modify an ESL file, you can easily make changes to your projects following the same methods.</p>
+<p>With this approach, you have the flexibility of creating schemas for each partner to address their unique versions of a particular document type. This approach works for the following MuleSoft connectors:</p>
+<ul>
+<li>Anypoint Connector for X12 EDI (X12 EDI Connector)</li>
+<li>Anypoint Connector for EDIFACT (EDIFACT Connector)</li>
+<li>Anypoint Connector for TRADACOMS (TRADACOMS Connector)</li>
+<li>Anypoint Connector for HL7 (HL7 Connector)</li>
+</ul>
+<p>Coupled with the power of DataWeave, you can easily read or write EDI files and apply complex transformations and business logic for your needs. </p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Connect to Azure Event Hubs</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="connect-to-azure-event-hubs"
+                  title="Connect to Azure Event Hubs"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=connect-to-azure-event-hubs">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p class="image-container"><img style="width: 624.00px" src="img/d47496c57b80bab8.png"></p>
+<p>Azure Event Hubs is a big data streaming platform and event ingestion service. It can receive and process millions of events per second. Data sent to an event hub can be transformed and stored by using any real-time analytics provider or batching/storage adapters.</p>
+<p>While there&#39;s currently no MuleSoft connector for Azure Event Hubs, you can connect using other methods. In this codelab, you&#39;ll learn two ways to connect using out-of-the-box connectors with MuleSoft and Anypoint Studio. The first way will be with the Kafka Connector. The second will leverage the REST APIs that are exposed from Azure Event Hubs.</p>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn </h2>
+<ul class="checklist">
+<li>How to connect to Azure Event Hubs using the Kafka Connector</li>
+<li>How to connect to Azure Event Hubs with the REST API</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Anypoint Studio 7.x</li>
+<li>Microsoft Azure Event Hubs</li>
+<li><a href="https://docs.mulesoft.com/kafka-connector/4.6/" target="_blank">Kafka Connector (4.6)</a></li>
+<li><a href="https://github.com/djuang1/azure-event-hubs-example-mule4" target="_blank">MuleSoft Project</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Azure Event Hubs" duration="2">
+        <p>If you don&#39;t have Event Hubs set up yet, here are the steps. Login to <strong>Azure</strong> and go to <strong>Event Hubs</strong>. Click on <strong>Create</strong> to create the Event Hub <strong>namespace.<br></strong></p>
+<p class="image-container"><img style="width: 524.50px" src="img/7d8bf24fc2b34bfc.png"></p>
+<p>When creating the <strong>namespace</strong>, be sure to select <strong>Standard </strong>or higher for the <strong>Pricing Tier</strong>, otherwise the Kafka connection won&#39;t work.</p>
+<p class="image-container"><img style="width: 536.50px" src="img/13e456c40fc43809.png"></p>
+<p>Once the namespace has been created, create the <strong>Event Hub</strong></p>
+<p class="image-container"><img style="width: 575.00px" src="img/c038da4bcf1acea9.png"></p>
+<p>Before we switch over to MuleSoft Anypoint Studio, click on <strong>Shared Access Policies</strong> on the left hand navigation bar. Click on the default policy (e.g. <strong>RootManageSharedAccessKey)</strong></p>
+<p class="image-container"><img style="width: 499.50px" src="img/6bd88eacfc099baf.png"></p>
+<p>Click on <strong>Copy to clipboard</strong> next to the <strong>Connection string-primary key</strong> field. We&#39;ll need this later.</p>
+<p class="image-container"><img style="width: 479.31px" src="img/38d124a3666ece69.png"></p>
+<p>Another property to take note of is the <strong>Consumer groups.</strong> The default one to use when you set the connection is <strong>$Default<br></strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/15938ace6b9ba89.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Import project into Anypoint Studio" duration="2">
+        <p>Download the project from Github <a href="https://github.com/djuang1/azure-event-hubs-example-mule4" target="_blank">here</a> and then import the project into Anypoint Studio. This project was built with 7.14 and runs on Mule 4.4.0</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ddd414d35ec1d0d8.png"></p>
+<p>Open the <strong>mule-properties.yaml</strong> file under <code>src/main/resources</code> and fill in the following fields.</p>
+<pre><code>azure:
+  eventhubs:
+    namespace: &#34;&#34;
+    password: &#34;&#34;
+    topic: &#34;&#34;
+    keyName: &#34;&#34;
+    key: &#34;&#34;</code></pre>
+<p><strong>namespace</strong> - Azure Event Hubs namespace that you created earlier (e.g. <code>muledemos</code>)</p>
+<p><strong>password</strong> - This is the <strong>Connection string-primary key</strong> that you copied from the <strong>Shared Access Policies</strong> section earlier. (e.g. <code>Endpoint=sb://<namespace>.servicebus.windows.net/;SharedAccessKeyName=<keyName>;SharedAccessKey=<key></code>)</p>
+<p><strong>topic</strong> - This is the name of the Event Hub you created (e.g. <code>testhub</code>)</p>
+<p><strong>keyName</strong> - This can be the name of the default key or a new key that you created in the <strong>Shared Access Policies</strong> section (e.g. <code>RootManageSharedAccessKey</code>)</p>
+<p><strong>key</strong> - This is the primary key for the keyName above (e.g. <code>D70M9+iK4JZcM+zcTmGMY/DDpxTGVBOWFBIFFA7HyMw=</code>)</p>
+<p>Save the changes to the file and switch back to the <strong>azure-event-hubs-example-mule4.xml</strong> file.</p>
+<p>Let&#39;s look at the configurations before we run the project. Switch to the <strong>Global Elements</strong> tab and open the <strong>Apache Kafka Producer configuration</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/aa5c50dc19b4d15e.png"></p>
+<p>Somethings to point out:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/760591adb2ea2b47.png"></p>
+<ol type="1" start="1">
+<li>The connection type is <strong>Producer SASL/PLAIN Connection</strong></li>
+<li>The Bootstrap Server URL is the <strong>namespace</strong> that you created and <code>.servicebus.windows.net:9093</code></li>
+<li>The username is <code>$ConnectionString</code> and the password is the <strong>Connection string-primary key</strong> that we copied from the <strong>Shared Access Policies</strong> section earlier.</li>
+</ol>
+<p>If you scroll down, you find the name of the topic which is the name of the Event Hub that we created.</p>
+<p class="image-container"><img style="width: 475.50px" src="img/cd180b69e193aed0.png"></p>
+<p>Go ahead and click on <strong>Test Connection... </strong>to make sure your connection settings are correct for your Event Hub environment. Once you get the <strong>Test connection successful</strong> message, let&#39;s run the project now. </p>
+<p>Close the properties window and then switch back to the Message Flow. Right-click on the canvas and select<strong> Run project</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/6e92d543b07e5c8c.png"></p>
+<p>When the project is successfully deployed, move on to the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2b86e6de73293fd3.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Kafka Connection" duration="5">
+        <p>The Kafka example consists of two flows. The flow with the <strong>Publish</strong> operation will write a string to the Event Hub. The flow with the <strong>Message Listener </strong>will pick that message off the Event Hub and write it to the console.</p>
+<p class="image-container"><img style="width: 489.50px" src="img/5fe1e180fc772c65.png"></p>
+<p>Let&#39;s go ahead and test the flow out. Switch to your browser and navigate to the following URL</p>
+<pre><code>http://localhost:8081/send</code></pre>
+<p>You should get the following response with a different timestamp of course.</p>
+<p class="image-container"><img style="width: 591.00px" src="img/e6a2f7faf8c907b0.png"></p>
+<p>The <strong>Publish </strong>operation sends the string <strong><code>"Hello World!"</code></strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/21a915485ff7111e.png"></p>
+<p>Switching back to Anypoint Studio, you&#39;ll see the string in the Console tab when the <strong>Message Listener</strong> operation receives the message that was published to the Event Hub and writes it to the console.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/34ecf244df2c3b3b.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test REST API Connection" duration="5">
+        <p>This flow is an example of how to write a message to the Event Hub using the REST APIs that are exposed. You&#39;ll notice in the flow that we use the <strong>Invoke static </strong>operation from the <strong>Java</strong> module. In order to call the REST API, we need to generate a SAS Token.</p>
+<p class="image-container"><img style="width: 491.50px" src="img/a5b77982d6bee3db.png"></p>
+<p>Go to <strong>src/main/java </strong>and open the <strong>SASToken.java</strong> file.</p>
+<p class="image-container"><img style="width: 476.50px" src="img/a4105517282eb2f8.png"></p>
+<p>In the file, find the <strong>GetSASToken</strong> function. You&#39;ll see that we pass in the resource URI, key name, and key to generate the token. </p>
+<p class="image-container"><img style="width: 563.50px" src="img/e252dbd918fe19ad.png"></p>
+<p>Switch back to the <strong>azure-event-hubs-example-mule4.xml </strong>file and select the <strong>Transform Message</strong> after the <strong>Invoke Static</strong> operation. You&#39;ll see that we&#39;re passing a JSON string to the REST API.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f33dd9a40506ca40.png"></p>
+<p>Jump to your browser and navigate to the following URL</p>
+<pre><code>http://localhost:8081/rest</code></pre>
+<p>You&#39;ll see the following response if you setup everything correctly.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/545092a63ada8bc5.png"></p>
+<p>Additionally, when you switch back to Anypoint Studio, the console log will show the JSON string. This is because the <strong>Message Listener</strong> is still listening to the Event Hub and picked up the message that we just wrote.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9577d866a00ffe1e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="2">
+        <p>MuleSoft makes it easy to connect to Azure Event Hub even without a connector. Using either Kafka or the REST API, we can take data from any system or source and write it to Azure Event Hub to be transformed and stored by using any real-time analytics provider or batching/storage adapters. </p>
+<p>You can use the example project for your own use to connect your data and services to Azure Event Hub. Look for a Azure Event Hubs connector in Anypoint Exchange soon</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

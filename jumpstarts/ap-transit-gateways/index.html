@@ -1,0 +1,166 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup Transit Gateways in Anypoint Platform</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid="G-RPRRBSY7PR"
+                  codelab-ga4id=""
+                  id="ap-transit-gateways"
+                  title="Setup Transit Gateways in Anypoint Platform"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>Amazon AWS Transit Gateway connects VPCs and on-premises networks through a central hub. This simplifies your network and puts an end to complex peering relationships. It acts as a cloud router – each new connection is only made once.</p>
+<p>In MuleSoft Anypoint Platform, we&#39;ve added the ability to set up Transit Gateways between CloudHub VPCs and your existing AWS VPCs resources.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/871916f0bb255d01.png"></p>
+<h2 is-upgraded><strong>Requirements / Prerequisites</strong></h2>
+<ul>
+<li>Anypoint Platform</li>
+<li>Anypoint VPC</li>
+<li>Amazon Web Services</li>
+</ul>
+<h2 is-upgraded><strong>Additional Resources</strong></h2>
+<ul>
+<li><a href="https://aws.amazon.com/transit-gateway" target="_blank">AWS Transit Gateway</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="AWS - Create Transit Gateway" duration="1">
+        <p>The first thing we need to do is create the Transit Gateway in AWS. If you already have one setup for your environment, you can click <strong>Next</strong> to move on to the next section. <br><br>Login to the AWS console and navigate to the <strong>Networking &amp; Content Delivery</strong> section and click on <strong>VPC</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/7e3eb5a5c5434a01.png"></p>
+<p>In the VPC Management Console, scroll down on the left-hand navigation bar and click on <strong>Transit Gateways</strong></p>
+<p class="image-container"><img style="width: 541.00px" src="img/aa8f0d9e4ae82ed2.png"></p>
+<p>Click on <strong>Create Transit Gateway</strong></p>
+<p class="image-container"><img style="width: 597.00px" src="img/76b66730907cd951.png"></p>
+<p>Fill in the <strong>Name tag</strong> and <strong>Description</strong> fields and click on <strong>Create Transit Gateway</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d75d7173a572d254.png"></p>
+<p>Once the Transit Gateway is created, you&#39;ll see the following message. Click on Close but keep the AWS Console open, we&#39;ll need to come back to it later to finish the setup process.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d7edab0a10330ccd.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Anypoint Platform - Add Transit Gateways" duration="1">
+        <p>Login to <strong>Anypoint Platform</strong> and navigate to <strong>Runtime Manager</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ac22fdb8ba4648ae.png"></p>
+<p>Assuming you already have a VPC setup, and the entitlement for Transit Gateways, your screen should look like this when you click on Transit Gateways on the left.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/60dc7fc73516cac9.png"></p>
+<p>Click on <strong>Add transit gateway</strong> and click on <strong>I&#39;m ready</strong> on the next screen.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1ce10e476fcab788.png"></p>
+<p>Give your transit gateway the same name as the one you used in AWS and select the same region as well and click on <strong>Next. </strong></p>
+<aside class="special"><p>Note: Be sure that your CloudHub VPC that you&#39;re planning to connect to the Transit Gateway is in the same region as the Transit Gateway that you just setup in AWS as well.</p>
+</aside>
+<p class="image-container"><img style="width: 624.00px" src="img/1cd5cfbedf7ad31d.png"></p>
+<p>In the next screen, right click on the <strong>Create Resource Share page</strong> link and open it in a new tab so you won&#39;t lose your settings in Anypoint Platform up to this point.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b459a328e5a31566.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="AWS - Create Resource Share" duration="1">
+        <p>In the <strong>Resource Access Manager</strong> screen, we&#39;re going to create a resource share. Give the resource share a <strong>Name </strong>in the <strong>Description</strong> section.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c74a5d2914d1ed.png"></p>
+<p>Scroll down to the <strong>Resources</strong> section and click on the drop-down and change it to <strong>Transit Gateways</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/57ee65d6495ac382.png"></p>
+<p>Next, scroll down to the <strong>Principals </strong>section and copy and paste the MuleSoft account ID and click on <strong>Add</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/cc3de4cc86b30459.png"></p>
+<p>Scroll down to the bottom and click on <strong>Create resource share</strong></p>
+<p class="image-container"><img style="width: 619.00px" src="img/b73c153703bf4b34.png"></p>
+<p>Keep the AWS Console open for the next section. We&#39;re going to jump back to Anypoint Platform to complete the setup.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Anypoint - Connect Transit Gateway" duration="1">
+        <p>So we&#39;re back in the Anypoint Platform and we need to complete the connection. Click on <strong>Next.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/2aeee2d0e97f7001.png"></p>
+<p>Copy and paste the ID and Owner from the AWS Resource share to the Anypoint Platform screen and click on <strong>Add</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/54f963578bad31cf.png"></p>
+<p>Once the connection is set up, you&#39;ll see the following screen with details on the Transit Gateway. Next we need to attach the CloudHub VPC to the Transit Gateway. Click on <strong>Attach VPC</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/847cc72dd138c396.png"></p>
+<p>The <strong>Select VPC</strong> dialog box will show you the list of VPCs that you have in your environment. Select the one you want to use and click on <strong>Next</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/19b2a67ac4ad88c7.png"></p>
+<p>Similar to what we did earlier when we set up the Resource Share in AWS, we need to go back to AWS and accept the VPC attachment to the Transit Gateway. Right-click on the <strong>Transit Gateway Attachments page</strong> link and open a new tab so you don&#39;t lose your place in Anypoint Platform.<br></p>
+<p class="image-container"><img style="width: 624.00px" src="img/b6362e569cdff82a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="AWS - Accept VPC Attachment" duration="1">
+        <p>In the AWS Console, you&#39;ll find yourself in the <strong>Transit Gateway Attachments</strong> section. If you already have the AWS Console open, you can find it under <strong>VPC &gt; Transit Gateways, Transit Gateway Attachments. </strong>We want to select the attachment that we created in Anypoint Platform. You can see the state set to <strong>pending acceptance</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f63b8b5b02fbc48d.png"></p>
+<p>Click on the <strong>Actions </strong>drop-down and select <strong>Accept.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/a7e3cb148c1886e0.png"></p>
+<p>Click on <strong>Accept</strong> in the window that pops up.</p>
+<p class="image-container"><img alt="Graphical user interface, text, application, email  Description automatically generated" style="width: 624.00px" src="img/5e48b965a8e0adb.png"></p>
+<p>Switch back to Anypoint Platform and give it a couple minutes to refresh and show the successful attachment of the Transit Gateway to the CloudHub VPC. You&#39;ll see the list of VPC routes displayed on this screen as well.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/88b3badfb165b9a8.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Anypoint - Add Route" duration="1">
+        <p>In order for the traffic to flow between VPCs, you need to configure the Routes. Click on <strong>Add Route</strong></p>
+<p class="image-container"><img style="width: 229.00px" src="img/860c28fc5bb99818.png"></p>
+<p>Fill in the field with the CIDR range for the VPC in AWS and then click on <strong>Add route</strong></p>
+<p class="image-container"><img style="width: 573.00px" src="img/31dd2017f6874a02.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="AWS - Add Route" duration="1">
+        <p>We need to do the same thing in AWS in order for the traffic to flow from AWS to CloudHub. In the VPC console, click on <strong>Route Tables </strong>and select the route table that is tied to the VPC.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5cfec1d7fdeea06e.png"></p>
+<p>In the <strong>Routes </strong>tab at the bottom, click on <strong>Edit routes</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/76a41ef08304544b.png"></p>
+<p>Click <strong>Add route</strong> and enter the CIDR range for the CloudHub VPC and select <strong>Transit Gateway</strong> from the <strong>Target</strong> dropdown and select the Transit Gateway that you set up previously.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/be3b55e8aa46fa37.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Connectivity" duration="1">
+        <p>Follow the instructions <a href="https://help.mulesoft.com/s/article/How-To-Use-Network-Tools-Application" target="_blank">here</a> to download the Network Tools application and deploy it to your CloudHub VPC to test connectivity to the AWS VPC.</p>
+<p>Before running the tool, you&#39;ll need to start an EC2 instance in the VPC that is connected to the Transit Gateway. If everything is set up correctly, you should see the following screen below.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f682155f4a5275ea.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>As you can see, setting up Transit Gateways with Anypoint Platform is a pretty simple and straightforward process. This new capability simplifies your network and puts an end to complex peering relationships.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

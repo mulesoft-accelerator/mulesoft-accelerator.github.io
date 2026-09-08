@@ -1,0 +1,137 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup TLS Context for Upstream with Flex Gateway in Connected Mode</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="tls-upstream-flexgateway"
+                  title="Setup TLS Context for Upstream with Flex Gateway in Connected Mode"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>Last Updated: 2023-05-30</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p><br>Using encryption, Transport Layer Security (TLS) policies protect communication between clients, API Instances, and upstream services. After you create a secret group, you can add a TLS context or a mutual authentication TLS (mTLS) context and apply the TLS context to API Instances in API Manager to encrypt their inbound and outbound traffic.</p>
+<p>In this codelab, we&#39;re going to walk you through the process of adding TLS Context for upstream communication with Flex Gateway in Connected Mode. If you don&#39;t have TLS for upstream configured, you&#39;ll see the following error message.</p>
+<p><strong>upstream connect error or disconnect/reset before headers. reset reason: connection failure</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/dc9d29d7fdd8b92d.png"></p>
+<p>In order to set up TLS for Upstream with Flex Gateway, Privacy Enhanced Mail (PEM) types is required for your Keystore when you configure Anypoint Secrets Manager.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to setup TLS for upstream with Flex Gateway in Connected mode.</li>
+<li>How to create Secret Groups in Anypoint Secrets Manager.</li>
+<li>How to add a new API in Anypoint API Manager.</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Flex Gateway 1.4.4 in Connected Mode</li>
+<li>Anypoint Platform</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Generate PEM" duration="2">
+        <p>Open a terminal or command prompt and enter the following command:</p>
+<pre><code>openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem</code></pre>
+<p>This command generates a 2048-bit RSA private key and a certificate signing request (CSR) in a single step. You&#39;ll be prompted to enter the information required for the certificate, such as your organization&#39;s details and the domain name(s). Fill in the requested information accordingly.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d2b05a488574766b.png"></p>
+<p>You&#39;ll need these two files for the next step when we setup Secrets Manager to add a TLS Context to Flex Gateway.</p>
+<p class="image-container"><img style="width: 487.92px" src="img/83de25d4fb016d88.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Secret Groups" duration="1">
+        <p>A secret group is a logical grouping of secrets that enables you to manage a group of secrets as a unit. Secrets Manager stores your secrets per secret group, per environment, and per business group. With the private key and certificate that we created in the previous step, let&#39;s create a TLS Context.</p>
+<p>Open a browser and login to <strong>Anypoint Platform</strong> and navigate to <strong>Secrets Manager</strong>.</p>
+<p class="image-container"><img style="width: 533.50px" src="img/bfa24dec677c52e9.png"></p>
+<p>Verify you are in the right environment before clicking on <strong>Create Secret Group</strong></p>
+<p class="image-container"><img style="width: 525.50px" src="img/90d569e1c13117d6.png"></p>
+<p>Give the Secret Group a name, click the checkbox for <strong>Secret group Downloadable</strong> and then click on <strong>Save</strong></p>
+<p class="image-container"><img style="width: 597.50px" src="img/5707fd9677aff19.png"></p>
+<p>Let&#39;s upload the keystore that we created in the first step. Navigate to the <strong>Keystore</strong> section and click on <strong>Add Keystore</strong></p>
+<p class="image-container"><img style="width: 580.50px" src="img/51a500361c597724.png"></p>
+<p>Give the Keystore a name and leave the <strong>Type </strong>as <strong>PEM. </strong>For the Certificate File and Key File, use the files that we created in the first step and then click on <strong>Save</strong></p>
+<p class="image-container"><img style="width: 596.50px" src="img/8dac5ccfc7eee119.png"></p>
+<p>Now that we&#39;ve added the Keystore, we&#39;re going to create a TLS Context. Click on <strong>TLS Context</strong> in the left-hand navigation and then click on <strong>Add TLS Context.</strong></p>
+<p class="image-container"><img style="width: 422.50px" src="img/f9e6cd1d669b59fb.png"></p>
+<p>Give the <strong>TLS Context</strong> a name (1) and then change the dropdown for <strong>Target </strong>to <strong>Flex Gateway </strong>(2)<strong>. </strong>For the <strong>Keystore</strong> field, select the keystore that we just created (3). Finally click on <strong>Next.</strong></p>
+<p class="image-container"><img style="width: 605.50px" src="img/117bec8895f0d95.png"></p>
+<p>Now that we&#39;ve created the Keystore and TLS Context, we can set up the API and apply the TLS Context.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add new API and apply TLS Context" duration="1">
+        <p>We&#39;re going to add a new API in API Manager but if you already have one that you need to add TLS Context to, you can skip ahead.</p>
+<p>Navigate to back <strong>API Manager</strong> and click on <strong>Add API</strong> and then click on <strong>Add new API.</strong></p>
+<p class="image-container"><img style="width: 480.50px" src="img/c4de9a5197f2c096.png"></p>
+<p>Leave <strong>Flex Gateway</strong> selected for the <strong>Runtime</strong> and select your connected Flex Gateway. If you don&#39;t have a Flex Gateway setup in Connected Mode yet, do that and then come back to this step. Otherwise, click on <strong>Next.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ee69ddfd9eca0e9.png"></p>
+<p>On the next screen, select<strong> Create new API</strong>. Give the API a name and select <strong>HTTP API </strong>from the drop down for <strong>Asset types</strong>. Click on <strong>Next.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/e5230be27ed9dd0b.png"></p>
+<p>For the <strong>Implementation URI</strong>, type in the following URL: <strong>https://www.aep.com</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/7c98a8cd5177ded7.png"></p>
+<p>Check the radio button <strong>HTTPS</strong> for the <strong>Scheme </strong>and then click on <strong>Add TLS Context.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/870802a822be746.png"></p>
+<p>In the pop-up window, select the Secret Group and TLS Context that we created earlier and then click on <strong>OK.</strong></p>
+<p class="image-container"><img style="width: 538.50px" src="img/89f838588cb75029.png"></p>
+<p>Click <strong>Next</strong></p>
+<p class="image-container"><img style="width: 529.00px" src="img/2e10f8400f953428.png"></p>
+<p>Click on <strong>Save &amp; Deploy</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/1d8041332b47bf51.png"></p>
+<p>Give the Flex Gateway a couple seconds to get the new configuration before moving on to the next step.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Proxied API" duration="1">
+        <p>To test out the proxied APIs, open a new tab and navigate to the URL:</p>
+<pre><code>https://localhost:8082/</code></pre>
+<p>If everything was configured correctly, you should see the following screen below.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cbedfb7265d128.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>In this codelab, you learned how to set up a TLS Context for upstream with Flex Gateway. We walked through adding the TLS Context in Secrets Manager and adding a new API to API Manager that requires TLS Context for upstream.</p>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/anypoint-security/secret-group-add-tls-context-flex" target="_blank">Add a TLS Context to Flex Gateway</a></li>
+<li><a href="https://docs.mulesoft.com/gateway/1.4/flex-conn-tls-config" target="_blank">Configuring TLS Context for Flex Gateway in Connected Mode</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

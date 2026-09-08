@@ -1,0 +1,142 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Use OData API with Salesforce Lightning Connect</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="odata-salesforce-lightning-connect"
+                  title="Use OData API with Salesforce Lightning Connect"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-15</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>Salesforce Lightning Connect lets you seamlessly access data from external sources, side-by-side with your Salesforce data. You can pull data from legacy systems such as SAP or Microsoft in real time, without making a copy of the data in Salesforce. And it&#39;s all easily configured by a simple yet powerful point and click interface. </p>
+<p>When you couple this capability with MuleSoft, you can quickly change and modify the underlying data without any significant impact. </p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>In this codelab, you&#39;re going to take a MuleSoft OData API and integrate it with Salesforce Lightning Connect. If you have an existing OData API, you can use that. Otherwise, you can use the following OData API endpoint.</p>
+<pre><code>https://odata-api-mule4.us-e1.cloudhub.io/api/odata.svc</code></pre>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to define an External Data Source in Salesforce</li>
+<li>Create External Object from an External Data Source</li>
+<li>Create a new tab from the External Object</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Salesforce</li>
+<li>MuleSoft OData API</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="External Data Source" duration="2">
+        <h2 is-upgraded><strong>Setup External Data Source</strong></h2>
+<p>Login to Salesforce.com and in the top-right, click on the gear icon and select <strong>Setup</strong></p>
+<p class="image-container"><img style="width: 298.50px" src="img/1a476c8be4e71392.png"></p>
+<p>In the <strong>Quick Find</strong> field, type in <strong>External</strong></p>
+<p class="image-container"><img style="width: 191.50px" src="img/d0b721554648e772.png"></p>
+<p>Click on <strong>External Data Sources</strong></p>
+<p>Click on <strong>New External Data Source</strong></p>
+<p class="image-container"><img style="width: 421.50px" src="img/dd8a7cb824b0ad97.png"></p>
+<p>Fill in the following fields and then click on <strong>Save</strong></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>External Data Source</p>
+</td><td colspan="1" rowspan="1"><p><code>MuleSoft_OData</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Type</p>
+</td><td colspan="1" rowspan="1"><p><code>Salesforce Connect: OData 2.0</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>URL</p>
+</td><td colspan="1" rowspan="1"><p><a href="https://odata-api-mule4.us-e1.cloudhub.io/api/odata.svc" target="_blank"><code>https://odata-api-mule4.us-e1.cloudhub.io/api/odata.svc</code></a></p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/8765f147cf736c15.png"></p>
+<h2 is-upgraded><strong>Create External Object</strong></h2>
+<p>In the next screen, click on <strong>Validate and Sync. </strong>This will generate a new <strong>External Object </strong>in Salesforce that points to the OData API.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ac3670677071c012.png"></p>
+<p>In the <strong>Validate External Data Source</strong> screen, check the checkboxes next to <strong>customers </strong>and <strong>orders </strong>and click on <strong>Sync</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/8f2797773ed9cbae.png"></p>
+<p>Back in the <strong>External Data Sources </strong>screen, you can verify the validation and sync was successful if you scroll down to the bottom and see <strong>customers</strong> and <strong>orders </strong>in the <strong>External Objects</strong> section.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ab6465f3aa15950e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="External Object Tabs" duration="3">
+        <h2 is-upgraded><strong>Setup Tabs</strong></h2>
+<p>In the <strong>Quick Find</strong> field in the left-hand navigation bar, search for <strong>Tab</strong></p>
+<p class="image-container"><img style="width: 334.33px" src="img/dfeaab18e3fed968.png"></p>
+<p>Click on <strong>Tabs</strong></p>
+<p>In the <strong>Custom Tabs </strong>screen, click on <strong>New</strong></p>
+<p class="image-container"><img style="width: 511.50px" src="img/46c57b88b9ca747d.png"></p>
+<p>In the <strong>New Custom Object Tab</strong>, select <strong>customers</strong> from the <strong>Object</strong> dropdown menu. Pick any <strong>Tab style</strong>. Click on <strong>Next.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ac35a78c5d597e77.png"></p>
+<p>In the <strong>Add to Profiles</strong> screen click on <strong>Next</strong></p>
+<p>In the <strong>Add to Custom Apps</strong> screen, click on <strong>Save</strong></p>
+<h2 is-upgraded><strong>Configure Object Tab View</strong></h2>
+<p>Next we want to configure the view of the new tab we created for the External Object. In the <strong>App Launcher</strong>, click on <strong>Search apps and items...</strong> and search for <strong>customers</strong></p>
+<p class="image-container"><img style="width: 363.50px" src="img/4316c58af9e70319.png"></p>
+<p>Click on <strong>customers </strong>to open the new tab. </p>
+<p>Change the <strong>List Views</strong> in the top left to <strong>All</strong></p>
+<p class="image-container"><img style="width: 489.27px" src="img/9cb0391a4806d705.png"></p>
+<p>Click the gear icon in the top right corner of the list and select <strong>Select Fields to Display</strong></p>
+<p class="image-container"><img style="width: 308.50px" src="img/daec9aa623598483.png"></p>
+<p>Change the <strong>Available Fields</strong> and <strong>Visible Fields</strong> to look like the following and then click on <strong>Save</strong></p>
+<p class="image-container"><img style="width: 511.50px" src="img/a25a16d92a399786.png"></p>
+<p>The final screen should look like this.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/69347b3f86a78f9c.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>Congratulations, you&#39;ve successfully integrated a MuleSoft OData API with Salesforce Lightning Connect. Instead of importing data into custom objects in Salesforce, data can reside externally be displayed in a custom tab within Salesforce.</p>
+<p>The benefit of this approach is the ability to manage and monitor the use of the data through the Anypoint Platform and API Manager. Developers can re-use this OData API for other projects in addition to leveraging it with Salesforce. </p>
+<p>Additionally the API loosely couples the underlying data source. If the database changes, or we need to change it to a new system, MuleSoft provides an easy way to change or compose data from other sources into the existing OData API. </p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://www.odata.org/documentation/odata-version-2-0/" target="_blank">OData Version 2.0 Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/apikit/4.x/creating-an-odata-api-with-apikit" target="_blank">Creating an OData-Enabled API</a></li>
+<li><a href="https://docs.mulesoft.com/apikit/4.x/apikit-odata-extension-reference" target="_blank">APIKit OData Extension Reference</a></li>
+<li><a href="https://trailhead.salesforce.com/en/content/learn/modules/lightning_connect/lightning_connect_setup" target="_blank">Trailhead: Set up Salesforce Connect</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

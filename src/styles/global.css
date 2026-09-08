@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth, flash-free theme transitions on the shell (not on the whole tree,
+   which would make Shiki color swaps look laggy). */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-gray-50 text-gray-800 antialiased transition-colors duration-200;
+}
+html.dark body {
+  @apply bg-gray-950 text-gray-200;
+}
+
+/* Give in-page anchor jumps (step navigation) breathing room under any
+   sticky header. */
+:target {
+  scroll-margin-top: 6rem;
+}
+
+/* ----------------------------------------------------------------------------
+   Shiki dual-theme wiring.
+   astro.config.mjs sets themes { light: 'github-light', dark: 'github-dark' }.
+   Astro renders the light theme inline and stores the dark colors in CSS
+   variables. Under our class-based `.dark`, swap to the dark variables.
+---------------------------------------------------------------------------- */
+html.dark .astro-code,
+html.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  /* font-style / weight / decoration for tokens that define them */
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+.astro-code {
+  @apply rounded-lg border border-gray-200 p-4 text-sm leading-relaxed;
+}
+html.dark .astro-code {
+  @apply border-gray-800;
+}

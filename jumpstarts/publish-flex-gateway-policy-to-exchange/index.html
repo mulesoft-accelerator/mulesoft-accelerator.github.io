@@ -1,0 +1,135 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Publish Flex Gateway Policy to Exchange</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="publish-flex-gateway-policy-to-exchange"
+                  title="Publish Flex Gateway Policy to Exchange"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=publish-flex-gateway-policy-to-exchange">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>Anypoint Flex Gateway is an ultrafast API gateway designed to manage and secure APIs running anywhere. You can implement custom policies via WebAssembly (WASM) extensions that run on Envoy as custom filters. This codelab will show you how to publish the custom policies that you build into Anypoint Exchange. An example custom policy is provided.</p>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<p>How to publish a Flex Gateway custom policy to Anypoint Exchange</p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Rust - <a href="https://www.rust-lang.org/tools/install" target="_blank">https://www.rust-lang.org/tools/install</a></li>
+<li><a href="https://docs.mulesoft.com/gateway/flex-conn-reg-run" target="_blank">Flex Gateway in Connected Mode</a></li>
+<li><a href="https://github.com/djuang1/flex_gateway_custom_policy_example" target="_blank">Custom Flex Gateway Policy</a></li>
+<li>Published API managed in API Manager</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Build Custom Policy" duration="1">
+        <p>If you already have a custom policy built, skip to the next step. Otherwise, download the <a href="https://github.com/djuang1/flex_gateway_custom_policy_example" target="_blank">custom policy</a> from Github and unzip the file.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/73c99f8c3a0cd1c9.png"></p>
+<p>Switch to a terminal window and navigate to the folder.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/96ef7bdba2bf561e.png"></p>
+<p>Add <code>wasm32</code> as a compilation target by running the following command.</p>
+<pre><code>rustup target add wasm32-unknown-unknown</code></pre>
+<p>Compile the custom policy with this command:</p>
+<pre><code>cargo build --target wasm32-unknown-unknown --release</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/9120a3b7493d3ac7.png"></p>
+<p>Install <code>wasm-gc</code> if you don&#39;t already have it installed. <code>wasm-gc</code> removes unneeded exports, imports, and functions to reduce the size of the final binary file.</p>
+<pre><code>cargo install wasm-gc</code></pre>
+<p>Run the optimization by executing the following command. This is the file that you need to publish to Exchange.</p>
+<pre><code>wasm-gc target/wasm32-unknown-unknown/release/flex_custom_policy.wasm -o target/flex_custom_policy-final.wasm</code></pre>
+<p>Move on to the next step to add the policy to Exchange.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add Policy to Exchange" duration="2">
+        <p>Navigate to Anypoint Exchange and click on <strong>Publish new asset</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ec26300d1ce10161.png"></p>
+<p>Give your new asset a <strong>Name</strong> and then select <strong>Policy </strong>from the <strong>Asset types</strong> dropdown. Additional fields will be displayed once you select <strong>Policy</strong>. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/d126d93fbf6ad07b.png"></p>
+<p>In the <a href="https://github.com/djuang1/flex_gateway_custom_policy_example" target="_blank">custom policy example</a> project, you&#39;ll find the files needed for the <strong>JSON Schema file </strong>and <strong>Metadata file</strong> fields.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ce9bae8098da0c7e.png"></p>
+<p>Click on <strong>Publish</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f168544cf44dfad9.png"></p>
+<p>Once the asset has been added to Exchange, you&#39;ll need to add the implementation to the asset. The implementation is either a <strong>*.jar</strong> file for a Mule 4 policy or a <strong>*.wasm</strong> file for a Flex Gateway policy.</p>
+<p>Click on <strong>Implementations</strong> on the left-hand navigation and then click on <strong>Add implementation</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/becac517635d1246.png"></p>
+<p>Give the implementation a <strong>Name</strong> and then click on <strong>Choose file</strong> for the <strong>Binary file</strong> field. This is the <strong>*.wasm</strong> file that we built in the first step. For the <strong>Metadata file</strong> field, select the <strong>implementation-metadata.yaml</strong> file from the Github project.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cbe8ae77de01bdfe.png"></p>
+<p>Scroll down and make sure the <strong>AssetId</strong> field isn&#39;t throwing an error because of an existing asset. If so, change the value and then click on <strong>Add implementation.</strong></p>
+<p class="image-container"><img style="width: 589.00px" src="img/928ec6d85550a5ca.png"></p>
+<p>If the asset and implementation were added successfully, you should see the following screen in Exchange.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/19c8d4687948f73d.png"></p>
+<p>Move on to the next step to add the custom policy to an API that you are managing in API Manager.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Apply Custom Policy" duration="2">
+        <p>Switch to API Manager and open an API that you&#39;d like to apply the custom policy against. Click on <strong>Policies</strong> on the left-hand navigation bar.</p>
+<p class="image-container"><img style="width: 543.50px" src="img/4344f22771952c89.png"></p>
+<p>Select the <strong>Custom Flex Gateway Policy</strong> that we just added and click on <strong>Next</strong></p>
+<p class="image-container"><img style="width: 557.50px" src="img/95f1fe4db311e157.png"></p>
+<p>Fill in the <strong>Property </strong>and <strong>Secure Property</strong> with any values. You can see the <strong>Secure Property</strong> field is masked based on the configuration in the <strong>policy-definition.json</strong> file.</p>
+<p>Click on <strong>Apply</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f1c60dbb61505936.png"></p>
+<p>If you have a window with the Flex Gateway logs, you&#39;ll see the policy applied to the API.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/16647074336e7ce4.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Custom Policy" duration="1">
+        <p>Switch to Postman and navigate to the API endpoint being proxied by the Flex Gateway and click on <strong>Send.</strong></p>
+<p>Click on the <strong>Headers</strong> tab in the response section. You&#39;ll see the <strong>custom-property </strong>and<strong> secure-custom-property</strong> headers with the values that you plugged in when you configured the policy in API Manager.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/53bac06e29b4a888.png"></p>
+<p>Open another tab in Postman and change the path to <strong>/hello</strong> and click on <strong>Send. </strong>In the Rust code, you can see that the policy matches on the path and sends custom headers and a body back in the response.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e6dae089e179ee29.png"></p>
+<p>Below is the custom body that is returned by the policy.</p>
+<p class="image-container"><img style="width: 558.00px" src="img/11061401c5413fb7.png"></p>
+<p>In the <strong>Headers</strong> tab of the response, you&#39;ll see 4 new headers as well as the values that you plugged in when you configured the policy in API Manager.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/485e8a81674721.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>Policies enable you to enforce regulations to help manage security, control traffic, and improve adaptability of your APIs. Once you&#39;ve written a custom policy for Mule 4 or Flex Gateway, you can easily share them with the rest of the organization by publishing them to Anypoint Exchange.</p>
+<p>Additional Documentation</p>
+<ul>
+<li><a href="https://docs.mulesoft.com/gateway/policies-custom-flex-implement-rust" target="_blank">Implementing a Flex Gateway Custom Policy in Rust</a></li>
+<li><a href="https://docs.mulesoft.com/gateway/policies-custom-flex-getting-started" target="_blank">Publishing a Flex Gateway or Mule 4 Custom Policy</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup an Embedded Derby Database in Mule 4</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="setup-embedded-derby-db"
+                  title="Setup an Embedded Derby Database in Mule 4"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>Last Updated: 2020-10-01</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p><a href="http://db.apache.org/derby/" target="_blank">Apache Derby</a> is a RDBMS which is implemented in Java. It is an open source database developed by Apache Software Foundation. </p>
+<p class="image-container"><img style="width: 220.00px" src="img/35d022365688c855.png"></p>
+<p>Derby provides an embedded database engine which can be embedded in to any Java application. Once deployed, it runs in the same JVM as the application. Simply loading the driver starts the database and it stops with the applications.</p>
+<p>From a MuleSoft standpoint, there are multiple applications of leveraging Derby in a project from maintaining state to encapsulating data along with an API implementation. This codelab will walk you through the process of setting of Derby in a new Mule project in Anypoint Studio.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to configure Apache Derby in a Mule project</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.6.x</li>
+<li>Mule EE 4.3.0</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create New Mule Project" duration="2">
+        <p>Start Anypoint Studio and create a new Mule project by clicking on <strong>File &gt; New Mule project</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/bd556590a984f2c1.png"></p>
+<p>Give the project a name e.g.  <strong>derbydb-mule4</strong> and click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 469.50px" src="img/7c20b5c25eda989b.png"></p>
+<p>In the Mule Palette, click on <strong>Add Module</strong> and drag-and-drop in the <strong>Database</strong> and <strong>Spring</strong> modules to add them to the project. Your palette should look like this.</p>
+<p class="image-container"><img style="width: 287.50px" src="img/b8b3717603f164ae.png"> </p>
+<p>Drag and drop the following components into the Mule Canvas </p>
+<ul>
+<li>Spring &gt; Authorization Filter</li>
+<li>HTTP &gt; Listener</li>
+<li>Database &gt; Select</li>
+<li>Transform Message</li>
+</ul>
+<p>so it matches the following screenshot. Don&#39;t worry about the red error markers, we&#39;ll go back and configure each component in the following sections.</p>
+<p class="image-container"><img style="width: 353.74px" src="img/ee188b6db6aa822f.png"></p>
+<p>Then right-click on the flow with the <strong>Authorization filter</strong> component and click on <strong>Delete</strong></p>
+<p class="image-container"><img style="width: 408.50px" src="img/50cffa2dce18a03d.png"></p>
+<p>In the next sections, we&#39;re going to create the database scripts to build the tables and also configure the Spring components that will setup the Derby database.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Database Scripts and Spring Bean Configuration" duration="2">
+        <p>In this section, we&#39;ll be creating the scripts for setting up the database and tables as well the Spring bean configuration file used by the Spring module.</p>
+<h2 is-upgraded><strong>Spring Bean Configuration</strong></h2>
+<p>In the <strong>Package Explorer</strong>, expand the <code>src/main/resources</code> folder. Right click on the folder and select <strong>New &gt; File</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d4b031abb434aa84.png"></p>
+<p>Name the file <code>springbeans.xml</code> and click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 486.50px" src="img/3775a1f22554c636.png"></p>
+<p>Paste the following XML into the file:</p>
+<pre><code>&lt;beans xmlns=&#34;http://www.springframework.org/schema/beans&#34;
+    xmlns:context=&#34;http://www.springframework.org/schema/context&#34;
+    xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;
+    xmlns:jdbc=&#34;http://www.springframework.org/schema/jdbc&#34;
+
+    xsi:schemaLocation=&#34;http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+      http://www.springframework.org/schema/jdbc
+      http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context-4.2.xsd
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-4.2.xsd&#34;&gt;
+    
+        &lt;bean class=&#34;org.apache.commons.dbcp2.BasicDataSource&#34; destroy-method=&#34;close&#34; id=&#34;dataSource&#34;&gt;
+                    &lt;property name=&#34;driverClassName&#34; value=&#34;org.apache.derby.jdbc.EmbeddedDriver&#34; /&gt;
+                    &lt;property name=&#34;url&#34; value=&#34;jdbc:derby:memory:demodb;create=true&#34; /&gt;
+                    &lt;property name=&#34;initialSize&#34; value=&#34;5&#34; /&gt;
+        &lt;/bean&gt;
+    
+    &lt;jdbc:initialize-database data-source=&#34;dataSource&#34;&gt;
+                    &lt;jdbc:script execution=&#34;INIT&#34; location=&#34;classpath:create-db.sql&#34; /&gt;
+                    &lt;jdbc:script execution=&#34;INIT&#34; location=&#34;classpath:insert-data.sql&#34; /&gt;
+         &lt;/jdbc:initialize-database&gt;
+    
+&lt;/beans&gt;</code></pre>
+<p>It should look like the screenshot below. This is used by the Spring module to initialize and configure the Derby database. You can see that it calls two SQL files in line 22 and 23 to create the database, tables and insert data into those tables. We&#39;ll create the SQL files next.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/953eed59c19587b6.png"></p>
+<h2 is-upgraded><strong>Database Scripts</strong></h2>
+<p>Right click on the folder <code>src/main/resources</code> again and click on <strong>New &gt; File </strong>and name the file <code>create-db.sql</code> and click on <strong>Finish</strong><code>. </code></p>
+<p class="image-container"><img style="width: 590.00px" src="img/94559605d3377726.png"></p>
+<p>Copy and paste the following script into the file and save it. This will create a new schema and a new table in the Derby database.</p>
+<pre><code>CREATE SCHEMA demodb;
+
+CREATE TABLE demodb.customers (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 5, INCREMENT BY 1), 
+customerId INTEGER, 
+companyName varchar(50),
+lastName varchar(50),
+firstName varchar(50),
+phone varchar(50),
+addressLine1 varchar(50),
+addressLine2 varchar(50),
+city varchar(50),
+state varchar(50),
+postalCode varchar(15),
+country varchar(50),
+productNumber INTEGER,
+creditLimit decimal(10,2),
+CONSTRAINT customer_primary_key PRIMARY KEY (id));</code></pre>
+<p>Repeat the previous steps to create another new file called <code>insert-data.sql</code></p>
+<p class="image-container"><img style="width: 585.00px" src="img/66d6001a303182be.png"></p>
+<p>Copy and paste the following script into the file and save it. This will populate the table that we just created.</p>
+<pre><code>DELETE from demodb.customers;
+INSERT INTO demodb.customers (customerId, companyName,lastName,firstName,phone,addressLine1,addressLine2,city,state,postalCode,country,productNumber,creditLimit) 
+VALUES 
+(103,&#39;Atelier graphique&#39;,&#39;Schmitt&#39;,&#39;Carine &#39;,&#39;40.32.2555&#39;,&#39;54, rue Royale&#39;,NULL,&#39;Nantes&#39;,NULL,&#39;44000&#39;,&#39;France&#39;,1370,21000.00)
+,(112,&#39;Signal Gift Stores&#39;,&#39;King&#39;,&#39;Jean&#39;,&#39;7025551838&#39;,&#39;8489 Strong St.&#39;,NULL,&#39;Las Vegas&#39;,&#39;NV&#39;,&#39;83030&#39;,&#39;USA&#39;,1166,71800.00)
+,(114,&#39;Australian Collectors, Co.&#39;,&#39;Ferguson&#39;,&#39;Peter&#39;,&#39;03 9520 4555&#39;,&#39;636 St Kilda Road&#39;,&#39;Level 3&#39;,&#39;Melbourne&#39;,&#39;Victoria&#39;,&#39;3004&#39;,&#39;Australia&#39;,1611,117300.00)
+,(119,&#39;La Rochelle Gifts&#39;,&#39;Labrune&#39;,&#39;Janine &#39;,&#39;40.67.8555&#39;,&#39;67, rue des Cinquante Otages&#39;,NULL,&#39;Nantes&#39;,NULL,&#39;44000&#39;,&#39;France&#39;,1370,118200.00)
+,(121,&#39;Baane Mini Imports&#39;,&#39;Bergulfsen&#39;,&#39;Jonas &#39;,&#39;07-98 9555&#39;,&#39;Erling Skakkes gate 78&#39;,NULL,&#39;Stavern&#39;,NULL,&#39;4110&#39;,&#39;Norway&#39;,1504,81700.00)
+,(124,&#39;Mini Gifts Distributors Ltd.&#39;,&#39;Nelson&#39;,&#39;Susan&#39;,&#39;4155551450&#39;,&#39;4427 Holt St.&#39;,NULL,&#39;Houston&#39;,&#39;TX&#39;,&#39;77401&#39;,&#39;USA&#39;,1165,210500.00)
+,(125,&#39;Havel &amp; Zbyszek Co&#39;,&#39;Piestrzeniewicz&#39;,&#39;Zbyszek &#39;,&#39;(26) 642-7555&#39;,&#39;ul. Filtrowa 68&#39;,NULL,&#39;Warszawa&#39;,NULL,&#39;01-012&#39;,&#39;Poland&#39;,NULL,0.00)
+,(128,&#39;Blauer See Auto, Co.&#39;,&#39;Keitel&#39;,&#39;Roland&#39;,&#39;+49 69 66 90 2555&#39;,&#39;Lyonerstr. 34&#39;,NULL,&#39;Frankfurt&#39;,NULL,&#39;60528&#39;,&#39;Germany&#39;,1504,59700.00)
+,(129,&#39;Mini Wheels Co.&#39;,&#39;Murphy&#39;,&#39;Julie&#39;,&#39;6505555787&#39;,&#39;415 Mission Street.&#39;,NULL,&#39;San Francisco&#39;,&#39;CA&#39;,&#39;94217&#39;,&#39;USA&#39;,1165,64600.00)
+,(131,&#39;Land of Toys Inc.&#39;,&#39;Lee&#39;,&#39;Kwai&#39;,&#39;2125557818&#39;,&#39;897 Long Airport Avenue&#39;,NULL,&#39;NYC&#39;,&#39;NY&#39;,&#39;10022&#39;,&#39;USA&#39;,1323,114900.00);</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Listener" duration="1">
+        <h2 is-upgraded><strong>HTTP Listener Configuration</strong></h2>
+<p>Go back to the Mule Canvas, click the <strong>Listener</strong> icon, and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 520.50px" src="img/a92d8f87223b0327.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, take note of the port. By default this will be <strong>8081</strong>. Go ahead and click on <strong>OK</strong> to accept the defaults and proceed.</p>
+<p class="image-container"><img style="width: 428.50px" src="img/efbd849ba705f3b8.png"></p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the Path field with the value <strong>/customers.</strong></p>
+<p class="image-container"><img style="width: 503.50px" src="img/80d0487bb7a450cc.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Spring Module" duration="1">
+        <p>Click on <strong>Global Elements</strong> in the Mule Canvas.</p>
+<p class="image-container"><img style="width: 416.00px" src="img/e9b16650d1b34774.png"></p>
+<p>Click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 219.50px" src="img/4bc5b789728d23a9.png"></p>
+<p>In the <strong>Filter</strong> box, search for spring. Click on <strong>Spring Config </strong>and click on <strong>OK.</strong></p>
+<p class="image-container"><img style="width: 367.50px" src="img/c28fd4192be3b188.png"></p>
+<p>In the <strong>Spring Config</strong> window, fill in the <strong>Files</strong> field with <code>springbeans.xml</code> and click on <strong>OK.</strong></p>
+<p class="image-container"><img style="width: 450.50px" src="img/5385efeddf3e9265.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Database" duration="1">
+        <p>Switch back to the <strong>Message Flow</strong> on the Mule Canvas and click on the <strong>Select</strong> operation.</p>
+<p class="image-container"><img style="width: 405.50px" src="img/49bf4ec9b88e8c39.png"></p>
+<p>Click on the green plus sign in the <strong>Basic Settings</strong> section next to <strong>Connector configuration</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/e656f05cd6ec63e7.png"></p>
+<p>In the <strong>Database Config</strong> window, change the <strong>Connection </strong>to <strong>Generic Connection</strong></p>
+<p class="image-container"><img style="width: 526.50px" src="img/e1b6a7cf3a6445b3.png"></p>
+<p>Copy and paste the following values into the corresponding fields under the <strong>General &gt; Connection</strong> section and click on <strong>OK</strong></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>URL</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong><code>jdbc:derby:memory:demodb</code></strong></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Driver class name</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong><code>org.apache.derby.jdbc.EmbeddedDriver</code></strong></p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 485.50px" src="img/8315af87b1ad98d8.png"></p>
+<p>Back in the <strong>Mule Properties</strong>, paste the following SQL script into the <strong>SQL Query Text</strong> field.</p>
+<pre><code>select * from demodb.customers </code></pre>
+<p class="image-container"><img style="width: 598.00px" src="img/e68b2cd364db4c28.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Transform Message" duration="1">
+        <p>In the Mule Canvas, click on the <strong>Transform Message </strong>component to open the <strong>Mule Properties</strong> tab.</p>
+<p class="image-container"><img alt="bapi4.2" style="width: 499.00px" src="img/2a1f61f69e0f7c4.png"></p>
+<p>Modify the DataWeave script and paste the following:</p>
+<pre><code>%dw 2.0
+output application/json
+---
+payload</code></pre>
+<p>This will take the data received from the database and return the data in JSON format back to the browser.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure pom.xml" duration="1">
+        <p>The last thing we need to configure before running the application are the Maven dependencies needed for the project to run successfully. In the <strong>Package Explorer</strong>, open the <strong>pom.xml</strong> file.</p>
+<p class="image-container"><img style="width: 181.06px" src="img/b7580e374eaf9dbf.png"></p>
+<p>Scroll down and find the <strong>sharedLibraries</strong> section and paste in the following XML</p>
+<pre><code>&lt;sharedLibrary&gt;
+    &lt;groupId&gt;org.apache.derby&lt;/groupId&gt;
+    &lt;artifactId&gt;derby&lt;/artifactId&gt;
+&lt;/sharedLibrary&gt;
+&lt;sharedLibrary&gt;
+    &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+    &lt;artifactId&gt;commons-dbcp2&lt;/artifactId&gt;
+&lt;/sharedLibrary&gt;
+&lt;sharedLibrary&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;
+&lt;/sharedLibrary&gt;</code></pre>
+<p>It should look like the following screenshot.</p>
+<p class="image-container"><img style="width: 429.67px" src="img/c56574059cd9d998.png"></p>
+<p>Then find the <strong>dependencies</strong> section and paste the following XML</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.derby&lt;/groupId&gt;
+    &lt;artifactId&gt;derby&lt;/artifactId&gt;
+    &lt;version&gt;10.14.2.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+    &lt;artifactId&gt;commons-dbcp2&lt;/artifactId&gt;
+    &lt;version&gt;2.5.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;
+    &lt;version&gt;5.1.0.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+<p>Here&#39;s a screenshot showing how it should look.</p>
+<p class="image-container"><img style="width: 424.50px" src="img/f42b9506659f92f.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run Mule Project" duration="1">
+        <p>Now that everything has been configured, let&#39;s run the project and see the Derby Database in action. Right-click on the canvas and click on <code>Run project</code></p>
+<p class="image-container"><img style="width: 545.50px" src="img/85ff85ffadb18805.png"></p>
+<p>When the project is successful deployed, switch to your browser and navigate to the following URL</p>
+<pre><code>http://localhost:8081/customers</code></pre>
+<p>If everything was configured successfully, you&#39;ll see the following response in your window.</p>
+<p class="image-container"><img style="width: 454.22px" src="img/85a318073ef45930.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>In this codelab, you learned how to setup a Derby Database in your Mule application. While this only shows a SELECT statement, you can run any standard database operation against the Derby Database.</p>
+<p>Additionally the SQL scripts can be modified as-needed. You can pre-populate the database with any data needed for the Mule application to run as an isolated container. </p>
+<p>One important thing to keep in mind is that once the application is stopped, the database and tables are dropped losing any changes that occurred while deployed.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="http://db.apache.org/derby/" target="_blank">Apache Derby</a></li>
+<li><a href="https://docs.mulesoft.com/spring-module/1.3/" target="_blank">Spring Module - Mule 4</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

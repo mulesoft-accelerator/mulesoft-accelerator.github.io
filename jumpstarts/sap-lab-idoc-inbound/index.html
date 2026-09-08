@@ -1,0 +1,244 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup MuleSoft as an IDoc Listener</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="sap-lab-idoc-inbound"
+                  title="Setup MuleSoft as an IDoc Listener"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-07</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>The Mule Runtime supports SAP integration through our Anypoint Connector for SAP, an SAP-certified Java connector that leverages the SAP Java Connector (JCo) libraries, thus allowing Mule applications to:</p>
+<ul>
+<li>Execute BAPI functions over the RFC protocol, supporting Synchronous RFC (sRFC), Transactional RFC (tRFC), and Queued RFC (qRFC)</li>
+<li>Act as a JCo Server to be called as a BAPI over sRFC, tRFC, and qRFC.</li>
+<li>Send IDocs over tRFC and qRFC.</li>
+<li>Receive IDocs over tRFC and qRFC.</li>
+<li>Transform SAP objects (JCo Function/BAPI &amp; IDocs) to and from XML.</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>This lab will show you how to use the SAP Connector as an IDoc Inbound Endpoint within your flow. The project, once deployed, will serve as a JCo Server and listen for an IDoc of type DEBMAS. Once it receives the IDoc, it will output the content to a file on your local machine.</p>
+<p class="image-container"><img style="width: 403.50px" src="img/64961d13f02ede3d.png"></p>
+<aside class="warning"><p><strong>Note:</strong> The SAP Connector module requires the use of your own SAP ECC R/3 or SAP S/4 HANA On-Premises instance. If you don&#39;t have one, you can leverage a hosted SAP service. </p>
+</aside>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to configure the SAP Connector to act as an IDoc Listener</li>
+</ul>
+<p>This codelab is focused on integrating with SAP ECC R/3 or SAP S/4 HANA On-Premises</p>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.5.x</li>
+<li>SAP Connector 5.x</li>
+<li>SAP ECC R3 and/or S/4 HANA On-Premises</li>
+<li>SAP GUI</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the SAP Connector" duration="4">
+        <h2 is-upgraded><strong>Create a new project</strong></h2>
+<p>Open <strong>Anypoint Studio</strong> and create a new <strong>Mule Project </strong>by going to <strong>File &gt; New &gt; Mule Project.</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/7b2270d151442f9d.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. workshop-sap), select a Runtime, and then click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 503.00px" src="img/c5049a8b7e88bd3c.png"></p>
+<p>To start off, we&#39;re going to add the SAP Connector to the canvas. In the Mule Palette, click on <strong>Search in Exchange</strong></p>
+<p class="image-container"><img alt="bapi2.1" style="width: 361.50px" src="img/153636832ee7b2e8.png"></p>
+<p>In the <strong>Add Modules to Project</strong> window, type in ‘sap&#39; for the search term (1) In the Available modules (2) select SAP Connector - Mule 4 and click on Add (3) Click on Finish (4) to add the module to the project. </p>
+<p class="image-container"><img alt="bapi2.2" style="width: 354.00px" src="img/4c90edcd648e776b.png"></p>
+<p>From the list of operations from <strong>SAP</strong>, drag and drop the <strong>Document listener </strong>operation  onto the canvas. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/c634e1504228b2b0.png"></p>
+<h2 is-upgraded><strong>Create Configuration Properties File</strong></h2>
+<p>We&#39;ll configure properties in a separate configuration file. Right-click on the <strong>src/main/resources</strong> folder and select <strong>New &gt; File</strong> and name the file <strong>app.properties</strong></p>
+<p class="image-container"><img alt="bapi2.4" style="width: 365.50px" src="img/a6fdfb056df934f2.png"></p>
+<p><br>Copy and paste the following into the newly create file. Populate the properties with the credentials and settings for your SAP instance. If needed, you can use the credentials below from our sandbox instance. Contact the instructor for the login and password.</p>
+<p class="image-container"><img style="width: 499.00px" src="img/985b5f65e2079188.png"></p>
+<pre><code>sap.jcoLang=en
+sap.jcoClient=
+sap.jcoUser=
+sap.jcoPasswd=
+sap.jcoAsHost=
+sap.jcoSysnr=
+
+sap.jcoGwHost=
+sap.jcoGwService=3300
+sap.jcoProgramId=
+sap.jcoConnectionCount=2</code></pre>
+<p>In the canvas, click on <strong>Global Elements</strong> (1) and then click on <strong>Create</strong> (2)</p>
+<p class="image-container"><img alt="bapi2.6" style="width: 425.50px" src="img/fbd53f8dd5a21946.png"></p>
+<p>In the Filter, type in <strong>‘prop&#39;</strong> (1) and select <strong>Configuration properties</strong> (2) and then click on <strong>OK</strong> (3)</p>
+<p class="image-container"><img alt="bapi2.7" style="width: 462.50px" src="img/432e60493865e83f.png"></p>
+<p>In the <strong>Configuration properties</strong>, click on the browse file button (1).</p>
+<p class="image-container"><img alt="bapi2.8" style="width: 499.00px" src="img/46f9b31f99029c89.png"></p>
+<p>Locate and select the <strong>app.properties</strong> file you created (2) and then click on <strong>OK</strong> (3) Back on the previous window, click on <strong>OK</strong> to save your changes (4).</p>
+<h2 is-upgraded><strong>Add SAP Connector Configuration</strong></h2>
+<p>Let&#39;s go back to the SAP Connector and use those properties to connect. In the <strong>Document listener</strong> operation, click on the green plus sign to configure the Connector configuration.</p>
+<p class="image-container"><img style="width: 402.50px" src="img/d93f9dc8733444a5.png"></p>
+<p>Change the <strong>Connection</strong> drop-down to <strong>Simple connection provider</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ae1d6c1fe9847799.png"></p>
+<p>In the <strong>General</strong> tab, under <strong>Required Libraries, </strong>click on the <strong>Configure</strong> button next to the <strong>iDoc Library </strong>field. Select <strong>Use local file</strong></p>
+<p class="image-container"><img alt="bapi2.10" style="width: 499.00px" src="img/9d99b9b3276122d5.png"></p>
+<p>In the Choose local file, click on <strong>Browse</strong> and point it to the <strong>sapidoc3.jar</strong> file. Keep the default settings and click on <strong>OK</strong></p>
+<p class="image-container"><img alt="bapi2.11" style="width: 499.00px" src="img/41422f21bc0485c6.png"></p>
+<p>Back in the <strong>SAP Config</strong> window, there should be a green checkmark next to the iDoc Library field. Next, let&#39;s add the <strong>JCo Library</strong>. Click on <strong>Configure</strong> and select <strong>Use local file </strong></p>
+<p class="image-container"><img alt="bapi2.12" style="width: 499.00px" src="img/a6a2b8c77b5ded98.png"></p>
+<p>In the <strong>Choose local file</strong> window, click on <strong>Browse</strong> and point it to the <strong>sapjco3.jar</strong> file. Keep the default settings and click on <strong>OK</strong>. </p>
+<p class="image-container"><img alt="bapi2.13" style="width: 499.00px" src="img/4f9767e760dc3f0b.png"></p>
+<p>Back in the <strong>SAP Config</strong> window, there should be a green checkmark next to the <strong>JCo Library</strong> field.</p>
+<p class="image-container"><img alt="bapi2.14" style="width: 499.00px" src="img/66dc5a50b5d9d1d1.png"></p>
+<p>Next, let&#39;s add the <strong>JCo Native Library</strong>. Click on Configure and select <strong>Use local file </strong></p>
+<p>For the JCO native libraries, they are platform specific. When you go to browse and select the files, be sure to change the dropdown to the specific extension you&#39;re looking for. Once you select the file, click on <strong>Open</strong></p>
+<p class="image-container"><img style="width: 418.50px" src="img/3e376caac7ca0c2a.png"></p>
+<p>JCo Platform-specific native libraries: </p>
+<ul>
+<li>Windows - sapjco3.dll </li>
+<li>Mac OS - libsapjco3.jnilib </li>
+<li>Linux - libsapjco3.so</li>
+</ul>
+<p>Keep the default settings on the Choose local file window and click on <strong>OK</strong></p>
+<p class="image-container"><img alt="bapi2.16" style="width: 499.00px" src="img/dac12993c23c40b9.png"></p>
+<p>Back in the <strong>SAP Config</strong> window, all the required libraries should be green now.</p>
+<p class="image-container"><img style="width: 518.50px" src="img/10d2870efdab0bec.png"></p>
+<p>Fill in the remaining fields with the corresponding property placeholders below.</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Application Server Host:</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoAsHost}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Username</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoUser}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Password</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoPasswd}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>System Number</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoSysnr}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Client</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoClient}</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 514.50px" src="img/7e0ad538483b5c1.png"></p>
+<p>Click on <strong>Test Connection</strong> to make sure everything has been configured correctly before clicking on <strong>OK</strong>. </p>
+<h2 is-upgraded>Configure the Listener settings</h2>
+<p>Back on the <strong>Document listener</strong> tab, fill in the properties for the listener using the property placeholders from the app.properties file that we just created</p>
+<p class="image-container"><img style="width: 444.50px" src="img/83714dda998849a1.png"></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Gateway Host:</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoGwHost}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Gateway Service</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoGwService}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Program id</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoProgramId}</p>
+</td></tr>
+</table>
+<p><br>That completes the setup for the SAP Connector to act as a IDoc listener. Next we&#39;ll add some logging to see the event in the debug Console.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create the Log Connector" duration="1">
+        <h2 is-upgraded>Add<strong> Log Connector</strong></h2>
+<p>For logging purposes, let&#39;s drag and drop a Logger into flow.</p>
+<p class="image-container"><img style="width: 515.50px" src="img/f31e6487a5c86eca.png"></p>
+<p>In the Mule Properties view for the Logger, enter the following into the Message field</p>
+<p class="image-container"><img alt="IDOC2.2" style="width: 499.00px" src="img/9846e26be8f5cc6a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create the File Connector" duration="1">
+        <h2 is-upgraded><strong>Add File Connector</strong></h2>
+<p>In the <strong>Mule Palette</strong>, click on <strong>Add Modules</strong> and drag and drop the <strong>File</strong> module to where it says Drag and drop here to add to project.</p>
+<p class="image-container"><img alt="IDOC2.3" style="width: 326.50px" src="img/f33889797106b18c.png"></p>
+<p>Select the <strong>File</strong> module and then select the <strong>Write</strong> operation and drag and drop that into the canvas. Place it after the <strong>Logger</strong> component.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/6ac9ec1a07c54cc2.png"></p>
+<p>Before we setup the <strong>Write</strong> operation, let&#39;s create a file placeholder in the <strong>src/main/resources</strong> folder of the project where the IDOC will be written to.</p>
+<p class="image-container"><img alt="IDOC2.5" style="width: 499.00px" src="img/86237a242de409cf.png"></p>
+<p>Right click on the<strong> src/main/resources</strong> folder and select <strong>New &gt; File</strong>.</p>
+<p>Give the file a name (e.g. <strong>debmas.xml</strong>) and click on <strong>Finish</strong></p>
+<p class="image-container"><img alt="IDOC.2.6" style="width: 499.00px" src="img/c373dcb17239dc22.png"></p>
+<p>Back in the <strong>Mule properties</strong> tab for the <strong>Write</strong> operation, click on the <strong>Browse</strong> button next to the <strong>Path</strong> field in the General section.</p>
+<p class="image-container"><img alt="IDOC2.7" style="width: 499.00px" src="img/b69a1d6383cb849f.png"></p>
+<p>Navigate to and select the file you created and then click on <strong>Open</strong></p>
+<p class="image-container"><img alt="IDOC2.8" style="width: 499.00px" src="img/c1c509d821ed7e03.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the Mule Application" duration="1">
+        <h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Right-click on the canvas and select <strong>Run project workshop-sap</strong></p>
+<p class="image-container"><img alt="IDOC3.1" style="width: 499.00px" src="img/3383cf30df7689b3.png"></p>
+<h2 is-upgraded><strong>Execute IDoc in SAP GUI</strong></h2>
+<p>In SAP GUI, enter in SAP transaction code <strong>BD12</strong></p>
+<p class="image-container"><img alt="IDOC3.2" style="width: 327.00px" src="img/832398daeda61589.png"></p>
+<p>3.3 Enter a customer ID in the Customer field. If you don&#39;t have one, you can use transaction code <strong>XD03</strong></p>
+<p class="image-container"><img alt="IDOC3.3" style="width: 499.00px" src="img/a9b576fd0f0d26fc.png"></p>
+<p>In the Output type field, enter <strong>DEBMAS</strong></p>
+<p>In the Logical system field, select the Logical System that was set up as the receiver.</p>
+<p>Click on <strong>Execute</strong> to send the IDoc to Mule.</p>
+<p class="image-container"><img alt="IDOC3.4" style="width: 293.00px" src="img/ecd8f80dda2dcfbd.png"></p>
+<p>If configured successfully, you should see two Information windows. One is for the setup of the IDoc for the customer, the second is the outbound processing of the IDoc to be sent to the JCo Server.</p>
+<p class="image-container"><img alt="IDOC3.5.a" style="width: 422.00px" src="img/4f6d3bfac5f3b75c.png"></p>
+<p class="image-container"><img alt="IDOC3.5.b" style="width: 422.00px" src="img/ca704f7978826875.png"></p>
+<h2 is-upgraded><strong>Check result in Anypoint Studio</strong></h2>
+<p>Back in Anypoint Studio, in the Console tab, you should see the Logger output the IDoc for the customer.</p>
+<p class="image-container"><img alt="IDOC3.6" style="width: 499.00px" src="img/d0dba04dbdee9d2c.png"></p>
+<p>Lastly, a file should also be created where you configured the Path field in the File Connector.</p>
+<p class="image-container"><img alt="IDOC3.7" style="width: 375.00px" src="img/256bea4798af2bc.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>Congratulations, you&#39;ve successfully built a Mule application that listens for IDocs from SAP. Once it receives the IDoc, it writes it to a folder.</p>
+<p class="image-container"><img style="width: 318.50px" src="img/64961d13f02ede3d.png"></p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/sap-connector/5.1/" target="_blank">SAP Connector - Mule 4 Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/release-notes/connector/sap-connector-release-notes-mule-4" target="_blank">SAP Connector Release Notes</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>MuleSoft MUnit - Using the Mock When Processor</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="munit-mocking"
+                  title="MuleSoft MUnit - Using the Mock When Processor"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2020-07-07</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>This guide provides an overview of setting up a MUnit test against a Web Server Consumer component in Mule 4.x. We&#39;ll use a publicly available <a href="http://www.dneonline.com/calculator.asmx" target="_blank">endpoint</a> that exposes a Calculator service for the implementation. Around that, we&#39;ll create a test suite that shows how to mock the Web Service response. </p>
+<p>When you use the ‘Mock when&#39; processor, it allows you simulate an endpoint. When you setup the validation using an ‘Assert that&#39; processor, you can test against the mocked data to ensure the transformations are correct.</p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>In this codelab, you&#39;re going to build simple MUnit test against a SOAP endpoint that is being called using the Web Service Consumer component.<br></p>
+<p class="image-container"><img style="width: 322.50px" src="img/410217dadf172c43.png"></p>
+<aside class="warning"><p><strong>Note:</strong>If you&#39;d like, you can use your own SOAP endpoint but you&#39;ll need to replace the XML in the output.xml file with the expected response from your API as well as the Transform Message processors</p>
+</aside>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to set a MUnit test suite to mock a SOAP response</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.5.x</li>
+<li>MUnit 2.2.5</li>
+<li>Mule EE 4.3.0</li>
+<li>Example SOAP Web Service - <a href="http://www.dneonline.com/calculator.asmx?wsdl" target="_blank">Link</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup HTTP Connector" duration="1">
+        <h2 is-upgraded><strong>Create a new project</strong></h2>
+<p>Open Anypoint Studio and create a new <strong>Mule Project</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/7b2270d151442f9d.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. munit-wsc), select a Runtime, and then click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 321.00px" src="img/8928ce4b23ed1eef.png"></p>
+<p>Once the new project is created, you&#39;ll be presented with a blank canvas. In the <strong>Mule Palette</strong> on the right, click on <strong>HTTP</strong> and then drag and drop the <strong>Listener</strong> into the canvas.</p>
+<p class="image-container"><img style="width: 190.00px" src="img/1ae43d6b515c1a2.png"></p>
+<h2 is-upgraded><br><br><strong>Add HTTP Listener Configuration</strong></h2>
+<p>If the Mule Properties tab doesn&#39;t open, click the <strong>Listener</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 420.17px" src="img/196ce9d4f08b5111.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, take note of the port. By default this will be <strong>8081</strong>. Go ahead and click on <strong>OK</strong> to accept the defaults and proceed.</p>
+<p class="image-container"><img style="width: 337.50px" src="img/3f81ca63e2ca4602.png"></p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the Path field with the value <strong>/calc.</strong></p>
+<p class="image-container"><img style="width: 427.50px" src="img/f340a1bd1cf6d836.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the Web Service Consumer" duration="1">
+        <h2 is-upgraded>Add the Web Service Consumer Connector</h2>
+<p>Back in the Mule Palette, we need to add the Web Service Consumer Connector. Click on Add Modules</p>
+<p class="image-container"><img style="width: 236.50px" src="img/ba1ab7cb2fdda578.png"></p>
+<p>From the list of available connectors, drag and drop the <strong>Web Service Consumer</strong> to the window that says Drag and drop here to add to project</p>
+<p>If a dialog window pops up asking to select a module version, select the newest version. If you don&#39;t have the latest version, click on <strong>Search in Exchange</strong> and search for <strong>Web Service Consumer</strong></p>
+<p class="image-container"><img style="width: 261.49px" src="img/72c09fe490575967.png"></p>
+<p>From the list of operations from <strong>Web Service Consumer</strong>, drag and drop the <strong>Consume</strong> onto the canvas. Place it after the Listener module.</p>
+<p class="image-container"><img style="width: 207.00px" src="img/f75617164806910d.png"></p>
+<h2 is-upgraded>Add Web Service Consumer Configuration</h2>
+<p>Select the <strong>Consume</strong> processor to open the <strong>Mule properties</strong> tab. Click on the green plus sign next to the <strong>Connector configuration</strong> field.</p>
+<p class="image-container"><img style="width: 410.50px" src="img/fa2138f5aca6ea8e.png"></p>
+<p><br>Paste the following into the Wsdl location field:</p>
+<pre><code>http://www.dneonline.com/calculator.asmx?wsdl</code></pre>
+<p>The <strong>Service</strong>, <strong>Port</strong>, and <strong>Address</strong> will automatically be parsed from the WSDL file. You&#39;ll need to click on the drop-down for each field and select the default for each:</p>
+<p><strong>Service</strong>: Calculator</p>
+<p><strong>Port</strong>: CalculatorSoap</p>
+<p><strong>Address</strong>: http://www.dneonline.com/calculator.asmx</p>
+<p class="image-container"><img style="width: 411.50px" src="img/a53dc09c2126df5b.png"></p>
+<p>Click on <strong>OK</strong> to close the window.</p>
+<h2 is-upgraded>Select the SOAP Operation</h2>
+<p>In the Mule properties window for the Consume component, select the drop-down for the Operation field and select Add.</p>
+<p class="image-container"><img style="width: 444.26px" src="img/7a15408dfb983943.png"></p>
+<p>In the next section, we&#39;ll create the SOAP request and format the response using DataWeave.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create SOAP Request and Response using DataWeave" duration="2">
+        <h2 is-upgraded><strong>Create DataWeave Script</strong></h2>
+<p>Now that the Web Service Consumer Connector is configured with the WSDL for the SOAP endpoint we intend to use, we need to set up the SOAP request to pass in.</p>
+<p>In the Mule Palette, find and drag and drop the Transform Message component into the canvas. Drop it between the Listener and the Consume module.</p>
+<p>Also drag and drop another one after the Consume module so it looks like the screenshot.</p>
+<p class="image-container"><img style="width: 444.98px" src="img/b400f907645f8bec.png"></p>
+<h2 is-upgraded><strong>Transform Message - Request</strong></h2>
+<p>For the first Transform Message, component tab, you can see how the component provides metadata around the output.</p>
+<p class="image-container"><img style="width: 432.50px" src="img/493865bebc1feb90.png"></p>
+<p>Let&#39;s make some modifications to the message. </p>
+<p>Under the <strong>Add</strong> node, double-click on <strong>intA</strong></p>
+<p>Notice how the DataWeave script is generated. Change null to &#34;10&#34;.</p>
+<p class="image-container"><img style="width: 418.50px" src="img/b40ab4eada0494c9.png"></p>
+<p>Do the same for intB. Change the null value to &#34;20&#34;.</p>
+<p class="image-container"><img style="width: 403.42px" src="img/bd7a8f56b2079551.png"></p>
+<p>The final DataWeave should look like the following below. You can also copy and paste the script into Studio as well:</p>
+<p class="image-container"><img style="width: 561.00px" src="img/cf2c3e519f4fbe2e.png"></p>
+<pre><code>%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+        ns0#Add: {
+                ns0#intA: 10,
+                ns0#intB: 20
+        }
+}</code></pre>
+<h2 is-upgraded><strong>Transform Message - Response</strong></h2>
+<p>For the second Transform Message component:</p>
+<p class="image-container"><img style="width: 468.50px" src="img/372232368b1c21b5.png"></p>
+<p>Paste the following DataWeave script below into the Transform Message script box. This script will extract the result and return the data back in JSON format.</p>
+<pre><code>%dw 2.0
+output application/json
+ns ns0 http://tempuri.org/
+---
+{
+        result: payload.body.ns0#AddResponse.ns0#AddResult default 0
+}</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the Mule Application" duration="1">
+        <h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Our next step is to test the flow we&#39;ve built. In the <strong>Package Explorer</strong>, right click on the canvas and <strong>Run project munit-wsc</strong></p>
+<p class="image-container"><img style="width: 440.50px" src="img/bbb9b22cb87321f9.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 522.80px" src="img/a14a2faadf593915.png"></p>
+<h2 is-upgraded><strong>Test Flow</strong></h2>
+<p>Let&#39;s test out our flow now. Switch to Google Chrome and enter the following URL from the table below. If everything was configured correctly, you should see the following result in your browser.</p>
+<pre><code>http://localhost:8081/calc</code></pre>
+<p class="image-container"><img style="width: 321.00px" src="img/9bcd5a822a56a0ae.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create MUnit Test Suite" duration="1">
+        <h2 is-upgraded><strong>Generate MUnit Test Suite</strong></h2>
+<p>Back in Studio, let&#39;s create the Munit Test Suite. Select and right-click on the flow. Choose <strong>MUnit &gt; Create new munit-wsc xml suite</strong></p>
+<p class="image-container"><img style="width: 465.50px" src="img/27f5f0a55ccc0f07.png"></p>
+<p>A new file will be created under <strong>src/test/munit</strong> called <strong>munit-wsc-test-suite.xml </strong>with a Test flow and a flow reference to the flow we&#39;re testing against.</p>
+<p class="image-container"><img style="width: 378.50px" src="img/27f60dd83a69806d.png"></p>
+<h2 is-upgraded><strong>Create Mocked Message</strong><br></h2>
+<p>Before we setup the <strong>Mock when</strong>, we need to setup the mocked message that we expect.</p>
+<p>Right click on the <strong>src/test/resources</strong> folder and select <strong>New &gt; File</strong></p>
+<p class="image-container"><img style="width: 390.50px" src="img/2dcf81a8cb80678e.png"></p>
+<p>In the <strong>New File</strong> dialog, enter the file name: <strong>output.xml</strong> and click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 339.50px" src="img/6585f8c70086323e.png"></p>
+<p>In the newly created file, paste the following XML:</p>
+<pre><code>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;
+&lt;AddResponse xmlns=&#34;http://tempuri.org/&#34; xmlns:xsd=&#34;http://www.w3.org/2001/XMLSchema&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;&gt;
+&lt;AddResult&gt;20&lt;/AddResult&gt;
+&lt;/AddResponse&gt;</code></pre>
+<p class="image-container"><img style="width: 521.38px" src="img/268e03229d133407.png"></p>
+<h2 is-upgraded><strong>Set Up Mock When Component</strong></h2>
+<p>Next, let&#39;s set the behavior of the test flow. In the <strong>Mule Palette</strong>, select <strong>MUnit Tools</strong> and click and drag the <strong>Mock when </strong>component to the test flow. Drop it in the <strong>Behavior</strong> section of the flow.</p>
+<p class="image-container"><img style="width: 514.71px" src="img/d808e1328fdd8cae.png"></p>
+<p>In the properties for the <strong>Mock when</strong>, type in the following into the corresponding fields:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Processor:</strong></p>
+</td><td colspan="1" rowspan="1"><p>wsc:consume</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>With attributes</strong></p>
+</td><td colspan="1" rowspan="1"><p>None</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Then return</strong></p>
+</td><td colspan="1" rowspan="1"><p>Edit inline</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Media type</strong></p>
+</td><td colspan="1" rowspan="1"><p>application/java</p>
+</td></tr>
+</table>
+<p>Check the <strong>Payload</strong> checkbox</p>
+<p>Paste the following in the <strong>Value</strong> field</p>
+<pre><code>output application/java
+---
+{
+         body: readUrl(&#39;classpath://output.xml&#39;,&#39;application/xml&#39;)        
+}</code></pre>
+<p class="image-container"><img style="width: 493.50px" src="img/7724a53b5ace0f5b.png"></p>
+<h2 is-upgraded><strong>Set Up Assert That Component</strong></h2>
+<p>Next we want to add an <strong>Assert that. </strong>The <strong>Assert that</strong> event processor allows you to run assertions in order to validate the state of a Mule Event&#39;s content.</p>
+<p>From the <strong>Mule Palette</strong>, drag and drop an <strong>Assert that</strong> component into the <strong>Validation</strong> section of the flow.</p>
+<p class="image-container"><img style="width: 513.50px" src="img/6db36e06a2fa92f9.png"></p>
+<p>Enter the following into the properties window of the <strong>Assert that</strong> component.</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Expression:</p>
+</td><td colspan="1" rowspan="1"><p>payload.result</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Is:</p>
+</td><td colspan="1" rowspan="1"><p>MunitTools::equalTo(&#34;20&#34;)</p>
+</td></tr>
+</table>
+<p>The <strong>Is:</strong> field uses <a href="https://docs.mulesoft.com/munit/2.1/munit-matchers" target="_blank"><strong>MUnit Matchers</strong></a> which are a set of DataWeave functions to define assertion conditions for any value in an expression instead of a specific value.</p>
+<p class="image-container"><img style="width: 490.12px" src="img/6d0cb9be776535a7.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run MUnit Test Suite" duration="1">
+        <p>In this next section, we&#39;ll run the MUnit suite and see the results of the test. The Studio Console will show the output of the flow. Additionally there are views for MUnit to show the results, errors, messages, and coverage reports.</p>
+<h2 is-upgraded><strong>Run Test Suite</strong><br></h2>
+<p>Now that the test is setup, let&#39;s run the test suite and see if it passes.</p>
+<p>Right click on the flow and select <strong>Run MUnit suite</strong></p>
+<p class="image-container"><img style="width: 368.50px" src="img/c56b0c5812a4be1f.png"></p>
+<p>If everything was configured correctly, the <strong>Console</strong> will show that the test was a success.</p>
+<p class="image-container"><img style="width: 539.50px" src="img/793d7dea8390ce34.png"></p>
+<h2 is-upgraded><strong>Generate Report</strong></h2>
+<p>Additionally the MUnit tab will show the run was successful with zero errors and failures.</p>
+<p>In the <strong>MUnit Coverage</strong> tab, click on <strong>Generate Report</strong></p>
+<p class="image-container"><img style="width: 321.00px" src="img/c6d06be8e39f7878.png"></p>
+<p>A <strong>MUnit Coverage Report</strong> will be generated and show an overview of the overall coverage of the tests.</p>
+<p class="image-container"><img style="width: 547.50px" src="img/1c519c2040d01d39.png"></p>
+<p>Lastly, if you switch back to the Mule flow, you&#39;ll see a green checkmark next to each processor that shows what the MUnit test covered.</p>
+<p class="image-container"><img style="width: 451.00px" src="img/cc0b734142f75686.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>MUnit is a Mule application testing framework that allows you to easily build automated tests for your integrations and APIs. It provides a full suite of integration and unit test capabilities such as the ability to mock endpoints such as an Event Processor when it matches the defined name and attributes. </p>
+<p class="image-container"><img style="width: 416.00px" src="img/cc0b734142f75686.png"></p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li>MUnit - Mule 4 Documentation</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>MuleSoft MUnit - Run Custom Assertion</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="munit-custom-assertion"
+                  title="MuleSoft MUnit - Run Custom Assertion"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2021-06-24</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>This guide provides an overview of the features of MUnit to run a custom assertion using the ‘Run Custom&#39; operation.</p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>You&#39;ll create a new Java class with a custom assertion and then create a test suite to test the Mule flow using the custom assertion.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5ac2a1635d68c9a4.png"></p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to create a custom assertion module in Java</li>
+<li>How to execute the custom assertion in MUnit test suite</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.5.0 or later</li>
+<li>MUnit 2.2.5 or later</li>
+<li>MUnit Anypoint Studio Plugin 2.5.0 or later</li>
+<li>Mule Runtime Engine 4.3.0 or later</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Mule Project" duration="3">
+        <h2 is-upgraded><strong>Start Up Anypoint Studio</strong></h2>
+<p>Open Anypoint Studio if you haven&#39;t opened it. Any workspace is fine.</p>
+<h2 is-upgraded>Create a new Mule Project</h2>
+<p>From <strong>File</strong> menu choose <strong>New</strong> &gt; <strong>Mule Project</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e98dad3c7af8e90.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. munit-run-custom), select a <strong>Runtime</strong> (e.g. Mule Server 4.3.0 EE), and then click on <strong>Finish</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/34c07bb5a2e9d326.png"></p>
+<h2 is-upgraded><strong>Set up HTTP listener</strong></h2>
+<p>Once the new project is created, you&#39;ll be presented with a blank canvas.</p>
+<p>From the <strong>Mule Palette</strong> on the right drag and drop <strong>HTTP</strong> &gt; <strong>Listener</strong> component onto the canvas.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/122be45437eac59b.png"></p>
+<p>For the <strong>Mule Properties</strong> of the <strong>Listener</strong>, click on the green plus sign to create a new <strong>Connector configuration</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b457359f4cc1678f.png"></p>
+<p>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, keep the default selection. Then click on <strong>OK.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/3bbd23856113de63.png"></p>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the <strong>Path</strong> field with the following:</p>
+<p>/custom</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f8978403f6f4f3de.png"></p>
+<h2 is-upgraded><strong>Set up Transform Message component</strong></h2>
+<p>From the <strong>Mule Palette</strong> on the right drag and drop <strong>Core</strong> &gt; <strong>Transform Message</strong> component onto the flow created in the previous step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e95cfa641099f074.png"></p>
+<p>Click on the <strong>Transform Message</strong> component. Copy and paste the following DataWeave Script.</p>
+<pre><code>%dw 2.0
+output application/json
+---
+[&#39;111&#39;,&#39;222&#39;,&#39;333&#39;]</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/94698c6a898e9bfe.png"></p>
+<h2 is-upgraded><strong>Set up Logger component</strong></h2>
+<p>From the <strong>Mule Palette</strong> on the right drag and drop <strong>Core</strong> &gt; <strong>Logger</strong> component onto the flow created in the previous step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/328a9b6fde2a5df.png"></p>
+<p>Click <strong>fx</strong> button on <strong>Message</strong> field to make it <strong>Expression Mode</strong>.</p>
+<p class="image-container"><img style="width: 469.00px" src="img/5b6ad018b1c3261f.png"></p>
+<p>Set the Message field to the following:</p>
+<pre><code>payload</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/9aa4f0d08a03de00.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Verify Mule Project Setup" duration="2">
+        <h2 is-upgraded>Start up the Mule Application</h2>
+<p>Our next step is to test the flow we&#39;ve built. Right click on the canvas and choose <strong>Run project munit-run-custom</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/bd007480b9eda547.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/94e1c81d19f7b298.png"></p>
+<h2 is-upgraded><strong>Run the Mule Application to test</strong></h2>
+<p>Open up your browser and enter <strong>http://localhost:8081/custom</strong> in the URL bar.</p>
+<p>If everything was configured correctly, you should see the following screen below:</p>
+<p class="image-container"><img style="width: 436.00px" src="img/7f4de294e5ce75d.png"></p>
+<p>Hit Terminate icon and stop the application.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/55f738657adab096.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create MUnit Test Suite" duration="5">
+        <h2 is-upgraded><strong>Generate blank MUnit test case</strong></h2>
+<p>Back in Studio, let&#39;s create the Munit Test Suite. </p>
+<p>Select and right-click on the flow. Choose <strong>MUnit</strong> &gt; <strong>Create blank test for this flow</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/adad5a0effe847fd.png"></p>
+<p>The blank MUnit Test scope will be created. In the execution, you&#39;ll see the <strong>Flow Reference</strong> to the flow in the Mule application.</p>
+<p class="image-container"><img style="width: 376.00px" src="img/b12442776ece4116.png"></p>
+<h2 is-upgraded><strong>Add MUnit Assert maven dependency into the project</strong></h2>
+<p>Next we want to create the custom assertion using a Java class.</p>
+<p>In the <strong>Package Explorer</strong> for the project, find pom.xml and open the file.</p>
+<p class="image-container"><img style="width: 326.00px" src="img/5e304ca5ed3aa3.png"></p>
+<p>Add following entry inside dependencies tag:</p>
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;com.mulesoft.munit&lt;/groupId&gt;
+        &lt;artifactId&gt;munit-assert&lt;/artifactId&gt;
+        &lt;version&gt;2.3.4&lt;/version&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+<p class="image-container"><img style="width: 491.00px" src="img/ba51d85b16da542.png"></p>
+<h2 is-upgraded><strong>Create a custom assertion</strong></h2>
+<p>In the <strong>Package Explorer</strong> for the project, find the <strong>src/test/java</strong> folder.</p>
+<p>Right click on the folder and select <strong>New</strong> &gt; <strong>Class</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/c6e57aa88b07890f.png"></p>
+<p>In the <strong>New Java Class</strong> window, fill in the <strong>Package:</strong> field with:</p>
+<p><code>com.mulesoft</code></p>
+<p>And the Name: field with:</p>
+<p><code>CustomAssertion</code></p>
+<p>and then click on <strong>Add...</strong> for the <strong>Interfaces:</strong> field.</p>
+<p class="image-container"><img style="width: 594.00px" src="img/378eaaaea614f0da.png"></p>
+<p>In the popped up window, type in</p>
+<p><code>MunitAssertion</code></p>
+<p>in the <strong>Choose interfaces:</strong> field and select the first matching item. </p>
+<p>Click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 393.00px" src="img/98e30c4385ffe5f.png"></p>
+<p>Click on <strong>Finish</strong> to close the window.<img style="width: 592.00px" src="img/6e8df085aa0d1b95.png"></p>
+<p>You&#39;ll see the newly created Java class with the auto-generated method stub.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1e6f58f17c992a70.png"></p>
+<p>Copy and paste the following code into the execute method:</p>
+<pre><code>if (!&#34;\&#34;111\&#34;&#34;.equals(arg0.getValue() + &#34;&#34;)) {
+    throw new AssertionError(&#34;Error: the payload is incorrect&#34;);
+}</code></pre>
+<p>This code will check the value of the payload that is passed into the custom assertion. If it doesn&#39;t equal the value, it will throw an assertion error.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/dd57d37e738ef33e.png"></p>
+<h2 is-upgraded><strong>Export the custom assertion module</strong></h2>
+<p>Classes from an application that are meant to be used by the MUnit module need to be exported in order for them to be accessible. In order to do that, you need to modify the <strong>mule-artifact.json</strong> file.</p>
+<aside class="special"><p><strong>Note:</strong> More information on exporting Java classes can be found <a href="https://docs.mulesoft.com/mule-runtime/4.3/how-to-export-resources#how-to-export-java-classes" target="_blank">here</a>.</p>
+</aside>
+<p>You can find <strong>mule-artifact.json</strong> file in the project folder. Double click on the file to open it so we can edit it.</p>
+<p class="image-container"><img style="width: 338.00px" src="img/8b0ba486c7a08569.png"></p>
+<p>The initial file looks like this:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c0aedd91192fc52d.png"></p>
+<p>Copy and paste the following code into the file:</p>
+<pre><code>{
+  &#34;minMuleVersion&#34;: &#34;4.3.0&#34;,
+  &#34;classLoaderModelLoaderDescriptor&#34;: {
+    &#34;id&#34;: &#34;mule&#34;,
+    &#34;attributes&#34;: {
+      &#34;exportedPackages&#34;: [
+        &#34;com.mulesoft&#34;
+      ]
+    }
+  }  
+}</code></pre>
+<p>Notice the <strong>exportedPackages</strong> field contains the package that we just created.</p>
+<p class="image-container"><img style="width: 460.00px" src="img/fe416bf0bfe7ab88.png"></p>
+<h2 is-upgraded><strong>Build the Test Scope</strong></h2>
+<p>Let&#39;s finish building the Test scope. From the Mule Palette, drag and drop the <strong>MUnit Tools</strong> &gt; <strong>Run custom operation</strong> into the Validation side of the scope.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/632f72469f344495.png"></p>
+<p>In the <strong>Mule Properties</strong> window, fill in the following fields with the corresponding data:</p>
+<p><strong>Assertion:</strong></p>
+<p><code>com.mulesoft.CustomAssertion</code></p>
+<p><strong>Expression:</strong></p>
+<p><code>#[payload[0]]</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/cfa4f98b38c13a31.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run MUnit Test Suite" duration="2">
+        <p>In this next section, we&#39;ll run the MUnit suite and see the results of the test. The Studio Console will show the output of the flow. Additionally there are views for MUnit to show the results, errors, messages, and coverage reports.</p>
+<h2 is-upgraded><strong>Run the test suite</strong></h2>
+<p>Now that the test is setup, let&#39;s run the test suite and see if it passes.</p>
+<p>Right click on the flow and select <strong>Run MUnit suite</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9403730ea94300a4.png"></p>
+<p>If everything was configured correctly, the <strong>Console</strong> will show that the test was a success.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cadef9cb8fb3e171.png"></p>
+<p>Additionally the <strong>MUnit</strong> tab will show the run was successful with zero errors and failures.</p>
+<p>In the <strong>MUnit Coverage</strong> tab, click on <strong>Generate Report</strong></p>
+<p class="image-container"><img style="width: 345.00px" src="img/dc84ffbc04f313ba.png"></p>
+<p>A <strong>MUnit Coverage Report</strong> will be generated and show an overview of the overall coverage of the tests.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/70c7a3bec00714fb.png"></p>
+<p>Lastly, if you switch back to the Mule flow, you&#39;ll see a green checkmark next to each processor that shows what the MUnit test covered.</p>
+<p class="image-container"><img style="width: 365.00px" src="img/af140c1e5ad03781.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="0">
+        <p>Congratulations, you&#39;ve successfully create a custom assertion and leverage it in MUnit test case.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded><strong>Reference docs</strong></h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/munit/2.3/" target="_blank">MUnit Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/munit/2.3/run-custom-event-processor" target="_blank">Run Custom Event Processor Documentation</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

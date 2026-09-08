@@ -1,0 +1,230 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Call Google APIs using the HTTP Connector and OAuth Model in Mule 4</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="call-google-apis-oauth20"
+                  title="Call Google APIs using the HTTP Connector and OAuth Model in Mule 4"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>Last Updated: 2020-11-25</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p class="image-container"><img style="width: 624.00px" src="img/f911943b58b8430e.png"></p>
+<p>Google provides an extensive library of APIs. In order to call these APIs from Mule, there are a couple of steps that need to be taken. In this codelab, we&#39;ll be covering how to setup Google and how to setup your Mule application to handle OAuth 2.0 - Authorization Code authentication with the Google APIs. We&#39;ll use the HTTP Request operation to make the calls. The HTTP Request connector supports connecting a Mule application to a service that requires any of the following types of authentication:</p>
+<ul>
+<li>Basic Authentication</li>
+<li>NTLM Authentication</li>
+<li>Digest Authentication</li>
+<li>OAuth2 - Authorization Code</li>
+<li>OAuth2 - Client Credentials</li>
+</ul>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to setup the HTTP Request connector for OAuth</li>
+<li>How to call the Google Drive API from a Mule application.</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.7.x</li>
+<li>Mule EE 4.3.0</li>
+<li>Google Cloud Platform </li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Google API for OAuth 2.0" duration="4">
+        <p>Before we build the Mule application, we need to setup a project in Google Cloud and create the credentials for the OAuth 2.0 call for the API that we plan to use. For this codelab, we&#39;ll use the Google Drive API.</p>
+<h2 is-upgraded><strong>Create Project</strong></h2>
+<p>Go to Google Cloud Console (<a href="https://console.cloud.google.com" target="_blank">https://console.cloud.google.com</a>) and create a new project or use an existing one.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2ebb57cbe598a586.png"></p>
+<p>In the project, click on the hamburger menu in the top left and navigate to to <strong>APIs &amp; Services</strong> and click on <strong>Library</strong></p>
+<p class="image-container"><img style="width: 534.11px" src="img/c77bb13dbb5bdfdf.png"></p>
+<p>Search for drive and click on Google Drive API</p>
+<p class="image-container"><img style="width: 513.50px" src="img/639c2cd42b37f4c6.png"></p>
+<p>Click on <strong>Enable</strong></p>
+<p class="image-container"><img style="width: 470.50px" src="img/789a96a7a0bb8d85.png"></p>
+<h2 is-upgraded><strong>Create Credentials</strong></h2>
+<p>In the Overview screen, click on <strong>Credentials</strong> on the left hand navigation.</p>
+<p class="image-container"><img style="width: 356.50px" src="img/cf0df4ecf3e8ba3f.png"></p>
+<p>In the Credentials screen, click on <strong>Create Credentials</strong> and click on <strong>OAuth client ID</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d5acb53e96188ad.png"></p>
+<p>Before you can create an <strong>OAuth client ID</strong>, you need to configure the consent screen. Click on <strong>Configure Consent Screen</strong>. In the next screen, check <strong>External </strong>and click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 501.50px" src="img/fc89ce8367963640.png"></p>
+<p>In the next screen, fill in the required fields for the <strong>App information</strong> and <strong>Developer contact information</strong> sections and click on <strong>Save and Continue</strong> near the bottom of the screen.</p>
+<p class="image-container"><img style="width: 494.50px" src="img/4f64286d79a8d06d.png"></p>
+<p>In the <strong>Scopes</strong> and <strong>Optional info </strong>section, just click on <strong>Save and Continue. </strong></p>
+<p>Lastly, on the <strong>Summary</strong> screen, click on <strong>Back to Dashboard</strong> to finish configuring the consent screen.</p>
+<p>Now we can go back and setup the OAuth 2.0 client ID. Click on <strong>Credentials</strong> on the left hand navigation and then click on <strong>Create Credentials </strong>and <strong>OAuth client ID</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/b49be13f1d839de.png"></p>
+<p>Select <strong>Web application </strong>for the <strong>Application type</strong> drop-down.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ab4b0708c2840ae0.png"></p>
+<p>Give the application a name (e.g. Mule Application) and add the following URI for the <strong>Authorized redirect URIs</strong> section and then click on <strong>Create</strong></p>
+<pre><code>http://localhost:8091/callback</code></pre>
+<p class="image-container"><img style="width: 461.53px" src="img/deb45e36e437062c.png"></p>
+<p>Copy down the client ID and client secret. You&#39;ll need these for the next section.</p>
+<p class="image-container"><img style="width: 382.50px" src="img/dac39e92d659cd09.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Mule Project" duration="1">
+        <h2 is-upgraded><strong>Create New Mule Project</strong></h2>
+<p>Now that we&#39;ve setup the Google API that we intend to use, let&#39;s create the Mule application. Switch over to Anypoint Studio and create a new project by going to <strong>File &gt; New &gt; Mule Project</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f5ed98402da31289.png"></p>
+<p>Before we build our flow, we need to add the OAuth module. In the Mule Palette, click on <strong>Search in Exchange</strong></p>
+<p class="image-container"><img style="width: 320.50px" src="img/c0b3b3d8f202274f.png"></p>
+<p>Search for <strong>OAuth</strong> and select the <strong>OAuth Module - Mule 4. </strong>Click on <strong>Add</strong> and then click on <strong>Finish</strong></p>
+<p class="image-container"><img style="width: 525.50px" src="img/7a7aa29c3b7885f0.png"></p>
+<p>Additionally you can add the module as a dependency to your <code>pom.xml</code> file</p>
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;org.mule.modules&lt;/groupId&gt;
+        &lt;artifactId&gt;mule-oauth-module&lt;/artifactId&gt;
+        &lt;version&gt;1.1.14&lt;/version&gt;
+        &lt;classifier&gt;mule-plugin&lt;/classifier&gt;
+&lt;/dependency&gt;</code></pre>
+<h2 is-upgraded><strong>Create Flow</strong></h2>
+<p>From the Mule Palette, drag and drop the following components to match the flow below. You&#39;ll need the <strong>HTTP &gt; Listener</strong>, <strong>HTTP &gt; Request </strong>components. We&#39;ll go back and configure everything later.</p>
+<p class="image-container"><img style="width: 242.50px" src="img/e9044684913b108a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Listener Configuration" duration="1">
+        <h2 is-upgraded>Set <strong>HTTP Listener Configuration</strong></h2>
+<p>Now go back and select the HTTP Listener component in the flow we just created. If the Mule Properties tab doesn&#39;t open, click the <strong>Listener</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 420.17px" src="img/196ce9d4f08b5111.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, take note of the port. By default this will be <strong>8081</strong>. Go ahead and click on <strong>OK</strong> to accept the defaults and proceed.</p>
+<p class="image-container"><img style="width: 337.50px" src="img/3f81ca63e2ca4602.png"></p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the <strong>Path</strong> field with the value <strong>/list. </strong>Also fill in the <strong>Display Name</strong> field with the value <strong>/list</strong>.</p>
+<p class="image-container"><img style="width: 348.50px" src="img/e3c35f70229fb07e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Request Configuration" duration="3">
+        <p>Let&#39;s configure the <strong>HTTP Request</strong> component now to call the Google API.</p>
+<h2 is-upgraded><strong>Set HTTP Request Configuration</strong></h2>
+<p>Select the <strong>HTTP Request</strong> component. If the Mule Properties tab doesn&#39;t open, click the <strong>Request</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/57530f74c4e67307.png"></p>
+<p>This is where the bulk of the configuration will be for to call the Google API.<br><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, change the <strong>Protocol </strong>to <strong>HTTPS. </strong>Set the <strong>Host</strong> to <a href="http://www.googleapis.com" target="_blank">www.googleapis.com</a>, and set the <strong>Port </strong>to <strong>443. </strong>Don&#39;t click on <strong>OK</strong> yet but scroll down.</p>
+<p class="image-container"><img style="width: 386.50px" src="img/9d739039e85eec50.png"></p>
+<p>Find the <strong>Authentication</strong> drop-down and change the value to <strong>Authorization code grant type</strong>. If the value is missing, you need to go back and add the OAuth Module that we covered in Section 3.</p>
+<p class="image-container"><img style="width: 470.50px" src="img/7685e56935ae284.png"></p>
+<p>In the new section that appears, fill in the following fields that match the table below. You can see a screenshot of what it should look like below the table:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Field</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Value</strong></p>
+</td><td colspan="1" rowspan="1"><p><strong>Description</strong></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Local callback url</p>
+</td><td colspan="1" rowspan="1"><p><code>http://localhost:8091/callback</code></p>
+</td><td colspan="1" rowspan="1"><p>This matches the Authorized redirect URI from Step 2</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>External callback url</p>
+</td><td colspan="1" rowspan="1"><p><code>http://localhost:8091/callback</code></p>
+</td><td colspan="1" rowspan="1"><p>This matches the Authorized redirect URI from Step 2</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Local authorization url</p>
+</td><td colspan="1" rowspan="1"><p><code>http://localhost:8091/login</code></p>
+</td><td colspan="1" rowspan="1"><p>This is the endpoint where the user goes to get the token from the OAuth endpoint</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Authorization url</p>
+</td><td colspan="1" rowspan="1"><p><code>https://accounts.google.com/o/oauth2/auth</code></p>
+</td><td colspan="1" rowspan="1"><p>Google specific endpoint that the <strong>Local authorization url</strong> will redirect the user for authorization.</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Client id</p>
+</td><td colspan="1" rowspan="1"><p><code><client_id></code></p>
+</td><td colspan="1" rowspan="1"><p>This is the client ID from Step 2</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Client secret</p>
+</td><td colspan="1" rowspan="1"><p><code><client_secret></code></p>
+</td><td colspan="1" rowspan="1"><p>This is the client secret from Step 2</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Scopes</p>
+</td><td colspan="1" rowspan="1"><p><code>https://www.googleapis.com/auth/drive</code></p>
+</td><td colspan="1" rowspan="1"><p>A list of scopes for the Google Drive API can be found here: <a href="https://developers.google.com/drive/api/v3/about-auth#OAuth2Authorizing" target="_blank">https://developers.google.com/drive/api/v3/about-auth#OAuth2Authorizing</a></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Token url</p>
+</td><td colspan="1" rowspan="1"><p><code>https://oauth2.googleapis.com/token</code></p>
+</td><td colspan="1" rowspan="1"><p>Google specific endpoint where the OAuth flow exchanges the code for access token and ID token.</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/ac4bed143a2e7e52.png"></p>
+<p>Click on <strong>OK</strong> to close the HTTP Request configuration screen.</p>
+<h2 is-upgraded><br><strong>Set Request Method and Path</strong></h2>
+<p>Back in the <strong>Request</strong> Mule properties tab, fill in the <strong>Method</strong> and <strong>Path</strong> field under the <strong>Request </strong>section.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9ad3bcf2630ce46e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run Mule Project" duration="1">
+        <p>Now that everything has been configured, let&#39;s run the project and walk through the OAuth 2.0 flow. Right-click on the canvas and click on <code>Run project <project name></code></p>
+<p class="image-container"><img style="width: 509.50px" src="img/8fd266337cabed63.png"></p>
+<p>When the project is successful deployed, switch to your browser and navigate to the following URL</p>
+<pre><code>http://localhost:8081/list</code></pre>
+<p>If everything was configured successfully, you&#39;ll see the following response in your window. This is expected because you haven&#39;t authenticated the user against the OAuth 2.0 server yet.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/386de763cc95a9cc.png"></p>
+<p>Open another tab and navigate to the following URL. Note that the port number is 8091 versus 8081. </p>
+<pre><code>http://localhost:8091/login</code></pre>
+<p class="image-container"><img style="width: 416.50px" src="img/5736dc56e691374f.png"></p>
+<p>If configured correctly, you&#39;ll be redirected to the Google Sign-In screen to authenticate the user. If you&#39;re already logged in, you&#39;ll be presented with the account you want to use. Once authenticated, you&#39;ll be redirected back to the authenticated redirect URI that you set up previously (<a href="http://localhost:8091/callback" target="_blank">http://localhost:8091/callback</a>) and you&#39;ll see the following screen.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8c7881ef26e601aa.png"></p>
+<p>Switch back to the tab from earlier (<a href="http://localhost:8081/list" target="_blank">http://localhost:8081/list</a>) and click refresh. Now you should see the data successfully returned back from the Google API.</p>
+<p class="image-container"><img style="width: 595.50px" src="img/b45cb3d38413f3af.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>In this codelab you learned how to setup and call a Google API from a Mule application using OAuth 2.0. As you learned, there are a couple of steps that need to be completed on the Google side in the Google Cloud console before we can make the call.</p>
+<p>While we only showed connecting with the Google Drive API, you can add additional APIs from their extensive library to your project. Just remember to add the scopes that you plan to call from Mule in order to have access to those APIs.</p>
+<p>From a Mule standpoint, you learned how to use the HTTP Request component along with the OAuth Module to call the Google API. The Mule application is pretty basic but it shows the minimum number of steps needed to setup the call. If you have any questions or run into any issues, don&#39;t hesitate to reach out.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/http-connector/1.5/http-listener-ref" target="_blank">HTTP Listener Reference - Mule 4</a></li>
+<li><a href="https://docs.mulesoft.com/http-connector/1.5/http-request-ref" target="_blank">HTTP Request Reference - Mule 4</a></li>
+<li><a href="https://docs.mulesoft.com/http-connector/1.5/http-authentication#oauth2-authorization-code" target="_blank">OAuth - Authorization Code</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

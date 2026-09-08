@@ -1,0 +1,212 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Connect to Microsoft SharePoint Online</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid="G-RPRRBSY7PR"
+                  codelab-ga4id=""
+                  id="microsoft-sharepoint-online-with-mulesoft"
+                  title="Connect to Microsoft SharePoint Online"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p>The Microsoft SharePoint connector provides support for both SharePoint 2013 and SharePoint Online for use in the cloud and on-premises. This connector enables content and document management, access to intranet and extranet portals and websites, collaboration, and enterprise search. </p>
+<p>In this codelab you&#39;ll learn how to set up the connector to work with SharePoint Online. We&#39;ll be configuring the connector to use OAuth Client Credentials.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Generate SSL Certificate" duration="1">
+        <p>Before we configure the SharePoint connector, we need to generate a SSL certificate because we&#39;re going to be setting up <strong>OAuth Client Credentials</strong> to connect to SharePoint.<br><br>First, run the following command to create an RSA private key.<br></p>
+<pre><code>openssl genrsa -aes256 -passout pass:mule123 -out server.pass.key 4096</code></pre>
+<p class="image-container"><img style="width: 534.00px" src="img/e3848c07a390331a.png"></p>
+<p>Run the next command to create a private key file <code>server.key</code> in the same working directory.</p>
+<pre><code>openssl rsa -passin pass:mule123 -in server.pass.key -out server.key</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/74cc4665382399fc.png"></p>
+<p>Run the next command in the same directory to create a certificate signing request <code>server.csr</code></p>
+<pre><code>openssl req -new -key server.key -out server.csr</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/a066d5797b67890a.png"></p>
+<p>Lastly, to generate a SSL certificate, run the following command. The <code>server.crt</code> is what you&#39;ll need to upload to SharePoint in the next step.<br></p>
+<pre><code>openssl x509 -req -sha256 -days 365 -in server.csr -signkey server.key -out server.crt</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/1ff4e0833ae84a59.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Java Keystore with SSL Certificate" duration="1">
+        <p>On the Mule side, we need to create a Java Keystore with the SSL certificate that we just created.<br><br>Run the following command in the same directory as the previous step. This will convert the certificate to PKCS12 </p>
+<p>The <code>-name</code> attribute will be the <strong>Keystore alias</strong> when you set up the connector later.</p>
+<pre><code>openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12 -name mule</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/ce6ec30376ebd90d.png"></p>
+<p>Lastly run the following command to convert the <code>server.p12</code> file to a Java Keystore file called <code>server.jks</code></p>
+<pre><code>keytool -importkeystore -srckeystore server.p12 -srcstoretype pkcs12 -destkeystore server.jks -deststoretype jks</code></pre>
+<p>When the prompt asks you for a password, be sure to copy that down (e.g. mule123). You&#39;ll need that when you configure the <strong>Keystore password</strong> when you set up the connector later.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/bd4587c338903c26.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup SharePoint" duration="3">
+        <p>Now that we have a SSL Certificate, let&#39;s set up an Application in Azure Active Directory (a.k.a as Entra ID) to allow the connector to communicate with SharePoint.</p>
+<p>Switch to your browser and navigate to SharePoint. Click on the <strong>App Launcher</strong> in the top left and click on <strong>Admin</strong></p>
+<p class="image-container"><img style="width: 510.50px" src="img/bee7a4af7157b3d1.png"></p>
+<p><br>On the left-hand navigation, click on <strong>Show all </strong>and click on <strong>Identity</strong></p>
+<p class="image-container"><img style="width: 367.50px" src="img/948d8269f34df35c.png"></p>
+<p>Click on <strong>Add</strong> and click on <strong>App registration</strong></p>
+<p class="image-container"><img style="width: 599.50px" src="img/a90e58c29fadb4f7.png"></p>
+<p>Give the application a name (e.g. MuleDemo). For the <strong>Supported account types</strong> section, leave the default radio button checked.In the <strong>Redirect URI</strong> section, select <strong>Web </strong>from the drop-down and fill in the field with <strong>http://localhost:8081. </strong>Lastly click on <strong>Register<br></strong></p>
+<p class="image-container"><img style="width: 586.50px" src="img/f3d0befcbab14720.png"></p>
+<p>In the next screen, copy down the <strong>Application (client) ID </strong>(e.g. 439d7ec6-b9c2-4c47-881e-58fa8481f8f3). We&#39;ll need this when we configure the MuleSoft connector later.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/4bd2eb74e411117f.png"></p>
+<p>Under the <strong>Manage</strong> section, click on <strong>API permissions</strong>. Click on <strong>Add a permission</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d92ed4032a5ebec4.png"></p>
+<p>In the <strong>Request API permissions</strong> window, click on <strong>SharePoint</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/b8bfaec50ee441f.png"></p>
+<p>Click on <strong>Application permissions </strong>and check all the checkboxes before clicking on <strong>Add permissions.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/6c4ff587cec75582.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/c9e03567e6d360a5.png"></p>
+<p>Back in the <strong>API permissions</strong> screen, click on <strong>Microsoft Graph</strong></p>
+<p class="image-container"><img style="width: 367.00px" src="img/c35148755e70de23.png"></p>
+<p>Enter in <strong>sites</strong> in the search box and select all the permissions. Click on <strong>Update permissions.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/93b3369b0dd6514d.png"></p>
+<p>Now that we&#39;ve add all the APIs that the API can call, click on <strong>Grant admin consent for &lt;Parent Tenant&gt;</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/8b879a5d85854e12.png"></p>
+<p>In the left-hand navigation, under the <strong>Manage</strong> section, click on <strong>Certificates &amp; secrets</strong>. Click on <strong>Upload certificate.<br></strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/2f95a8073db7c4d1.png"></p>
+<p>In the <strong>Upload certificate</strong> window, find the select the <strong>server.crt</strong> file that we created in the previous step. Give the certificate a name (e.g. MuleCert) and click on <strong>Add</strong></p>
+<p class="image-container"><img style="width: 605.00px" src="img/fd7e70dfc077f522.png"></p>
+<p>Lastly, click on <strong>Overview</strong> and then click on <strong>Endpoints. </strong>You&#39;ll need to copy down the <strong>OAuth 2.0 token endpoint (v2) </strong>URL which we&#39;ll need when we configure the MuleSoft connector.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/63a1693c44bc40fb.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Mule Application" duration="1">
+        <p>For the purpose of the codelab, we&#39;re going to create a very simple flow that gets the content of a single file and outputs that to the browser in plain text format.</p>
+<p>Open <strong>Anypoint Studio</strong> and create a new <strong>Mule Project</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/f1720a9c5d877d24.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. sharepoint-example), select a Runtime, and then click on <strong>Finish</strong></p>
+<p>From the previous step where we created the Java Keystore, copy the server.jks file to the <strong>src/main/resources</strong> folder.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9ffa30bacfbee056.png"></p>
+<p>Next we want to add the SharePoint connector to the project. In the <strong>Mule Palette</strong>, click on <strong>Search in Exchange. </strong>In the window that pops up, search for sharepoint and select the <strong>SharePoint </strong>connector. Click on <strong>Add </strong>and then click on <strong>Finish. </strong></p>
+<p class="image-container"><img style="width: 464.50px" src="img/2cec5d5c53050b21.png"></p>
+<p>With the project created and the connector added to the project, let&#39;s create the flow. Drag and drop the following components into a new Mule project so it looks like the following screenshot:</p>
+<ul>
+<li>HTTP - HTTP Listener</li>
+<li>SharePoint - File Get Content</li>
+<li>Transform Message</li>
+</ul>
+<p class="image-container"><img style="width: 433.50px" src="img/31f376185f563231.png"></p>
+<h2 is-upgraded>HTTP Listener</h2>
+<p>The configuration for the HTTP Listener operation will be pretty standard. For the config, leave the default protocol and port (e.g. <a href="http://localhost:8081" target="_blank">http://localhost:8081</a>)</p>
+<p>For the path, set it to <code>/get</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/3bb5e09970c8d07.png"></p>
+<h2 is-upgraded>SharePoint - File Get Content</h2>
+<p>For the SharePoint Connector configuration, click on the green plus sign and select <strong>SharePoint online</strong>. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/9d4670f8972a6b33.png"></p>
+<p> In the <strong>Global Element Properties </strong>window, set the <strong>Connection</strong> drop down to <strong>OAuth Client Credentials.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/986090c96077dbb2.png"></p>
+<p>Configure the <strong>General</strong> tab according to the table below. Once configured, click on <strong>Test Connection... </strong>If configured correctly and the test is successful, click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 518.12px" src="img/1d1c36454a67fc77.png"></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Site url</p>
+</td><td colspan="1" rowspan="1"><p>https://&lt;domain name&gt;.sharepoint.com/sites/&lt;SharePoint site name&gt;/</p>
+<p>(e.g. https://83shfm.sharepoint.com/sites/MuleDemo/)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Client ID</p>
+</td><td colspan="1" rowspan="1"><p>The <strong>Application (client) ID</strong> from the <strong>Setup SharePoint</strong> step (e.g. 439d7ec6-b9c2-4c47-881e-58fa8481f8f3)</p>
+<p class="image-container"><img style="width: 439.00px" src="img/a38d66c5acfbf024.png"></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Token URL</p>
+</td><td colspan="1" rowspan="1"><p>https://login.microsoftonline.com/&lt;Directory (tenant ID&gt;/oauth2/v2.0/token</p>
+<p>(e.g. https://login.microsoftonline.com/b3921bc3-c29d-40ea-bf61-2f1406ff0b91/oauth2/v2.0/token)</p>
+<p class="image-container"><img style="width: 439.00px" src="img/101be3d4c28fbda4.png"></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Scopes</p>
+</td><td colspan="1" rowspan="1"><p>https://&lt;domain name&gt;.sharepoint.com/.default<br></p>
+<p>(e.g. https://83shfm.sharepoint.com/.default)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Keystore alias</p>
+</td><td colspan="1" rowspan="1"><p>Set in the <strong>Create Java Keystore with SSL Certificate</strong> step (e.g. <code>mule</code>)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Path to keystore</p>
+</td><td colspan="1" rowspan="1"><p>This needs to be the full path to the keystore file. (e.g. &lt;Project Home&gt;/sharepoint-example-mule4/src/main/resources/server.jks)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Keystore password</p>
+</td><td colspan="1" rowspan="1"><p>Set in the <strong>Create Java Keystore with SSL Certificate</strong> step (e.g. <code>mule123</code>)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Keystore type</p>
+</td><td colspan="1" rowspan="1"><p>JKS</p>
+</td></tr>
+</table>
+<p>Back on the <strong>Mule properties</strong> tab for the <strong>File get content</strong> operation, set the <strong>File server relative url</strong> to the location of the file that we want to extract.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cefb72bcdc882987.png"></p>
+<p>You can see how the URL is formatted based on the location of the file in SharePoint. I have a JSON file located in the <strong>Shared Documents </strong>folder so the URL would look like the following:</p>
+<pre><code>/sites/MuleDemo/Shared Documents/customer.json</code></pre>
+<p>You can download a copy of the JSON file here to drop into your SharePoint folder <a href="https://github.com/djuang1/sharepoint-example-mule4/blob/main/src/main/resources/customer.json" target="_blank">here</a>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7ce42913be91aa56.png"></p>
+<p>Now the SharePoint connector is configured, let&#39;s set up how we want the content to be displayed.</p>
+<h2 is-upgraded>Transform Message</h2>
+<p>For the Transform Message, we&#39;re just going to output the data in plain text format. The script should look like the following.</p>
+<pre><code>%dw 2.0
+output text/plain
+---
+payload</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/295f59003e58028a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Application" duration="1">
+        <p>Let&#39;s test the application and see it in action. Right-click on the canvas and select <strong>Run project sharepoint-example</strong></p>
+<p class="image-container"><img style="width: 474.50px" src="img/d964508bac74fc7a.png"></p>
+<p>Once the app is successfully deployed, switch to a browser.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/22bbd99864ab176d.png"></p>
+<p>Navigate to the following URL</p>
+<pre><code>http://localhost:8081/get</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/aa7353b70bab21ef.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>Congrats on completing the codelab! You successfully set up the SharePoint connector to leverage <strong>OAuth Client Credentials. </strong>Understanding how to set up the connector configuration is often the biggest hurdle. </p>
+<h2 is-upgraded>Additional Resources</h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/sharepoint-connector/3.5" target="_blank">https://docs.mulesoft.com/sharepoint-connector/3.5</a></li>
+<li><a href="https://docs.mulesoft.com/sharepoint-connector/3.5/sharepoint-connector-reference#sharepoint-online_security-token" target="_blank">SharePoint Connector 3.5 Reference - Mule 4 | MuleSoft Documentation</a> </li>
+<li><a href="https://github.com/djuang1/sharepoint-example-mule4" target="_blank">https://github.com/djuang1/sharepoint-example-mule4</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

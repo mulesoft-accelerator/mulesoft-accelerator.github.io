@@ -1,0 +1,358 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Exposing SAP Table Data with MuleSoft - Part 1</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="sap-table-data-with-mulesoft-part-1"
+                  title="Exposing SAP Table Data with MuleSoft - Part 1"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>Last Updated: 2023-07-03</p>
+<p class="image-container"><img style="width: 624.00px" src="img/70b2c1dd5ddbba06.png"></p>
+<h2 is-upgraded><br><strong>Overview</strong></h2>
+<p><br>Master Data, Transactional Data, Configuration Data, Custom Z-Tables: these are various types of tables that store data around SAP. Each table is designed to hold specific types of data related to a particular module or aspect of the business.</p>
+<p>How you access data from these tables in SAP can vary from use-case to use-case. MuleSoft provides various approaches to access SAP data including, but not limited to IDocs, Remote Function Calls/BAPIs, JDBC, OData, etc... </p>
+<p>In this codelab, we&#39;re going to cover how to access data from SAP tables and Z-tables using the <a href="https://www.anypoint.mulesoft.com/exchange/com.mulesoft.connectors/mule-sap-connector/" target="_blank">MuleSoft SAP Connector</a> and without writing any Java or ABAP code. We&#39;ll be using the RFC_READ_TABLE function which is an out-of-the-box function module provided by SAP. You can also use BPP_RFC_READ_TABLE if you&#39;d like but for the purpose of this codelab, we&#39;ll be using RFC_READ_TABLE.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to expose data from SAP tables using the SAP Connector</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>SAP ECC or S/4HANA</li>
+<li>SAP GUI</li>
+<li>Anypoint Studio</li>
+<li><a href="https://www.anypoint.mulesoft.com/exchange/com.mulesoft.connectors/mule-sap-connector/" target="_blank">SAP Connector</a></li>
+<li>SAP JCo libraries</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="View Table in SAP GUI" duration="2">
+        <p>Before we jump over to MuleSoft Anypoint Studio, let&#39;s look at a table in SAP that we&#39;ll be using for the codelab. Launch the SAP GUI application on your computer and log in to your SAP system with your user credentials.</p>
+<p>Once you are logged in, in the command field at the top of the screen, enter the transaction code <strong>SE16N</strong> and press Enter or click on the Enter button.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c724505c77897456.png"></p>
+<p>The <strong>General Table Display</strong> screen will appear. In the <strong>Table</strong> field, enter the table name <strong>KNA1</strong> and click on the Execute button (or press F8) to execute the transaction. <strong>KNA1</strong>, which is a Customer Master table, stores customer-related information such as names, addresses, contact details, and financial data.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d7c0fd9653ce5376.png"></p>
+<p>The <strong>KNA1: Display of Entries Found</strong> screen will display the contents of the <strong>KNA1</strong> table. You can see the data in a tabular format with different columns representing different fields of the table. </p>
+<p>For the function we&#39;re going to be calling, we need to get the technical field names. Click on the <strong>Details</strong> button above the table to bring up the <strong>Detailed Display </strong>window.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/66a956ea04236d89.png"></p>
+<p>You&#39;ll need to copy the technical field names that you want to extract data from later.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/866504564acd858e.png"></p>
+<p>For this codelab, let&#39;s plan to use <strong>KUNNR, LAND1, NAME1, ORT01, PSTLZ, REGIO</strong>. If you&#39;re planning to pull data from an SAP Z-Table, just repeat the steps above with the Z-Table name and copy the technical field names that you&#39;d like to display.</p>
+<p>Now that we&#39;ve seen the table and we know which columns we&#39;re pulling data from, we&#39;re going to set up a Mule flow to expose the KNA1 table as a simple REST API.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup HTTP Connector" duration="2">
+        <h2 is-upgraded><strong>Create a new project</strong></h2>
+<p>Open Anypoint Studio and create a new <strong>Mule Project</strong></p>
+<p class="image-container"><img style="width: 519.50px" src="img/7b2270d151442f9d.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. sap-customer-table), select a Runtime, and then click on <strong>Finish</strong></p>
+<p>Once the new project is created, you&#39;ll be presented with a blank canvas. In the <strong>Mule Palette</strong> on the right, click on <strong>HTTP</strong> and then drag and drop the <strong>Listener</strong> into the canvas.</p>
+<p class="image-container"><img style="width: 472.50px" src="img/ee0ec9bb7864c13e.png"></p>
+<h2 is-upgraded><br><br><strong>Add HTTP Listener Configuration</strong></h2>
+<p>If the Mule Properties tab doesn&#39;t open, click the <strong>Listener</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 520.50px" src="img/a92d8f87223b0327.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, take note of the port. By default this will be <strong>8081</strong>. Go ahead and click on <strong>OK</strong> to accept the defaults and proceed.</p>
+<p class="image-container"><img style="width: 428.50px" src="img/efbd849ba705f3b8.png"></p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the Path field with the value <strong>/customers.</strong></p>
+<p class="image-container"><img style="width: 503.50px" src="img/80d0487bb7a450cc.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the SAP Connector" duration="3">
+        <h2 is-upgraded><strong>Add the SAP Connector</strong></h2>
+<p>Back in the Mule Palette, we need to add the SAP Connector. Click on <strong>Search in Exchange</strong></p>
+<p class="image-container"><img alt="bapi2.1" style="width: 361.50px" src="img/153636832ee7b2e8.png"></p>
+<p>In the <strong>Add Modules to Project</strong> window, type in ‘sap&#39; for the search term (1) In the Available modules (2) select SAP Connector - Mule 4 and click on Add (3) Click on Finish (4) to add the module to the project. </p>
+<p class="image-container"><img alt="bapi2.2" style="width: 354.00px" src="img/4c90edcd648e776b.png"></p>
+<p>From the list of operations from <strong>SAP</strong>, drag and drop the <strong>Synchronous Remote Function Call</strong> onto the canvas. Place it after the <strong>Listener</strong> module.</p>
+<p class="image-container"><img style="width: 585.50px" src="img/9647a8931a492580.png"></p>
+<h2 is-upgraded><strong>Create Configuration Properties File</strong></h2>
+<p>For this guide, we&#39;ll configure properties in a separate configuration file. Right-click on the <strong>src/main/resources</strong> folder and select <strong>New &gt; File</strong> and name the file <strong>app.properties</strong></p>
+<p class="image-container"><img alt="bapi2.4" style="width: 365.50px" src="img/a6fdfb056df934f2.png"></p>
+<p><br>Copy and paste the following into the newly created file. Populate the properties with the credentials and settings for your SAP instance. </p>
+<p class="image-container"><img style="width: 277.00px" src="img/eef9dec3736113f0.png"></p>
+<pre><code>sap.jcoLang=EN
+sap.jcoClient=
+sap.jcoUser=
+sap.jcoPasswd=
+sap.jcoAsHost=
+sap.jcoSysnr=</code></pre>
+<p>In the canvas, click on <strong>Global Elements</strong> (1) and then click on <strong>Create</strong> (2)</p>
+<p class="image-container"><img alt="bapi2.6" style="width: 425.50px" src="img/fbd53f8dd5a21946.png"></p>
+<p>In the Filter, type in <strong>‘prop&#39;</strong> (1) and select <strong>Configuration properties</strong> (2) and then click on <strong>OK</strong> (3)</p>
+<p class="image-container"><img alt="bapi2.7" style="width: 462.50px" src="img/432e60493865e83f.png"></p>
+<p>In the <strong>Configuration properties</strong>, click on the browse file button (1).</p>
+<p class="image-container"><img style="width: 624.00px" src="img/a721a8275a68d22c.png"></p>
+<p>Locate and select the <strong>app.properties</strong> file you created (2) and then click on <strong>OK</strong> (3) Back on the previous window, click on <strong>OK</strong> to save your changes (4).</p>
+<h2 is-upgraded><strong>Add SAP Connector Configuration</strong></h2>
+<p>Let&#39;s go back to the SAP Connector and use those properties to connect to SAP. In addition, you&#39;ll need to have the SAP JCo library files which you can download from the SAP Support website. <br><br>In the <strong>Synchronous Remote Function Call</strong> operation, click on the green plus sign to configure the Connector configuration.</p>
+<p class="image-container"><img style="width: 553.50px" src="img/1b46924174184d49.png"></p>
+<p>Change the <strong>Connection</strong> drop-down to <strong>Simple connection provider</strong></p>
+<p class="image-container"><img style="width: 620.00px" src="img/7c265263780444f9.png"></p>
+<p>In the <strong>General</strong> tab, under <strong>Required Libraries, </strong>click on the <strong>Configure</strong> button next to the <strong>iDoc Library </strong>field. Select <strong>Use local file</strong></p>
+<p class="image-container"><img alt="bapi2.10" style="width: 499.00px" src="img/9d99b9b3276122d5.png"></p>
+<p>In the Choose local file, click on <strong>Browse</strong> and point it to the <strong>sapidoc3.jar</strong> file. Keep the default settings and click on <strong>OK</strong></p>
+<p class="image-container"><img alt="bapi2.11" style="width: 499.00px" src="img/41422f21bc0485c6.png"></p>
+<p>Back in the <strong>SAP Config</strong> window, there should be a green checkmark next to the iDoc Library field. Next, let&#39;s add the <strong>JCo Library</strong>. Click on <strong>Configure</strong> and select <strong>Use local file </strong></p>
+<p class="image-container"><img alt="bapi2.12" style="width: 499.00px" src="img/a6a2b8c77b5ded98.png"></p>
+<p>In the <strong>Choose local file</strong> window, click on <strong>Browse</strong> and point it to the <strong>sapjco3.jar</strong> file. Keep the default settings and click on <strong>OK</strong>. </p>
+<p class="image-container"><img alt="bapi2.13" style="width: 499.00px" src="img/4f9767e760dc3f0b.png"></p>
+<p>Back in the <strong>SAP Config</strong> window, there should be a green checkmark next to the <strong>JCo Library</strong> field.</p>
+<p class="image-container"><img alt="bapi2.14" style="width: 499.00px" src="img/66dc5a50b5d9d1d1.png"></p>
+<p>Next, let&#39;s add the <strong>JCo Native Library</strong>. Click on Configure and select <strong>Use local file </strong></p>
+<p>For the JCO native libraries, they are platform specific. When you go to browse and select the files, be sure to change the dropdown to the specific extension you&#39;re looking for. Once you select the file, click on <strong>Open</strong></p>
+<p class="image-container"><img style="width: 418.50px" src="img/3e376caac7ca0c2a.png"></p>
+<p>JCo Platform-specific native libraries: </p>
+<ul>
+<li>Windows - sapjco3.dll </li>
+<li>Mac OS - libsapjco3.jnilib </li>
+<li>Linux - libsapjco3.so</li>
+</ul>
+<p>Keep the default settings on the Choose local file window and click on <strong>OK</strong></p>
+<p class="image-container"><img alt="bapi2.16" style="width: 499.00px" src="img/dac12993c23c40b9.png"></p>
+<p>Back in the <strong>SAP Config</strong> window, all the required libraries should be green now.</p>
+<p class="image-container"><img style="width: 518.50px" src="img/10d2870efdab0bec.png"></p>
+<p>Fill in the remaining fields with the corresponding property placeholders below.</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Application Server Host:</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoAsHost}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Username</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoUser}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Password</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoPasswd}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>System Number</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoSysnr}</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Client</p>
+</td><td colspan="1" rowspan="1"><p>${sap.jcoClient}</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 514.50px" src="img/7e0ad538483b5c1.png"></p>
+<p>Click on <strong>Test Connection</strong> to make sure everything has been configured correctly before clicking on <strong>OK</strong>. </p>
+<h2 is-upgraded>Call RFC_READ_TABLE</h2>
+<p>Back on the <strong>Synchronous Remote Function Call</strong> tab, click on the refresh button next to the <strong>Function Name</strong> field. Once it refreshes, click on the magnifying glass icon next to it.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cd244fda4963ebb2.png"></p>
+<p>In the search field, type in <strong>RFC_READ_TABLE</strong> and then select the <strong>RFC_READ_TABLE</strong> item from the matching items list.</p>
+<p class="image-container"><img style="width: 600.00px" src="img/c1f7bb5fcd80f40c.png"></p>
+<p>Click <strong>OK</strong>.</p>
+<p>If you know the name of the BAPI you want to use from your system, you can type that into the <strong>Function Name</strong> field as well.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3a861bafdba2a49b.png"></p>
+<p>And this completes the configuration of the SAP Connector. In this next section you will formulate the request that needs to be passed into the BAPI/Function call. You&#39;ll use DataWeave to create the message.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create RFC_READ_TABLE Request using DataWeave" duration="1">
+        <h2 is-upgraded><strong>Create DataWeave Script</strong></h2>
+<p>Now that the SAP Connector is configured with the correct credentials and set with the function RFC_READ_TABLE we need to set up the request message to pass to the function.</p>
+<p>In the Mule Palette, find and drag and drop the <strong>Transform Message</strong> component into the canvas. Drop it between the <strong>Listener</strong> and the <strong>Synchronous Remote Function Call</strong> operation</p>
+<p class="image-container"><img style="width: 624.00px" src="img/99daffccb36ed381.png"></p>
+<p>In the <strong>Transform Message</strong> tab, you can see how the component provides metadata around the output.</p>
+<p class="image-container"><img style="width: 535.50px" src="img/9d8294b0b30f1d7e.png"></p>
+<p>Let&#39;s make some modifications to the message. Copy and paste the script below into the script editor of the Transform Message component.</p>
+<pre><code>%dw 2.0
+output application/xml
+---
+{
+        RFC_READ_TABLE: {
+                &#34;import&#34;: {
+                        DELIMITER: &#34;|&#34;,
+                        QUERY_TABLE: &#34;KNA1&#34;,
+                        ROWCOUNT: &#34;10&#34;
+                },
+                tables: {
+                        FIELDS: {
+                                row: {
+                                        FIELDNAME: &#34;KUNNR&#34;
+                                },
+                                row: {
+                                        FIELDNAME: &#34;LAND1&#34;
+                                },
+                                row: {
+                                        FIELDNAME: &#34;NAME1&#34;
+                                },
+                                row: {
+                                        FIELDNAME: &#34;ORT01&#34;
+                                },
+                                row: {
+                                        FIELDNAME: &#34;PSTLZ&#34;
+                                },
+                                row: {
+                                        FIELDNAME: &#34;REGIO&#34;
+                                }
+                        }
+                }
+        }
+}</code></pre>
+<p>It should look like the following:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ea70a7b235f88d57.png"></p>
+<p>The <strong>import</strong> node defines the column delimiter, the table that we&#39;re retrieving data from in SAP, and the max number of rows to return. The <strong>QUERY_TABLE</strong> field can be the name of any table from SAP including a Z-table.</p>
+<p>In the <strong>tables.FIELDS.row</strong> section, this is where we use the technical field names that we copied in the first step. These correspond to table columns that we want to retrieve from SAP.</p>
+<p>In the next step we&#39;re going to configure how the data is presented back to the user once the call is successfully made to the RFC_READ_TABLE function and data is returned.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Transform RFC_READ_TABLE Response to JSON" duration="1">
+        <h2 is-upgraded><strong>Create DataWeave Script for Response</strong></h2>
+<p>Once the SAP Connector successfully calls the RFC_READ_TABLE function module, the data is returned as XML. Below is an example of what that XML data looks like:</p>
+<pre><code>&lt;?xml version=&#39;1.0&#39; encoding=&#39;UTF-8&#39;?&gt;
+&lt;RFC_READ_TABLE&gt;
+  &lt;import&gt;
+    &lt;DELIMITER&gt;|&lt;/DELIMITER&gt;
+    &lt;NO_DATA/&gt;
+    &lt;QUERY_TABLE&gt;KNA1&lt;/QUERY_TABLE&gt;
+    &lt;ROWCOUNT&gt;10&lt;/ROWCOUNT&gt;
+    &lt;ROWSKIPS&gt;0&lt;/ROWSKIPS&gt;
+  &lt;/import&gt;
+  &lt;tables&gt;
+    &lt;DATA&gt;
+      &lt;row id=&#34;0&#34;&gt;
+        &lt;WA&gt;0000487989|US |Silvia Cameron                     |Antioch                            |60002     |IL&lt;/WA&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;1&#34;&gt;
+        &lt;WA&gt;0000487990|US |Greg Merwin                        |Seattle                            |98122-5324|WA&lt;/WA&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;2&#34;&gt;
+        &lt;WA&gt;0000487991|US |Robert Henderson                   |Minneapolis                        |55427     |MN&lt;/WA&gt;
+      &lt;/row&gt;
+    &lt;/DATA&gt;
+    &lt;FIELDS&gt;
+      &lt;row id=&#34;0&#34;&gt;
+        &lt;FIELDNAME&gt;KUNNR&lt;/FIELDNAME&gt;
+        &lt;OFFSET&gt;000000&lt;/OFFSET&gt;
+        &lt;LENGTH&gt;000010&lt;/LENGTH&gt;
+        &lt;TYPE&gt;C&lt;/TYPE&gt;
+        &lt;FIELDTEXT&gt;Customer Number&lt;/FIELDTEXT&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;1&#34;&gt;
+        &lt;FIELDNAME&gt;LAND1&lt;/FIELDNAME&gt;
+        &lt;OFFSET&gt;000011&lt;/OFFSET&gt;
+        &lt;LENGTH&gt;000003&lt;/LENGTH&gt;
+        &lt;TYPE&gt;C&lt;/TYPE&gt;
+        &lt;FIELDTEXT&gt;Country Key&lt;/FIELDTEXT&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;2&#34;&gt;
+        &lt;FIELDNAME&gt;NAME1&lt;/FIELDNAME&gt;
+        &lt;OFFSET&gt;000015&lt;/OFFSET&gt;
+        &lt;LENGTH&gt;000035&lt;/LENGTH&gt;
+        &lt;TYPE&gt;C&lt;/TYPE&gt;
+        &lt;FIELDTEXT&gt;Name 1&lt;/FIELDTEXT&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;3&#34;&gt;
+        &lt;FIELDNAME&gt;ORT01&lt;/FIELDNAME&gt;
+        &lt;OFFSET&gt;000051&lt;/OFFSET&gt;
+        &lt;LENGTH&gt;000035&lt;/LENGTH&gt;
+        &lt;TYPE&gt;C&lt;/TYPE&gt;
+        &lt;FIELDTEXT&gt;City&lt;/FIELDTEXT&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;4&#34;&gt;
+        &lt;FIELDNAME&gt;PSTLZ&lt;/FIELDNAME&gt;
+        &lt;OFFSET&gt;000087&lt;/OFFSET&gt;
+        &lt;LENGTH&gt;000010&lt;/LENGTH&gt;
+        &lt;TYPE&gt;C&lt;/TYPE&gt;
+        &lt;FIELDTEXT&gt;Postal Code&lt;/FIELDTEXT&gt;
+      &lt;/row&gt;
+      &lt;row id=&#34;5&#34;&gt;
+        &lt;FIELDNAME&gt;REGIO&lt;/FIELDNAME&gt;
+        &lt;OFFSET&gt;000098&lt;/OFFSET&gt;
+        &lt;LENGTH&gt;000003&lt;/LENGTH&gt;
+        &lt;TYPE&gt;C&lt;/TYPE&gt;
+        &lt;FIELDTEXT&gt;Region (State, Province, County)&lt;/FIELDTEXT&gt;
+      &lt;/row&gt;
+    &lt;/FIELDS&gt;
+    &lt;OPTIONS/&gt;
+  &lt;/tables&gt;
+&lt;/RFC_READ_TABLE&gt;</code></pre>
+<p>Let&#39;s go ahead and transform that XML using DataWeave and output the customer data as JSON.</p>
+<p>From the Mule Palette drag and drop a Transform Message module into the canvas. Place it after the <strong>Synchronous Remote Function Call </strong>operation. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/fcd7b3883bdbc3e5.png"></p>
+<p>In the <strong>Mule Properties</strong> tab for the <strong>Transform Message</strong> component, modify the DataWeave script and paste in the following:</p>
+<pre><code>%dw 2.0
+output application/json
+---
+payload.RFC_READ_TABLE.tables.DATA.*row map ((item, index) -&gt; do {
+    var items = valuesOf(read(item.WA default &#34;&#34;, &#34;csv&#34;, {separator: &#34;|&#34;, header:false})[0])
+    ---
+    {
+        (
+            payload.RFC_READ_TABLE.tables.FIELDS.*row map ((row, index) -&gt; 
+                {
+                    (row.FIELDTEXT): trim(items[row.@id as Number])
+                })
+        )
+    }
+})</code></pre>
+<p>The script takes each row and splits it by the delimiter which we set as ‘|&#39;. Additionally it trims the fields and removes any blank spaces from the beginning and end of the string.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the Mule Application" duration="1">
+        <h2 is-upgraded><strong>Run Project</strong></h2>
+<p>Our next step is to test the flow we&#39;ve built. In the Package Explorer, right click on the canvas and Run project workshop-sap</p>
+<p class="image-container"><img style="width: 624.00px" src="img/48e6d4994ed1c399.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b6ad3feb021bff7f.png"></p>
+<h2 is-upgraded><strong>Test Flow</strong></h2>
+<p>Let&#39;s test out our flow now. Switch to your web browser and enter the following URL: </p>
+<pre><code>http://localhost:8081/customers</code></pre>
+<p>If everything was configured correctly, you should see the following result in your browser. The Mule application that you just created allows you to send a request to an SAP to retrieve data from a table to get a list of 10 customers and return that list in JSON format.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1f04e8287916179a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>In this codelab, you learned how to use MuleSoft and the SAP Connector to expose data from an SAP table. Instead of writing Java or ABAP code, we leveraged the out-of-the-box function module, RFC_READ_TABLE, to read the KNA1 table and expose a simple REST API that displays customer data from SAP.</p>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://github.com/djuang1/sap-rfc-read-table-example-mule4" target="_blank">GitHub Repository</a></li>
+<li><a href="https://docs.mulesoft.com/sap-connector/5.8/" target="_blank">SAP Connector - Mule 4 - Documentation</a> </li>
+<li><a href="https://docs.mulesoft.com/release-notes/connector/sap-connector-release-notes-mule-4" target="_blank">SAP Connector - Mule 4 - Release Notes </a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

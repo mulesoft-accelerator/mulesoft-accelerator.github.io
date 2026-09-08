@@ -1,0 +1,356 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Setup OAuth 2.0 Access Token Enforcement using Mule OAuth Provider Policy for Mule 4.x</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="apim-oauth2-provider-policy"
+                  title="Setup OAuth 2.0 Access Token Enforcement using Mule OAuth Provider Policy for Mule 4.x"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>Last Updated: 2021-05-25</p>
+<p class="image-container"><img style="width: 398.00px" src="img/50249915c3c87b57.png"></p>
+<p>This guide provides an overview on how to set up and enable the <strong>OAuth 2.0 access token enforcement using Mule OAuth provider </strong>policy in API Management in the Anypoint Platform. This policy allows you to configure a single OAuth provider for multiple APIs. </p>
+<p>To manage APIs using this policy, you first build and deploy a Mule OAuth provider application (Circle A in the diagram above) that verifies the validity of OAuth 2.0 credentials. An example provider template is provided <a href="https://github.com/djuang1/oauth2-provider-mule4" target="_blank">here</a> on Github. Circle B in the diagram above will be the API application or proxy that is deployed to Runtime Manager. </p>
+<h2 is-upgraded><strong>Requirements / Prerequisites</strong></h2>
+<ul>
+<li>Anypoint Platform Account</li>
+<li>Anypoint Studio 7.9</li>
+<li>Mule 4.3.0</li>
+<li><a href="https://github.com/djuang1/oauth2-provider-mule4" target="_blank">OAuth 2.0 Provider Template - Mule 4.x</a></li>
+<li><a href="https://www.getpostman.com/" target="_blank">Postman</a> </li>
+</ul>
+<h2 is-upgraded><strong>Additional Resources</strong></h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/connectors/oauth/oauth2-provider-documentation-reference#configurations" target="_blank">OAuth2 Provider Module Documentation Reference</a></li>
+<li><a href="https://docs.mulesoft.com/connectors/oauth/oauth2-provider-documentation-reference#create-client" target="_blank">Create Client</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create and Deploy an External OAuth Provider" duration="4">
+        <p>To apply the OAuth 2.0 Access Token Enforcement Policy, you must first configure and deploy your own provider application that verifies the validity of OAuth 2.0 credentials. This application will be referenced in the policy and used to generate and validate the OAuth 2.0 token. To get started, download the template from Github using this link: <a href="https://github.com/djuang1/oauth2-provider-mule4" target="_blank">https://github.com/djuang1/oauth2-provider-mule4</a></p>
+<p>Once you download the *.zip file, uncompress the file.</p>
+<p class="image-container"><img style="width: 562.80px" src="img/983ae3ae06a3e886.png"></p>
+<p>In Anypoint Studio, click on <code>File > Import</code></p>
+<p>Expand the Anypoint Studio node and select Anypoint Studio project from File System and click on Next</p>
+<p class="image-container"><img style="width: 323.00px" src="img/e0a225110a24fed2.png"></p>
+<p>Browse to the uncompressed project from Github and expand and select the folder for the project. Click on Open</p>
+<p class="image-container"><img style="width: 472.14px" src="img/75bf8b46e66ac7d8.png"></p>
+<p>In the Mule Import window, click on <code>Finish</code></p>
+<p class="image-container"><img style="width: 411.80px" src="img/e953000725af1b8d.png"></p>
+<p>Let&#39;s look at the project and breakdown the different pieces.</p>
+<p>In the project are two flows, the <code>oauth2-validate-flow</code> provides the endpoint to validate the token. The <code>oauth2-register-client-flow</code> allows you to register new clients against the OAuth provider. The OAuth 2.0 Provider connector also exposes two additional endpoints that aren&#39;t displayed as flows. These paths can be configured but for the purpose of this template, I&#39;m using the following:</p>
+<pre><code>/authorize
+/token</code></pre>
+<p>These are part of the OAuth dance and will be needed when you configure the RAML for the API that will be protected by the OAuth 2.0 provider.</p>
+<p class="image-container"><img style="width: 382.20px" src="img/4473d85daef05727.png"></p>
+<p>Next, expand the <code>src/main/resources</code> folder. </p>
+<p>Open the <code>beans.xml</code> file. The template uses the Spring Security module to manage users. You can add additional users here. Additionally you can extend this module with Spring JDBC to authenticate against a database of users.</p>
+<p class="image-container"><img style="width: 577.47px" src="img/57dab74c8130cb9a.png"></p>
+<p>Lastly, let&#39;s look at the <code>mule.properties</code> file in the same folder. After you&#39;ve run this example, you can change the properties to fit your environment.</p>
+<p>But for now, copy down the following:</p>
+<pre><code>demo.client_id=DEMOID
+demo.client_secret=DEMOSECRET
+demo.client_name=Demo Client
+demo.redirect_url=https://localhost:8082/callback</code></pre>
+<p>You&#39;ll need these for later when you request a token in Postman.</p>
+<p class="image-container"><img style="width: 514.27px" src="img/803e52599dcef709.png"></p>
+<p>Go ahead and deploy the application to CloudHub now. You&#39;ll probably need to change the application name here. CloudHub doesn&#39;t allow for duplicate app names on the service so just add your initials to the app name. (e.g. oauth2-provider-mule4-dj)</p>
+<p>Also, be sure to check the Use Object Store v2 checkbox as well.</p>
+<p class="image-container"><img style="width: 519.80px" src="img/254a4d94fddea33.png"></p>
+<p>Once it&#39;s deployed to CloudHub and up and running, let&#39;s test it.</p>
+<p>Open a browser and navigate to the URL for the deployed app. e.g. </p>
+<pre><code>https://oauth2-provider-mule4.us-e1.cloudhub.io/authorize?client_id=DEMOID&amp;redirect_uri=https://localhost:8082/callback&amp;scope=ROLE_ADMIN&amp;response_type=token</code></pre>
+<p>If successful, you should see the following screen below. I&#39;ve highlighted where some of the values are populated from the mule.properties file.</p>
+<p>Additionally the URL has values that correspond to some of the properties we&#39;ve configured:</p>
+<pre><code>client_id=DEMOID
+redirect_uri=https://localhost:8082/callback
+scope=ROLE_ADMIN</code></pre>
+<p class="image-container"><img style="width: 435.03px" src="img/13077e628ad4a2aa.png"></p>
+<p>Next, let&#39;s look at the <code>/register</code> endpoint. Navigate to the following URL but replace the app URL with your own:</p>
+<pre><code>https://oauth2-provider-mule4.us-e1.cloudhub.io/register</code></pre>
+<p>You should see the following in the screenshot below.</p>
+<p class="image-container"><img style="width: 623.13px" src="img/4c6fc506fe84c74b.png"></p>
+<p>Add a ?client_id=TEST to the end of the URL and you should see the following</p>
+<p class="image-container"><img style="width: 456.60px" src="img/8fdc6cd63066ede8.png"></p>
+<p>Switching to Runtime Manager, select the deployed application and navigate to Object Store.</p>
+<p>Click on <code>_defaultPersistentObjectStore > clientObjectStore</code> and you&#39;ll see the newly added Client ID</p>
+<p class="image-container"><img style="width: 468.54px" src="img/9533a18b130d8ced.png"></p>
+<p>If you change the client_id to TEST in the authorize step:</p>
+<pre><code>https://oauth2-provider-mule4.us-e1.cloudhub.io/authorize?client_id=TEST&amp;redirect_uri=https://localhost:8082/callback&amp;scope=ROLE_ADMIN&amp;response_type=token</code></pre>
+<p>you&#39;ll see the following.</p>
+<p class="image-container"><img style="width: 451.25px" src="img/bb46b12fa78a1751.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Publish a Test API" duration="2">
+        <p>Now that you&#39;ve deployed a provider application, we&#39;ll create and deploy an API that will use the application to validate the OAuth token. To simplify and make it easier to learn, we will provide a pre-configured API that you can paste into Design Center and publish to Exchange.</p>
+<p>Open <code>Design Center</code> and create a new API specification.<br><br></p>
+<p class="image-container"><img style="width: 191.80px" src="img/c068e1cd045fc2b0.png"><br></p>
+<p><br>Give the project a name (e.g. Test API with OAuth 2.0) and click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 341.40px" src="img/3c497b3f27517d23.png"></p>
+<p>Paste the following RAML into the designer and change the <strong>authorizationUri</strong> and <strong>accessTokenUri </strong>to point to the OAuth 2.0 provider that we just deployed. If you want to apply this to an existing API, just copy and paste the <strong>securitySchemes:</strong> section into your API. Additionally for each method you want to apply this to, paste the following: <strong>securedBy: [oauth_2_0] </strong>after the method.</p>
+<pre><code>#%RAML 1.0
+version: v1
+title: Test API with OAuth 2.0
+baseUri: http://localhost:8081/api
+
+documentation:
+  - title: Test API with OAuth 2.0
+    content: API used to test against OAuth 2.0 provider.
+securitySchemes:
+  oauth_2_0:
+    description: |
+      This API supports OAuth 2.0 for authenticating all API requests.
+    type: OAuth 2.0
+    describedBy:
+      headers:
+        Authorization:
+          description: |
+             Used to send a valid OAuth 2 access token. Do not use with the &#34;access_token&#34; query
+             string parameter.
+          type: string
+      queryParameters:
+        access_token:
+          description: |
+             Used to send a valid OAuth 2 access token. Do not use together with the &#34;Authorization&#34;
+             header
+          type: string
+      responses:
+        401:
+          description: |
+            Bad or expired token. This can happen if the user or the API revoked or expired an
+            access token. To fix, you should re-authenticate the user.
+        403:
+          description: |
+            Bad OAuth request (wrong consumer key, bad nonce, expired timestamp...). Unfortunately,
+            re-authenticating the user won&#39;t help here.
+    settings:
+      authorizationUri: https://oauth2-provider-dj.us-e1.cloudhub.io/authorize
+      accessTokenUri: https://oauth2-provider-dj.us-e1.cloudhub.io/token
+      authorizationGrants: [ authorization_code,client_credentials ]
+types:   
+  user:
+    description: User datatype
+    type: object
+    properties:
+      id:
+        required: false
+        type: string
+      firstName:
+        required: false
+        type: string
+      lastName:
+        required: true
+        example: Last name example
+        type: string
+      email:
+        required: false
+        example: email@example.com
+        type: string
+  users:
+    description: List of users
+    type: array
+    items:
+      type: user
+/users:
+  description: Get Users
+  displayName: Users
+  get:
+    securedBy: [oauth_2_0]
+    responses: 
+      400:
+      200:
+        body: 
+          application/json:
+            type: users
+            example:
+              [{
+                &#34;id&#34;:&#34;1&#34;,
+                &#34;firstName&#34;:&#34;Joe&#34;,
+                &#34;lastName&#34;:&#34;Smith&#34;,
+                &#34;email&#34;:&#34;joe.smith@test.com&#34;
+              }]</code></pre>
+<p><strong>Note: Changing the authorizationUri and the accessTokenUri in the RAML is an important step. Without these configurations, the OAuth policy won&#39;t know where to redirect the user to get a token.</strong></p>
+<p>Click on <code>Publish to Exchange</code> in the top right.</p>
+<p class="image-container"><img style="width: 333.00px" src="img/47ac6530ce3c0700.png"></p>
+<p>Switch to <code>API Manager</code> and click on Manage API and select <code>Manage API from Exchange</code></p>
+<p class="image-container"><img style="width: 426.20px" src="img/171254941f809a01.png"></p>
+<p>Search for and select the API that we created (e.g. Test API with OAuth 2.0) to auto-populate the API Name field. Check the box for <strong>Mule Version </strong>to use Mule 4 and keep the remaining fields with their defaults values and then click on <strong>Save.</strong></p>
+<p class="image-container"><img style="width: 478.20px" src="img/4bb2c419825393da.png"></p>
+<p>Back on the <strong>Settings</strong> page for the API, take note of the <code>API ID</code> under <strong>Autodiscovery</strong>. We&#39;ll need this later when we set up the implementation in Studio.<br></p>
+<p class="image-container"><img style="width: 507.00px" src="img/2c218dd642ce9f1.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Apply OAuth Policy" duration="1">
+        <p>The next step is to walk you through the process of applying the OAuth policy to the API that you just setup in API Manager. On the left hand navigation, click on <strong>Policies</strong> on the left-hand navigation and then click on <strong>Apply New Policy</strong></p>
+<p class="image-container"><img style="width: 480.60px" src="img/a15b9e89b5b34d0f.png"></p>
+<p>Expand and click on the latest policy for the <strong>OAuth 2.0 access token enforcement using Mule OAuth provider </strong>policy and click on <strong>Configure Policy</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/7519a078d15e0cc6.png"></p>
+<p>In the pop-up window, enter the following for the corresponding fields and then click on <strong>Apply</strong></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Scopes - Case Sensitive</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>ROLE_ADMIN</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Access Token validation endpoint url</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>https://oauth2-provider-<Your Initials>.us-e1.cloudhub.io/validate</code></p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/ca423e31de22f2f3.png"></p>
+<p>The <strong>Policies</strong> screen should look like the following after the policy is applied successfully.</p>
+<p class="image-container"><img style="width: 559.80px" src="img/b60c2c3a68724ced.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Implement the API" duration="4">
+        <p>We&#39;re going to take the API we designed with RAML and create a new API application in Anypoint Studio. We&#39;ll add the API Auto Discovery component and deploy the API application to CloudHub. Once deployed, this API will be protected by the policy we applied and leverage the OAuth 2.0 Provider.</p>
+<p>In Anypoint Studio, click on <strong>File &gt; New &gt; Mule Project</strong></p>
+<p class="image-container"><img style="width: 507.14px" src="img/10033f73e24d27f0.png"></p>
+<p>Give the project a name under <strong>Project Name: </strong>with your initials (e.g. test-api-with-oauth2-dj).</p>
+<p>Adding your initials will reduce the need to change the name of the app during deployment because CloudHub doesn&#39;t allow for duplicate app names. Next, click the green plus sign under <strong>API Implementation</strong> in the <strong>Import a published API tab </strong>to add the RAML and select <strong>from Exchange</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/c4bc1cd7dd4b7fd6.png"></p>
+<p>Search for the API we created in Design Center or the API that you are going to apply the OAuth 2.0 policy against. Once you find it, select if from <strong>Available modules</strong> and click on <strong>Add. </strong>Click on <strong>Finish </strong>and then click on <strong>Finish </strong>in the <strong>New Mule Project</strong> window</p>
+<p class="image-container"><img style="width: 454.20px" src="img/fb21bb6fe0264cf1.png"></p>
+<p>Once the project is generated, click on <strong>Global Elements </strong>and click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 441.49px" src="img/7f5de24c5b8002d5.png"></p>
+<p>Type in <strong>auto</strong> and select <strong>API Autodiscovery </strong>and then click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 581.40px" src="img/63b6ca3799e99632.png"></p>
+<p>Fill in the <strong>API Id</strong> with the ID from the API that we created in API Manager. Select the main flow for the <strong>Flow Name</strong> field and then click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 572.60px" src="img/7cb5a18f6cb721af.png"></p>
+<p>Switch back to the <strong>Message Flow</strong> and right-click on the project, select <strong>Anypoint Platform &gt; Deploy to CloudHub</strong></p>
+<p class="image-container"><img style="width: 475.00px" src="img/f335d5b0eb52cd12.png"></p>
+<p><br>Add your initials to the application&#39;s name (djuang-api-with-oauth2) and keep all the other default values in the popup window and click on <strong>Deploy Application</strong></p>
+<p class="image-container"><img style="width: 495.00px" src="img/3da91d0519ba19b6.png"></p>
+<p>Once the application is deployed, move on to the next step.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the OAuth Secured API" duration="1">
+        <p>To verify the External OAuth provider application and policy are working, we&#39;ll use Postman to make a call against the API. </p>
+<p>Switch over to Exchange and open the newly published asset. In the top right corner, click on the three dots and click on <strong>Request access</strong></p>
+<p class="image-container"><img style="width: 449.40px" src="img/678b4c9c464f42c4.png"></p>
+<p>First, select the API that you deployed from the <strong>API Instance </strong>drop down. If you have an existing application, you can select that from the <strong>Application</strong> drop down (e.g. Demo Client). Otherwise, click on <strong>Create a new application</strong></p>
+<p class="image-container"><img style="width: 364.08px" src="img/fb5c76724a46d0e6.png"></p>
+<p>Give the application a name (e.g. Demo Client) and click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 253.40px" src="img/c6e025c31f2d5f6a.png"></p>
+<p>Click on <strong>Request access</strong></p>
+<p class="image-container"><img style="width: 336.00px" src="img/c78fbf6786c28238.png"></p>
+<p>Exchange will open up a new tab with and direct you to the Application details page. <br><br>This page provides you a view of all the APIs that have been tied to this application.</p>
+<p class="image-container"><img style="width: 560.62px" src="img/1a5084dfafa98ea1.png"></p>
+<p>If you switch back to the Exchange tab, copy down the Client ID and Client secret and click on <strong>Close.</strong></p>
+<p class="image-container"><img style="width: 336.00px" src="img/b4c93511d26a3059.png"></p>
+<p>Before we can use the Client ID, we need to register it with the OAuth Provider we deployed in Step 1. Navigate to the following URL and replace the App URL with your deployment and replace the <strong>client_id</strong>, <strong>client_secret</strong>, and <strong>name</strong> parameters.</p>
+<pre><code>https://oauth2-provider-mule4.us-e1.cloudhub.io/register?client_id=f2f055ad0a714b7d9c7dfc2ff76c2431&amp;client_secret=c711e255727840868bC39c5EFA6CD98B&amp;name=Mobile</code></pre>
+<p class="image-container"><img style="width: 624.44px" src="img/a901e7a9580cd3a1.png"></p>
+<p>Now that you&#39;ve registered the application with the OAuth Provider, switch to Postman. Enter your application URL in the URL field:</p>
+<pre><code>http://test-api-oauth2.us-e1.cloudhub.io/api/users</code></pre>
+<p class="image-container"><img style="width: 514.34px" src="img/a9567115632c2313.png"></p>
+<p>In the <strong>Authorization </strong>section, select the <strong>Type </strong>drop-down and select <strong>OAuth 2.0  </strong></p>
+<p class="image-container"><img style="width: 375.80px" src="img/803ea4336452ad0e.png"></p>
+<p>Click on <strong>Get New Access Token</strong></p>
+<p class="image-container"><img style="width: 420.60px" src="img/8cc35042454f439.png"></p>
+<p>Enter the data for the following fields </p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Grant Type</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>Authorization Code</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Callback URL</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>https://localhost:8082/callback</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Authorization URL</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>https://oauth2-provider-mule4.us-e1.cloudhub.io/authorize [Replace the App URL with your deployment]</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Access Token URL</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>https://oauth2-provider-mule4.us-e1.cloudhub.io/token [Replace the App URL with your deployment]</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Client ID</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>[Client ID from Exchange]</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Client Secret</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>[Client secret from Exchange]</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Scope - Case Sensitive</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>ROLE_ADMIN</code></p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 483.00px" src="img/843e6209f0cc22d1.png"></p>
+<p>If the OAuth policies have been configured correctly, you should be presented with the authorization screen. The window is generated from the OAuth 2.0 Provider application that was created in Step 1.</p>
+<p>Enter the following for the fields:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Username</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>admin</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Password</strong></p>
+</td><td colspan="1" rowspan="1"><p><code>admin</code></p>
+</td></tr>
+</table>
+<p>Click on <strong>Login and Authorize</strong></p>
+<p class="image-container"><img style="width: 445.40px" src="img/246ac81431ff1ec9.png"></p>
+<p>If set up correctly, you&#39;ll see a newly generated token. Click on <strong>Use Token</strong></p>
+<p class="image-container"><img style="width: 571.00px" src="img/892b57a01291afae.png"></p>
+<p>Click on <strong>Send</strong> on the top-right.</p>
+<p class="image-container"><img style="width: 400.60px" src="img/9593c40559fc14a6.png"></p>
+<p>If successful, you should see a status of <strong>200 OK</strong> and the data returned from the API.</p>
+<p class="image-container"><img style="width: 400.98px" src="img/8f044b810ceb19c1.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Show Client Credential Grant (Optional)" duration="1">
+        <p>You can also show authorization using the client credential grant.<br></p>
+<p>Go back to the <strong>Authorization </strong>tab and click on <strong>Get New Access Token</strong></p>
+<p class="image-container"><img style="width: 606.54px" src="img/76e85f06431c6ee0.png"></p>
+<p>Change <strong>Grant Type</strong> to <strong>Client Credentials</strong></p>
+<p class="image-container"><img style="width: 336.00px" src="img/782384f64ec3efd.png"></p>
+<p>Verify the <strong>Access Token URL</strong> has the correct path:</p>
+<p>e.g. <a href="https://oauth2-provider-dj.us-e1.cloudhub.io/token" target="_blank">https://oauth2-provider-dj.us-e1.cloudhub.io/token</a></p>
+<p>And click on <strong>Request Token</strong></p>
+<p class="image-container"><img style="width: 459.00px" src="img/1064811bb9565d61.png"></p>
+<p>If the call was successful, you&#39;ll see the following screen. Click on <strong>Use Token</strong></p>
+<p class="image-container"><img style="width: 502.40px" src="img/a024afbe57189f20.png"></p>
+<p>Click on <strong>Send</strong> on the top-right.</p>
+<p class="image-container"><img style="width: 336.00px" src="img/9593c40559fc14a6.png"></p>
+<p>If successful, you should see a status of <strong>200 OK</strong> and the data returned from the API.</p>
+<p class="image-container"><img style="width: 336.00px" src="img/8f044b810ceb19c1.png"></p>
+<p class="image-container"><img style="width: 96.00px" src="img/a495c04066b1b734.png"></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

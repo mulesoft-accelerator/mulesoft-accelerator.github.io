@@ -1,0 +1,87 @@
+---
+// Host layout for an embedded claat codelab. The <google-codelab> element
+// (injected by [...slug].astro) brings its own step navigation, step drawer,
+// and "time remaining" countdown via codelab-elements.js — we just load that
+// runtime, the fonts it expects, and wrap it in the theme shell (back link,
+// dark mode). Claat assets are served from public/ (see scripts/stage-claat.mjs).
+import ThemeToggle from '../components/ThemeToggle.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'A guided MuleSoft jumpstart.' } = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const home = base.endsWith('/') ? base : base + '/';
+const assets = `${home}jumpstarts/assets`;
+const gridHref = `${home}jumpstarts/`;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#4F7DC9" />
+    <title>{title}</title>
+    <link rel="icon" href={`${home}favicon.svg`} type="image/svg+xml" />
+
+    {/* Fonts + icons the codelab-elements stylesheet expects. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono"
+    />
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href={`${assets}/codelab-elements.css`} />
+
+    {/* No-flash theme init (runs before first paint). */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (stored === 'dark' || (!stored && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen">
+    {/* Slim theme-shell bar above the codelab. claat renders its own title +
+        countdown bar directly beneath this. */}
+    <header
+      class="sticky top-0 z-50 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-2 transition-colors dark:border-gray-800 dark:bg-gray-950"
+    >
+      <a
+        href={gridHref}
+        class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-brand-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-brand-300"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        All Jumpstarts
+      </a>
+      <div class="ml-auto">
+        <ThemeToggle />
+      </div>
+    </header>
+
+    {/* The embedded <google-codelab> element renders here. */}
+    <slot />
+
+    {/* claat runtime — order matters: shims, then elements, then prettify. */}
+    <script src={`${assets}/native-shim.js`} is:inline></script>
+    <script src={`${assets}/custom-elements.min.js`} is:inline></script>
+    <script src={`${assets}/prettify.js`} is:inline></script>
+    <script src={`${assets}/codelab-elements.js`} is:inline></script>
+  </body>
+</html>

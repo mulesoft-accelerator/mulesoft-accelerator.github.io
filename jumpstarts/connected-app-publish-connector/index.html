@@ -1,0 +1,194 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Publish Connector to Exchange using Connected App</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid="G-RPRRBSY7PR"
+                  codelab-ga4id=""
+                  id="connected-app-publish-connector"
+                  title="Publish Connector to Exchange using Connected App"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="1">
+        <p>As part of MuleSoft&#39;s commitment to trust and helping our customers improve their security posture, the multi-factor authentication (MFA) requirement changed some of the processes. One of those is publishing assets to Exchange. This codelab will show you how to create a Connected App and setup Maven and your project to publish a connector to Exchange. </p>
+<h2 is-upgraded>Pre-requisites</h2>
+<ul>
+<li>A connector created using the <a href="https://docs.mulesoft.com/mule-sdk/1.1/" target="_blank">Mule SDK</a></li>
+<li>Maven 3.9.x</li>
+<li>Anypoint Platform account</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Connected Application" duration="1">
+        <p>Login in to Anypoint Platform and click on Access Management</p>
+<p class="image-container"><img style="width: 482.50px" src="img/96c5f0878b7b8042.png"></p>
+<p>In the left-hand navigation bar, click on <strong>Connected Apps</strong></p>
+<p class="image-container"><img style="width: 289.00px" src="img/b86921cc531a5d50.png"></p>
+<p>Click <strong>Create app</strong></p>
+<p class="image-container"><img style="width: 508.77px" src="img/b45ac0cc2df56828.png"></p>
+<p>Give your app a name (e.g. <strong>PublishToExchange) </strong>and click on the radio button for <strong>App acts on its own behalf (client credentials)</strong> and then click on <strong>Add Scopes</strong></p>
+<p class="image-container"><img style="width: 607.27px" src="img/244e61af011f6268.png"></p>
+<p>In the search box, type in <strong>&#34;exchange&#34; </strong>and then click on <strong>Select all</strong> or click on each scope individually until all of them are selected. Click on<strong> Next </strong>to move to the next window.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c54c891fd5495edf.png"></p>
+<p>You can select all or just one of the <strong>Business Groups</strong> and then click on <strong>Next</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/aa3a1dd5452c7742.png"></p>
+<p>Click on <strong>Add Scopes</strong> to finish setting up the scopes.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/dc85a7985c099955.png"></p>
+<p>Click on <strong>Save</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/a2f6daee918700d3.png"></p>
+<p>Click on <strong>Copy Id </strong>and <strong>Copy Secret</strong> and paste them into a text editor. We&#39;re going to need them in the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9638f144ccff57b0.png"></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Id</p>
+</td><td colspan="1" rowspan="1"><p>da6045afeb0c48e89bb456930624b7d8</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Secret</p>
+</td><td colspan="1" rowspan="1"><p>503d7456a84c4419Af7f4401Cd7547dd</p>
+</td></tr>
+</table>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Edit Maven settings.xml File" duration="1">
+        <p>Now that we&#39;ve created the Connected App and we have the Client ID and Secret, we need to modify Maven and add the credentials to the <strong>settings.xml</strong> file.<br><br>You can find the <strong>settings.xml</strong> file in your Maven .m2 directory. The directory is <em><code>~/.m2</code></em> on macOS or Linux and <em><code><default-drive>\Users\YOUR_USER_NAME\.m2</code></em> on Windows. </p>
+<p>Find the &lt;<strong>servers&gt; </strong>section and add a new server.<br></p>
+<pre><code>&lt;servers&gt;
+.
+.
+&lt;server&gt;
+&lt;username&gt;~~~Client~~~&lt;/username&gt;
+&lt;password&gt;[Client ID]~?~[Client Secret]&lt;/password&gt;
+&lt;id&gt;anypoint-exchange&lt;/id&gt;
+&lt;/server&gt;
+.
+.
+&lt;/servers&gt;</code></pre>
+<p>As you can see above, you define the username as <code>~~~Client~~~</code> and the password as <code>clientID~?~clientSecret</code>. Replace clientID with the client ID. Replace clientSecret with the client secret from the previous step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f6c549458f4d803.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Edit Project pom.xml" duration="1">
+        <p>With the credentials for the Connected App set now, we need to configure the connector to leverage them in order to publish the project to Exchange using the Anypoint Exchange Maven Facade API version 3.</p>
+<p>There are a couple edits that need to be made to the <strong>pom.xml</strong> file in your project. The first is the <strong>&lt;groupId&gt;.</strong> This should be set to the Anypoint Organization where you are planning to publish the connector to. You can find instructions on how to get the Organization ID <a href="https://docs.mulesoft.com/exchange/to-publish-assets-maven#view-your-organization-id" target="_blank">here</a>.</p>
+<aside class="warning"><p><strong>Note:</strong> Be sure to remove SNAPSHOT from the &lt;version&gt; before deploying.</p>
+</aside>
+<p class="image-container"><img style="width: 624.00px" src="img/eeb59a0c372eac03.png"></p>
+<p>Also, if there isn&#39;t a <strong>&lt;distributionManagement&gt;</strong> section, add the following below. This will point to your Anypoint Exchange. You can see the reference to <strong><code>${project.groupId}</code></strong> which we just added above. </p>
+<p class="image-container"><img style="width: 624.00px" src="img/bb31918d5cebafb9.png"></p>
+<pre><code>&lt;distributionManagement&gt;
+    &lt;repository&gt;
+        &lt;id&gt;anypoint-exchange&lt;/id&gt;
+        &lt;name&gt;Exchange2 Repository&lt;/name&gt;
+        &lt;url&gt;https://maven.anypoint.mulesoft.com/api/v3/organizations/${project.groupId}/maven&lt;/url&gt;
+        &lt;layout&gt;default&lt;/layout&gt;
+    &lt;/repository&gt;
+&lt;/distributionManagement&gt;</code></pre>
+<p>The <strong>&lt;repositories&gt;</strong> and <strong>&lt;pluginRepositories&gt;</strong> are next. Be sure the <strong>&lt;id&gt;</strong> matches the <strong>&lt;id&gt;</strong> in the<strong> settings.xml</strong> file and the <strong>&lt;repository&gt;</strong> in the <strong>&lt;distributionManagement&gt;</strong> section above. This leverages the credentials for the Connected App.</p>
+<pre><code>&lt;repositories&gt;
+        &lt;repository&gt;
+            &lt;id&gt;anypoint-exchange&lt;/id&gt;
+            &lt;name&gt;Corporate Repository&lt;/name&gt;
+            &lt;url&gt;https://maven.anypoint.mulesoft.com/api/v3/maven&lt;/url&gt;
+            &lt;layout&gt;default&lt;/layout&gt;
+        &lt;/repository&gt;
+    &lt;/repositories&gt;
+    &lt;pluginRepositories&gt;
+        &lt;pluginRepository&gt;
+            &lt;id&gt;mulesoft-releases&lt;/id&gt;
+            &lt;name&gt;mulesoft release repository&lt;/name&gt;
+            &lt;layout&gt;default&lt;/layout&gt;
+            &lt;url&gt;http://repository.mulesoft.org/releases/&lt;/url&gt;
+            &lt;snapshots&gt;
+                &lt;enabled&gt;false&lt;/enabled&gt;
+            &lt;/snapshots&gt;
+        &lt;/pluginRepository&gt;
+    &lt;/pluginRepositories&gt;</code></pre>
+<p>The last section to add to the <strong>pom.xml</strong> file is <code>exchange-mule-maven-plugin</code> plugin. The latest version of this plugin is 0.0.13. You can see the snippet below.</p>
+<p class="image-container"><img style="width: 564.50px" src="img/1d7b6e6fbdde28ce.png"></p>
+<pre><code>&lt;build&gt;
+   &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.mule.tools.maven&lt;/groupId&gt;
+            &lt;artifactId&gt;exchange-mule-maven-plugin&lt;/artifactId&gt;
+            &lt;version&gt;0.0.13&lt;/version&gt;
+            &lt;executions&gt;
+                &lt;execution&gt;
+                   &lt;id&gt;validate&lt;/id&gt;
+                   &lt;phase&gt;validate&lt;/phase&gt;
+                   &lt;goals&gt;
+                       &lt;goal&gt;exchange-pre-deploy&lt;/goal&gt;
+                   &lt;/goals&gt;
+                &lt;/execution&gt;
+                &lt;execution&gt;
+                   &lt;id&gt;deploy&lt;/id&gt;
+                   &lt;phase&gt;deploy&lt;/phase&gt;
+                   &lt;goals&gt;
+                       &lt;goal&gt;exchange-deploy&lt;/goal&gt;
+                   &lt;/goals&gt;
+               &lt;/execution&gt;
+           &lt;/executions&gt;
+           &lt;inherited&gt;false&lt;/inherited&gt;
+       &lt;/plugin&gt;
+   &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Deploy Connector to Exchange" duration="1">
+        <p>With the <strong><code>settings.xml</code></strong> and <strong><code>pom.xml</code></strong> file updated, we can run the following command at the command line to build and deploy the connector to Exchange.</p>
+<pre><code>mvn clean deploy</code></pre>
+<p>If everything was set up correctly, you should see the following output in your console window.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c2fe16d31dd02093.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="1">
+        <p>Setting up a Connected App to publish a connector to Exchange adds an extra layer of security and meets the MFA requirements of the Anypoint Platform. You can read more with the resources below.</p>
+<h2 is-upgraded>Resources</h2>
+<ul>
+<li><a href="https://help.mulesoft.com/s/article/MFA-requirement-for-all-MuleSoft-Anypoint-Platform-users" target="_blank">MFA requirement for all MuleSoft Anypoint Platform users</a></li>
+<li><a href="https://docs.mulesoft.com/exchange/to-publish-assets-maven" target="_blank">Publish Assets Using Maven | MuleSoft Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/access-management/multi-factor-authentication#exempt-mfa-users" target="_blank">About Multi-Factor Authentication | MuleSoft Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/mule-sdk/1.1/" target="_blank">Mule SDKs | MuleSoft Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/exchange/connected-app-authentication" target="_blank">Connected Application Authentication | MuleSoft Documentation</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

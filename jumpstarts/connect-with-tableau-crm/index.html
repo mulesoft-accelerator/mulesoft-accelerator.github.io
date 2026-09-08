@@ -1,0 +1,176 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Connect with CRM Analytics (formerly Tableau CRM)</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid="G-RPRRBSY7PR"
+                  codelab-ga4id=""
+                  id="connect-with-tableau-crm"
+                  title="Connect with CRM Analytics (formerly Tableau CRM)"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p class="image-container"><img style="width: 624.00px" src="img/bec2f2c30d63cf15.png"></p>
+<p>CRM Analytics (formerly Tableau CRM) empowers your Salesforce CRM users with actionable insights and AI-driven analytics right in their workflow. In this Codelab, you&#39;ll learn how to use MuleSoft to create a dataset in CRM Analytics, upload data into the dataset, and trigger the system to start processing the data. </p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Anypoint Studio 7.x</li>
+<li>CRM Analytics (formerly Tableau CRM, a.k.a Einstein Analytics, a.k.a Wave Analytics)</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create CSV File" duration="1">
+        <p>To simplify this Codelab, we&#39;re going to create a CSV file to use as the schema for the CRM Anlytics dataset. Copy the data below and paste it into a text editor and save it as a CSV file (e.g. <code>result.csv</code>)</p>
+<pre><code>longDescription,id,description,canUseRevenueSchedule,isIntellectualPropertyProtected,isAutoProvisionable,isCustomerDiscountAllowed,requiresUnitPriceLabel
+12397-MOTOR_HSG_RT,12397-MOTOR_HSG_RT,12397-MOTOR_HSG_RT,false,false,false,false,true
+133341-VAL_STEM_SEAL,133341-VAL_STEM_SE,133341-VAL_STEM_SEAL,false,false,false,false,true
+134438-OIL_PUMP_CVR,134438-OIL_PUMP_CV,134438-OIL_PUMP_CVR,false,false,false,false,true</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup App and Dataset" duration="2">
+        <p>Before we can load data into CRM Analytics, we need to create an <strong>App</strong> and <strong>Dataset</strong>. Login to Salesforce and click on the <strong>App Launcher</strong> and click on <strong>Analytics Studio</strong></p>
+<p class="image-container"><img style="width: 510.50px" src="img/f9ae699a7ff5f000.png"></p>
+<p>Click on <strong>Create</strong> and select <strong>App.</strong></p>
+<p class="image-container"><img style="width: 334.00px" src="img/3e3007a9f862765c.png"></p>
+<p>Click on <strong>Create Blank App</strong></p>
+<p class="image-container"><img style="width: 460.50px" src="img/b0f6025b7e64277d.png"></p>
+<p>Click on <strong>Continue</strong></p>
+<p class="image-container"><img style="width: 461.50px" src="img/216823773221ede2.png"></p>
+<p>Give your app a name (e.g. Mule_Example) and click on <strong>Create. </strong>Be sure not to include a space in the name.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b4f543bd6c8eca20.png"></p>
+<p>Once the app has been created, click on <strong>Create</strong> again and select <strong>Dataset</strong></p>
+<p class="image-container"><img style="width: 558.50px" src="img/71ed0fb1882debae.png"></p>
+<p>Click on <strong>CSV File</strong></p>
+<p class="image-container"><img style="width: 356.50px" src="img/63797e9b9793dbf2.png"></p>
+<p>Find the CSV file that we created earlier and drag and drop that into the window. Click on <strong>Next</strong></p>
+<p class="image-container"><img style="width: 467.34px" src="img/b2f9e0cfeba1bea5.png"></p>
+<p>Give your <strong>Dataset Name</strong> a name (e.g. Product) and in the <strong>Data Schema File</strong> section, click on the drop down and click on <strong>Download File</strong>. This step is very important because you need the schema file for the connector. Click on <strong>Next</strong></p>
+<aside class="warning"><p><strong>IMPORTANT: </strong>Don&#39;t forget to download the Data Schema File (XMD). You need this file for the CRM Analytics connector to understand how to load the data into the dataset.</p>
+</aside>
+<p class="image-container"><img style="width: 511.50px" src="img/576d6192e84f252f.png"></p>
+<p>If you need to make any changes to the field attributes, you can do that in the next screen. Otherwise, click on <strong>Upload File</strong>.</p>
+<p class="image-container"><img style="width: 581.50px" src="img/ab9cd9feddd7efd9.png"></p>
+<p>Once the dataset is created, copy down the API Name. (e.g. Products1) You&#39;ll need to use this to configure the connector in the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/14179d51f9b55d72.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create the Mule Application" duration="5">
+        <p>Now that we&#39;ve created the App and Dataset, we can create the Mule Application to load the data into the dataset. Switch over to Anypoint Studio and create a new Mule project.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/835ba147199c1f8f.png"></p>
+<p>In the previous step, you downloaded a dataset schema file that was in JSON format. Take that file and add it to your project in the <strong>src/main/resources </strong>folder. We&#39;ll need to link to that file later in the Codelab.</p>
+<p class="image-container"><img style="width: 322.50px" src="img/de1d84f7b9355bb9.png"></p>
+<p>Next, in the <strong>Mule Palette</strong>, click on <strong>Search in Exchange. </strong>Search for ‘analytics&#39; and select <strong>Salesforce Einstein Analytics Connector</strong> and click on <strong>Add. </strong>Click on <strong>Finish.</strong></p>
+<p class="image-container"><img style="width: 433.50px" src="img/a144505e92ba834b.png"></p>
+<p>In the <strong>Mule Palette</strong>, find the connector we just added and select the <strong>Upload external data into new data set and start processing</strong> operation.</p>
+<p class="image-container"><img style="width: 433.92px" src="img/264744f8d8a7a280.png"></p>
+<p>Drag and drop that into the canvas.</p>
+<p class="image-container"><img style="width: 368.50px" src="img/3efa83c6c7d833d5.png"></p>
+<p>In the <strong>Mule Properties</strong> window, click on the green plus sign next to the <strong>Connector configuration</strong> drop down field.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/28a703b2b1ee8a24.png"></p>
+<p>Fill in the <strong>Username, Password, </strong>and<strong> Security Token</strong> field with your Salesforce credentials. Click on <strong>Test Connection...</strong> and if it&#39;s successful, click on <strong>OK.</strong></p>
+<p class="image-container"><img style="width: 419.50px" src="img/5a535a167037ffe9.png"></p>
+<p>Back on the <strong>Mule Properties</strong> tab, click on the file browser button next to the <strong>Type</strong> field and find the schema file that we added to the <strong>src/main/resources</strong> folder.</p>
+<p>Then in the <strong>DataSet info</strong> section, select and fill in the fields:</p>
+<ul>
+<li>Operation<strong> - </strong>Set this to APPEND</li>
+<li>Description - A description of the dataset (e.g. Mule Demo Data)</li>
+<li>Label - A label for the dataset (e.g. Label)</li>
+<li>Data set name - Fill this in with the name of the dataset that you created in the previous step. (e.g. Product)</li>
+<li>Edgemart container - This is the name of the App that you created in the previous step. (e.g. Mule_Example)</li>
+<li>Notification set - Set this to ALWAYS</li>
+<li>Notification email<strong> - </strong>Set this to your e-mail address.</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/cc8253121178ea2f.png"></p>
+<p>Now that the Tableau CRM connector is configured, let&#39;s configure the components around it. Go ahead and drop in an HTTP Listener and two Transform Message components around the Tableau CRM connector. It should look like the screenshot below.</p>
+<p class="image-container"><img style="width: 418.50px" src="img/6027e50ac4be47f6.png"></p>
+<p>For the HTTP Listener operation, set the configuration to use the default settings (e.g. HTTP and port 8081) and then set the <strong>Path</strong> to <strong>/load.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/e4468f731697e9f1.png"></p>
+<p>In the first <strong>Transform Message</strong> component, we&#39;re just going to hard code the data that we&#39;re loading into Tableau CRM. This data needs to match the schema file that was generated in the first step. I&#39;ve included an example of the DataWeave script I&#39;ve used for this codelab below.</p>
+<pre><code>%dw 2.0
+output application/java
+---
+[
+  {
+    &#34;longDescription&#34;: &#34;1000 Miles&#34;,
+    &#34;id&#34;: &#34;1000 MILES&#34;,
+    &#34;description&#34;: &#34;1000 Miles&#34;,
+    &#34;canUseRevenueSchedule&#34;: false,
+    &#34;isIntellectualPropertyProtected&#34;: false,
+    &#34;isAutoProvisionable&#34;: false,
+    &#34;isCustomerDiscountAllowed&#34;: false,
+    &#34;requiresUnitPriceLabel&#34;: true
+  }
+]</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/c11671d53d2d4fc3.png"></p>
+<p>In the last <strong>Transform Message</strong> component, we just want to take the output and return that back to the user in JSON format. You can copy and paste the DataWeave script below.</p>
+<pre><code>%dw 2.0
+output application/json
+---
+payload</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/42938fd74da7435a.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run Application and Load Data" duration="0">
+        <p>Let&#39;s run the Mule application and load data into Tableau CRM. Right click on the canvas and select <strong>Run project &lt;application name&gt;</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/4b210dc8d2fa67a2.png"></p>
+<p>Switch to your browser and open the following URL</p>
+<pre><code>http://localhost:8081/load</code></pre>
+<p>If the flow was set up correctly, you should see the following screen.</p>
+<p class="image-container"><img style="width: 548.00px" src="img/9093793b8290c5fb.png"></p>
+<p>Additionally, in the Console tab, you&#39;ll see messages about sending data to Analytics cloud.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d2469fc1af169c5c.png"></p>
+<p>Switch back to Tableau CRM and click on <strong>Data Manager</strong></p>
+<p class="image-container"><img style="width: 354.50px" src="img/3673bd6651d03a52.png"></p>
+<p>You&#39;ll see the job in the Monitor section and the status showing the data was successfully loaded.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/213494b667a99f97.png"></p>
+<p>Let&#39;s look at the data now. Click on <strong>Data</strong> in the left-hand navigation. Click on the drop-down icon and select <strong>Explore.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/1c2182495390904.png"></p>
+<p>In the new window, click on <strong>Table Mode</strong> to toggle the view and see the data that we just appended to the Dataset.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/85a2642b57f45718.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>Congratulations! You&#39;ve learned how to load data into Tableau CRM using MuleSoft and the Tableau CRM connector. While this Codelab shows you how to load static data, you can extend this project further and load data from a database, file, or even API. MuleSoft gives you the ability to orchestrate and enrich data from these various sources to help your users make better decisions.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

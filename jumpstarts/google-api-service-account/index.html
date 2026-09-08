@@ -1,0 +1,198 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Connect to Google APIs with a Service Account</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  codelab-ga4id=""
+                  id="google-api-service-account"
+                  title="Connect to Google APIs with a Service Account"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>When integrating with the Google API using MuleSoft, choosing between a service account and OAuth 2.0 depends on the nature of the application and the access requirements.</p>
+<p>A service account is ideal for server-to-server interactions where no user interaction is needed. It allows MuleSoft to authenticate to Google APIs independently, bypassing the need for user credentials, which is useful for backend processes and automation tasks, like accessing resources on Google Cloud Platform or Google Workspace for predefined tasks. Since service accounts authenticate with a JSON Web Token (JWT) and private key, they are well-suited for high-security environments, offering a streamlined, controlled, and scalable way to access Google APIs without requiring end-user authorization.</p>
+<p>In this Codelab, you&#39;ll learn how to set up a Google service account and call a Google API.</p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Anypoint Studio 7.x</li>
+<li>Google Cloud Platform</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Google Service Account" duration="2">
+        <p>Log into <strong>Google Cloud</strong> and navigate to <strong>APIs &amp; Services</strong></p>
+<p class="image-container"><img style="width: 511.00px" src="img/ad4b7d2c3cf12031.png"></p>
+<p>Click on <strong>Credentials </strong>and click on <strong>Create Credentials.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/e3be9d38aa2261ad.png"></p>
+<p>Click on <strong>Service account</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/eb55bec428d5e9c1.png"></p>
+<p>Fill in the <strong>Service account name</strong> and <strong>Service account ID </strong>and click on <strong>Create and Continue. </strong>Then click on <strong>Done</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/2cb7953781081b6b.png"></p>
+<p>Select the newly created account under <strong>Service Accounts</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f95cb360f0b02664.png"></p>
+<p>Click on <strong>Keys</strong></p>
+<p class="image-container"><img style="width: 466.50px" src="img/a5ae71237bf09b81.png"></p>
+<p>Click <strong>Add Key </strong>and click on <strong>Create New Key</strong></p>
+<p class="image-container"><img style="width: 478.50px" src="img/c9249608bc9abcd5.png"></p>
+<p>Keep the default <strong>JSON </strong>section and click on <strong>Create. </strong>It&#39;ll download a file to your local desktop. Make sure you know where it was saved. We&#39;ll need that file for the next step.</p>
+<p class="image-container"><img style="width: 383.50px" src="img/ef09d8a12a3517ae.png"></p>
+<p>We&#39;re going to need the <strong>Private Key</strong> and the <strong>Client Email</strong> from the file.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create Configuration Properties File" duration="5">
+        <p>Assuming you&#39;ve created a new project in Anypoint Studio already, let&#39;s create a Configuration Properties file. In the <strong>src/main/resources </strong>folder, create a new file called <strong>mule-properties.yaml</strong></p>
+<p class="image-container"><img style="width: 342.00px" src="img/ed0516cead5d436a.png"></p>
+<p>Create the following properties in the file.</p>
+<pre><code>google:
+ privateKey: &#34;&#34;
+ clientEmail: &#34;&#34;
+ scope: &#34;https://www.googleapis.com/auth/drive.readonly&#34;</code></pre>
+<p>Open the JSON file that you downloaded from Google Cloud Platform and copy and paste the values for the <strong>privateKey</strong> and <strong>clientEmail</strong> into the properties file.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/68d5359f7f5eae59.png"></p>
+<p>Go to the <strong>Global Configuration Elements </strong>tab and click on <strong>Create. <br><br></strong>In the filter field, type in <strong>properties</strong> and select <strong>Configuration properties</strong> and click on <strong>OK</strong></p>
+<p>Find the newly create properties file and click on <strong>OK</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/9af33edde0831340.png"></p>
+<p>Now that you have the configuration properties setup, let&#39;s move on to the next step to create the flow.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add the DataWeave JWT Dependency" duration="5">
+        <p>In order to generate the RSA signed JWT, we need to add a DataWeave library to our project. Switch over to <strong>Anypoint Platform</strong> and navigate to <strong>Exchange</strong>.</p>
+<p>In the search field, type in <strong>dataweave jwt</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/ef0d529c7ca9f564.png"></p>
+<p>Click on <strong>DataWeave JWT Library</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/8234ec3f2c1b30f8.png"></p>
+<p>On the far right, click on <strong>Dependency Snippets</strong></p>
+<p class="image-container"><img style="width: 470.00px" src="img/60142c5f178b4efd.png"></p>
+<p>Click on <strong>Copy</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f4144469e9a9a975.png"></p>
+<p>Switch back to Anypoint Studio and open the <strong>pom.xml</strong> file in the Mule application</p>
+<p class="image-container"><img style="width: 431.00px" src="img/9ad7c6fa381ef34a.png"></p>
+<p>Scroll down to the <strong>&lt;dependency&gt; </strong>section and paste the XML like the screenshot below and click <strong>Save</strong></p>
+<p class="image-container"><img style="width: 599.00px" src="img/d584c1688b99c535.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create the Flow" duration="5">
+        <p>For the Mule application, we&#39;re going to keep it simple. Drag and drop the following components to make the following flow below: <strong>HTTP Listener, Transform Message, HTTP Request, HTTP Request</strong></p>
+<p class="image-container"><img style="width: 503.00px" src="img/941de88352d9cb25.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Listener" duration="1">
+        <p>The configuration for the HTTP Listener is pretty straightforward. Keep the default values for the <strong>Connector configuration</strong> (e.g. localhost:8081) and set the path to <strong>/files</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/8e60175cde2213df.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Transform Message" duration="1">
+        <p>The Transform Message component will generate the RSA signed JWT that you need to pass to the Google endpoint to generate the access token. </p>
+<p>Change the destination from <strong>Payload</strong> to a variable called <strong>token</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/4715b32b13ccc2df.png"></p>
+<p>And copy and paste the script below into the script editor for the component. </p>
+<pre><code>%dw 2.0
+output application/java
+import jwt::RSA
+---
+{
+        token: RSA::JWT(
+                {
+                        iss: p(&#39;google.clientEmail&#39;),
+                        aud: &#39;https://oauth2.googleapis.com/token&#39;,
+                        scope: p(&#39;google.scope&#39;),
+                        iat: now() as Number { unit: &#39;seconds&#39; },
+                        exp: (now() + |PT3600S|) as Number { unit: &#39;seconds&#39; }
+                },
+                p(&#39;google.privateKey&#39;)
+        ),
+        expiration: now() + |PT3550S|
+}</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Request - Token" duration="1">
+        <p>With the RSA signed JWT, we&#39;re going to pass that to the Google Token endpoint to generate the access token. The <strong>Configuration </strong>should look like this:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9eeebc512c56d644.png"></p>
+<p>The <strong>Request</strong> method is a <strong>POST </strong>and the path is <strong>/token</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/8e82c3165f2a6556.png"></p>
+<p>Set the body to the following DataWeave script:        </p>
+<pre><code>%dw 2.0
+output application/x-www-form-urlencoded
+---
+{
+        grant_type: &#39;urn:ietf:params:oauth:grant-type:jwt-bearer&#39;,
+        assertion: vars.token.token
+}</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Request - Call API" duration="1">
+        <p>The Google Token endpoint will return the access token you need to call the Google API. Let&#39;s configure the 2nd HTTP Request component. For the <strong>Connector configuration, </strong>set it to the following:</p>
+<p class="image-container"><img style="width: 553.00px" src="img/dd84fe2153ddc43a.png"></p>
+<p>For the <strong>Request</strong> section, configure the following parameters. <strong>Method </strong>should be set to <strong>GET</strong> and the <strong>Path</strong> should be set to <strong>/drive/v3/files</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/6582ae4368a22566.png"></p>
+<p>Lastly, we need to pass the access token in the header. Click on <strong>Header </strong>and add the following for <strong>Authorization:</strong></p>
+<pre><code>&#34;Bearer &#34; ++ payload.access_token</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/e08dccda561e204d.png"></p>
+<p>That&#39;s it! Go ahead and save the project and move on to the next step.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test Project" duration="1">
+        <p>Right click on the canvas and select <strong>Run project &lt;name&gt;</strong></p>
+<p class="image-container"><img style="width: 573.00px" src="img/2c66bd96b2e0c200.png"></p>
+<p>Once it&#39;s deployed, navigate back to your browser and go the following URL</p>
+<p>http://localhost:8081/files</p>
+<p class="image-container"><img style="width: 385.00px" src="img/888ba83c417bbd9e.png"></p>
+<p>If everything was configured successfully, you&#39;ll get back a list of files from the Google API.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>Congratulations on completing this Codelab. Setting up a Mule flow to call a Google API using a Service Account is pretty simple. When calling Google APIs from MuleSoft, using a service account is best for server-to-server interactions, where access doesn&#39;t require user consent and is needed for backend processes, automation, or system-level integrations. Service accounts allow MuleSoft to authenticate independently with secure credentials, enabling scalable access to Google resources without user involvement. </p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

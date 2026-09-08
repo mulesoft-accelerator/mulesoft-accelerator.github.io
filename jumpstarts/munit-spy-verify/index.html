@@ -1,0 +1,204 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>MuleSoft MUnit - Spy and Verify</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="UA-172158109-1"
+                  id="munit-spy-verify"
+                  title="MuleSoft MUnit - Spy and Verify"
+                  environment="web"
+                  feedback-link="https://github.com/djuang1/mulesoft-codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p><strong>Last Updated:</strong> 2021-06-28</p>
+<h2 is-upgraded><strong>Overview</strong></h2>
+<p>This guide provides an overview of the features of MUnit to spy on a certain message processor before and after its execution as well as validating the number of times a particular message processor was called.</p>
+<h2 is-upgraded><strong>What you&#39;ll build</strong></h2>
+<p>You&#39;ll build a test suite leveraging Spy event processor. The test suite checks and verifies payload before and after its transformation at a certain processor.</p>
+<p class="image-container"><img style="width: 471.00px" src="img/d3eac3e873f151e2.png"></p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to set up Spy event processor in MUnit test suite</li>
+<li>How to execute the test suite</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Anypoint Studio 7.5.0 or later</li>
+<li>MUnit 2.2.5 or later</li>
+<li>MUnit Anypoint Studio Plugin 2.5.0 or later</li>
+<li>Mule Runtime Engine 4.3.0 or later</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Mule Project" duration="3">
+        <h2 is-upgraded><strong>Start Up Anypoint Studio</strong></h2>
+<p>Open Anypoint Studio if you haven&#39;t opened it. Any workspace is fine.</p>
+<h2 is-upgraded>Create a new Mule Project</h2>
+<p>From <strong>File</strong> menu choose <strong>New</strong> &gt; <strong>Mule Project</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e98dad3c7af8e90.png"></p>
+<p>In the <strong>New Mule Project</strong> window, give the project a name (e.g. munit-spy-verify), select a <strong>Runtime</strong> (e.g. Mule Server 4.3.0 EE), and then click on <strong>Finish</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ddf6a9745520b9.png"></p>
+<h2 is-upgraded><strong>Set up HTTP listener</strong></h2>
+<p>Once the new project is created, you&#39;ll be presented with a blank canvas.</p>
+<p>From the <strong>Mule Palette</strong> on the right, drag and drop <strong>HTTP</strong> &gt; <strong>Listener</strong> component onto the canvas.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/136ca3773a21452c.png"></p>
+<p>For the <strong>Mule Properties</strong> of the <strong>Listener</strong>, click on the green plus sign to create a new <strong>Connector configuration</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b457359f4cc1678f.png"></p>
+<p>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, keep the default selection. Then click on <strong>OK.</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/3bbd23856113de63.png"></p>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the <strong>Path</strong> field with the following:</p>
+<p>/spy</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2a731a096dc3ac6a.png"></p>
+<h2 is-upgraded><strong>Set up Transform Message component</strong></h2>
+<p>From the <strong>Mule Palette</strong> on the right drag and drop <strong>Core</strong> &gt; <strong>Transform Message</strong> component onto the flow created in the previous step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/131eebb302cd25c2.png"></p>
+<p>Click on the <strong>Transform Message</strong> component. Copy and paste the following DataWeave Script.</p>
+<pre><code>%dw 2.0
+output application/json
+---
+[&#39;111&#39;,&#39;222&#39;,&#39;333&#39;]</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/4d8f0ffcd77294e3.png"></p>
+<h2 is-upgraded><strong>Set up Logger component</strong></h2>
+<p>From the <strong>Mule Palette</strong> on the right drag and drop <strong>Core</strong> &gt; <strong>Logger</strong> component onto the flow created in the previous step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/74e753dc8121eff5.png"></p>
+<p>Click <strong>fx</strong> button on <strong>Message</strong> field to make it <strong>Expression Mode</strong>.</p>
+<p class="image-container"><img style="width: 469.00px" src="img/5b6ad018b1c3261f.png"></p>
+<p>Set the Message field to the following:</p>
+<pre><code>payload</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/9aa4f0d08a03de00.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Verify Mule Project Setup" duration="2">
+        <h2 is-upgraded>Start up the Mule Application</h2>
+<p>Our next step is to test the flow we&#39;ve built. Right click on the canvas and choose <strong>Run project munit-spy-verify</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/14727bd8db420766.png"></p>
+<p>The <strong>Console</strong> tab should pop-up now. Wait for the status to show <strong>DEPLOYED</strong> before moving onto the next step.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/648e105c0996dc72.png"></p>
+<h2 is-upgraded><strong>Run the Mule Application to test</strong></h2>
+<p>Open up your browser and enter <strong>http://localhost:8081/spy</strong> in the URL bar.</p>
+<p>If everything was configured correctly, you should see the following screen below:</p>
+<p class="image-container"><img style="width: 540.38px" src="img/44896d7b6e70c87d.png"></p>
+<p>Hit Terminate icon and stop the application.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5fd356f731f57926.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create MUnit Test Suite" duration="5">
+        <h2 is-upgraded><strong>Generate blank MUnit test case</strong></h2>
+<p>Back in Studio, let&#39;s create the Munit Test Suite. </p>
+<p>Select and right-click on the flow. Choose <strong>MUnit</strong> &gt; <strong>Create blank test for this flow</strong>.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2ce8719207370198.png"></p>
+<p>The blank MUnit Test scope will be created. In the execution, you&#39;ll see the <strong>Flow Reference</strong> to the flow in the Mule application.</p>
+<p class="image-container"><img style="width: 388.00px" src="img/6b36e649c4fdb186.png"></p>
+<h2 is-upgraded><strong>Add and Configure Spy Processor</strong></h2>
+<p>The Spy Processor allows you to spy what happens before and after an event processor is called. We will add the processor to test the transform processor transforms the data as we expect.</p>
+<p>From the <strong>Mule Palette</strong>, drag and drop the <strong>MUnit Tools</strong> &gt; <strong>Spy</strong> into the <strong>Behavior</strong> section of the <strong>Test</strong> scope.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2e0521ebab728db7.png"></p>
+<p>In the Mule Properties tab, hit <strong>Pick processor</strong> button.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8427ce255e043391.png"></p>
+<p>Double click <strong>Transform Message</strong>. Then tick <strong>doc:id</strong> in <strong>Attributes for Transform Message</strong> section. Hit <strong>OK</strong> button when it is activated.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/625a324d6b1d4c08.png"></p>
+<aside class="special"><p><strong>Note:</strong> Here you choose which Attributes you want MUnit to evaluate for the match during the execution. In this lab, we chose doc:id, however, you can of course choose doc:name or both if you want.</p>
+</aside>
+<h2 is-upgraded><strong>Add and configure Assert processor</strong></h2>
+<p>From the <strong>Mule Palette</strong>, drag and drop the <strong>MUnit Tools</strong> &gt; <strong>Assert that</strong> into the <strong>Before call</strong> and <strong>After call</strong> boxes of the <strong>Spy</strong> component in the flow.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cf031a8e5e7fff18.png"></p>
+<p>For the <strong>Assert that</strong> in the <strong>Before call</strong>, hit <strong>fx</strong> button on <strong>Expression</strong> field to make it expression mode and type the following:</p>
+<p><code>payload</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d522cedff341b697.png"></p>
+<p>On <strong>Is</strong> field, change the value from</p>
+<p><code>MunitTools::notNullValue()</code></p>
+<p>to</p>
+<p><code>MunitTools::nullValue()</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/77dbcf7de0deb9ec.png"></p>
+<p>For the <strong>Assert that</strong> in the <strong>After call</strong>, hit <strong>fx</strong> button on <strong>Expression</strong> field to make it expression mode and type the following:</p>
+<p><code>payload</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/76b629fcdc13b2e6.png"></p>
+<p>On <strong>Is</strong> field, change the value from</p>
+<p><code>MunitTools::notNullValue()</code></p>
+<p>to</p>
+<p><code>MunitTools::withMediaType('application/json')</code></p>
+<p class="image-container"><img style="width: 624.00px" src="img/35a7795062cba1f7.png"></p>
+<h2 is-upgraded><strong>Add and configure Verify processor</strong></h2>
+<p>Lastly we want to verify the call with the Verify call component. </p>
+<p>Drag the <strong>MUnit Tools</strong> &gt; <strong>Verify call</strong> component into the <strong>Validation</strong> section of the <strong>Test</strong> scope.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/dda0743877a9a168.png"></p>
+<p>In the Mule Properties tab, hit <strong>Pick processor</strong> button.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/45742bfb4b880bad.png"></p>
+<p>Double click <strong>Transform Message</strong>. Then tick <strong>doc:id</strong> in <strong>Attributes for Transform Message</strong> section. Hit <strong>OK</strong> button when it is activated.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/884a697877f5d569.png"></p>
+<p>Scroll down until you see <strong>Validate that...</strong> section.</p>
+<p>Choose <strong>Is equal to...</strong> on the <strong>Comparison</strong> field. Then type in <strong>1</strong> in the <strong>Value</strong> field.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cf832fb22bbd862c.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run MUnit Test Suite" duration="2">
+        <p>In this next section, we&#39;ll run the MUnit suite and see the results of the test. The Studio Console will show the output of the flow. Additionally there are views for MUnit to show the results, errors, messages, and coverage reports.</p>
+<h2 is-upgraded><strong>Run the test suite</strong></h2>
+<p>Now that the test is setup, let&#39;s run the test suite and see if it passes.</p>
+<p>Right click on the flow and select <strong>Run MUnit suite</strong>.</p>
+<p class="image-container"><img style="width: 580.00px" src="img/f859c6bbac16916d.png"></p>
+<p>If everything was configured correctly, the <strong>Console</strong> will show that the test was a success.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/86f40ad26e8530be.png"></p>
+<p>Additionally the <strong>MUnit</strong> tab will show the run was successful with zero errors and failures.</p>
+<p>In the <strong>MUnit Coverage</strong> tab, click on <strong>Generate Report</strong></p>
+<p class="image-container"><img style="width: 340.00px" src="img/3cd1ae150572d6fd.png"></p>
+<p>A <strong>MUnit Coverage Report</strong> will be generated and show an overview of the overall coverage of the tests.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7db18997999a0533.png"></p>
+<p>Lastly, if you switch back to the Mule flow, you&#39;ll see a green checkmark next to each processor that shows what the MUnit test covered.</p>
+<p class="image-container"><img style="width: 436.00px" src="img/f1672703d75aa279.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="0">
+        <p>Congratulations, you&#39;ve successfully create a MUnit test case using Spy event processor.</p>
+<h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+<p>Check out some of these codelabs...</p>
+<ul>
+<li>TBD</li>
+</ul>
+<h2 is-upgraded><strong>Reference docs</strong></h2>
+<ul>
+<li><a href="https://docs.mulesoft.com/munit/2.3/" target="_blank">MUnit Documentation</a></li>
+<li><a href="https://docs.mulesoft.com/munit/2.3/spy-event-processor" target="_blank">Spy Event Processor Documentation</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

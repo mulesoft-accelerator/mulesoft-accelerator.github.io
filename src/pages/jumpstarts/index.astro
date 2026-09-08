@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CodelabCard from '../../components/CodelabCard.astro';
+import { getLabs, getCategories } from '../../lib/labs';
+
+// Grid landing at /jumpstarts/ — replaces the legacy ./jumpstarts/index.html.
+const codelabs = getLabs();
+const categories = getCategories(codelabs);
+---
+<BaseLayout
+  title="MuleSoft Jumpstarts"
+  description="Hands-on, guided MuleSoft jumpstarts. Step through building small applications and adding features across integrations."
+>
+  <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        Jumpstarts
+      </h1>
+      <p class="mt-3 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
+        Guided, hands-on tutorials. Each jumpstart steps you through building a small
+        application or adding a new feature.
+        <span class="font-medium text-gray-800 dark:text-gray-200">
+          {codelabs.length} {codelabs.length === 1 ? 'lab' : 'labs'} available.
+        </span>
+      </p>
+    </div>
+
+    {/* Search + category filters (progressive enhancement — cards render server-side) */}
+    <div class="mb-8 flex flex-col gap-4">
+      <div class="relative w-full md:w-1/2">
+        <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="7" />
+          <path stroke-linecap="round" d="M21 21l-4.3-4.3" />
+        </svg>
+        <input
+          id="search"
+          type="search"
+          placeholder="Search jumpstarts&hellip;"
+          autocomplete="off"
+          class="w-full rounded-full border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-800 placeholder-gray-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+        />
+      </div>
+
+      {categories.length > 0 && (
+        <div id="filters" class="flex flex-wrap gap-2">
+          <button
+            data-filter="all"
+            class="filter-btn rounded-full border border-brand-500 bg-brand-500 px-3 py-1 text-sm text-white transition-colors"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              data-filter={cat.key.toLowerCase()}
+              class="filter-btn rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-600 transition-colors hover:bg-brand-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              aria-pressed="false"
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div id="grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {codelabs.map((lab) => <CodelabCard lab={lab} />)}
+    </div>
+
+    <p id="empty" class="hidden py-16 text-center text-gray-500 dark:text-gray-400">
+      No jumpstarts match your search.
+    </p>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  (() => {
+    const search = document.getElementById('search');
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const filterBtns = Array.from(document.querySelectorAll('.filter-btn'));
+    if (!grid) return;
+
+    const cards = Array.from(grid.querySelectorAll('.codelab-card'));
+    let activeFilter = 'all';
+
+    const activeClasses = ['border-brand-500', 'bg-brand-500', 'text-white'];
+    const idleClasses = ['border-gray-300', 'text-gray-600', 'dark:border-gray-700', 'dark:text-gray-300'];
+
+    function setActiveButton(clicked) {
+      filterBtns.forEach((btn) => {
+        const isActive = btn === clicked;
+        btn.setAttribute('aria-pressed', String(isActive));
+        activeClasses.forEach((c) => btn.classList.toggle(c, isActive));
+        idleClasses.forEach((c) => btn.classList.toggle(c, !isActive));
+      });
+    }
+
+    function apply() {
+      const q = (search?.value || '').trim().toLowerCase();
+      let visible = 0;
+      cards.forEach((card) => {
+        const haystack = card.getAttribute('data-search') || '';
+        const cats = card.getAttribute('data-categories') || '';
+        const matchesText = !q || haystack.includes(q);
+        const matchesCat =
+          activeFilter === 'all' || cats.split('|').includes(activeFilter);
+        const show = matchesText && matchesCat;
+        card.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      if (empty) empty.classList.toggle('hidden', visible !== 0);
+    }
+
+    search?.addEventListener('input', apply);
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeFilter = btn.getAttribute('data-filter') || 'all';
+        setActiveButton(btn);
+        apply();
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,232 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Send a message to Slack</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="send-a-message-to-slack"
+                  title="Send a message to Slack"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=send-a-message-to-slack">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <p class="image-container"><img style="width: 377.50px" src="img/d7667d9965075229.png"></p>
+<p>In this codelab, we&#39;ll walk through the process of sending a message to Slack from a Mule application using the Slack Connector. You&#39;ll learn how to easily create an app in the Slack API console. Lastly, in Anypoint Studio, you&#39;ll create a simple flow that sends a canned message to a channel in Slack.</p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Anypoint Studio 7.x</li>
+<li>Slack Connector</li>
+<li>Slack Workspace</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Set Up a Slack App" duration="2">
+        <p>Before we can send a message to Slack from MuleSoft, we need to create a Slack App. Navigate to https://api.slack.com and click on <strong>Create App</strong></p>
+<p class="image-container"><img style="width: 410.50px" src="img/92001e7141c716b0.png"></p>
+<p>In the next screen, click on <strong>From an app manifest</strong></p>
+<p class="image-container"><img style="width: 378.50px" src="img/836000a804f1296.png"></p>
+<p>Select the workspace you want to publish the app to and click on <strong>Next</strong>.</p>
+<p class="image-container"><img style="width: 549.00px" src="img/704ff4ca2e2b811e.png"></p>
+<p>In the next step, paste the following over the default app manifest:</p>
+<pre><code>display_information:
+  name: Codelab Demo App
+features:
+  bot_user:
+    display_name: Codelab Demo App
+    always_online: true
+oauth_config:
+  redirect_urls:
+    - https://localhost:8082/callback
+    - https://0.0.0.0:8082/callback
+    - https://127.0.0.1:8082/callback
+  scopes:
+    bot:
+      - chat:write
+      - channels:read
+      - incoming-webhook
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false</code></pre>
+<p><br>It should look like the screenshot below before you click on <strong>Next</strong></p>
+<p class="image-container"><img style="width: 366.94px" src="img/c73491d45a2564fd.png"></p>
+<p>In the last step, click on <strong>Create</strong></p>
+<p class="image-container"><img style="width: 388.50px" src="img/bd14ba63e8585b8f.png"></p>
+<p>Before we can use the Slack App, we need to install it into a Workspace. Click on <strong>Install to Workspace.</strong></p>
+<p class="image-container"><img style="width: 475.50px" src="img/e03bbcf536a07bc2.png"></p>
+<p>Select a channel to allow the app to post to by default and click on <strong>Allow</strong>.</p>
+<p class="image-container"><img style="width: 413.19px" src="img/1f24a806ccaac7af.png"></p>
+<p>You&#39;ll return back to the <strong>Basic Information</strong> section of your newly created app. In the <strong>App Credentials</strong> section, you&#39;ll want to copy down the <strong>Client ID</strong> and <strong>Client Secret. </strong>We&#39;ll need these to configure the Slack Connector in Studio later.</p>
+<p><img style="width: 543.46px" src="img/f2d9d0b999efd951.png"><br><br>Ok, keep the window open for now if you didn&#39;t copy the Client ID and Client Secret down and switch to Anypoint Studio to create the Mule application. </p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Setup Mule Project" duration="1">
+        <h2 is-upgraded><strong>Create New Mule Project</strong></h2>
+<p>Now that we&#39;ve set up the Slack App, let&#39;s create the Mule application. Switch over to Anypoint Studio and create a new project by going to <strong>File &gt; New &gt; Mule Project</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/f5ed98402da31289.png"></p>
+<p><br>In the <strong>New Mule Project</strong> dialog window, give the project a name (e.g. slack-example-mule4) and click on <strong>Next</strong>.</p>
+<p class="image-container"><img style="width: 493.88px" src="img/d8b54f56dc35e010.png"></p>
+<p>Before we build our flow, we need to add the Slack module. In the Mule Palette, click on <strong>Search in Exchange</strong></p>
+<p class="image-container"><img style="width: 320.50px" src="img/c0b3b3d8f202274f.png"></p>
+<p>Search for <strong>Slack</strong> and select the <strong>Slack Connector - Mule 4. </strong>Click on <strong>Add</strong> and then click on <strong>Finish. </strong>Be sure to select the connector that doesn&#39;t have <strong>Community </strong>in the name.</p>
+<p class="image-container"><img style="width: 593.00px" src="img/35d073e830792bf3.png"></p>
+<p>Additionally you can add the module as a dependency to your <code>pom.xml</code> file</p>
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;com.mulesoft.connectors&lt;/groupId&gt;
+        &lt;artifactId&gt;mule4-slack-connector&lt;/artifactId&gt;
+        &lt;version&gt;1.0.9&lt;/version&gt;
+        &lt;classifier&gt;mule-plugin&lt;/classifier&gt;
+&lt;/dependency&gt;</code></pre>
+<h2 is-upgraded><strong>Create Flow</strong></h2>
+<p>From the Mule Palette, drag and drop the following components to match the flow below. You&#39;ll need the <strong>HTTP &gt; Listener</strong>, <strong>Transform Message, Slack &gt; Send Message, </strong>and the <strong>Transform Message </strong>components. We&#39;ll go back and configure everything later.</p>
+<p class="image-container"><img style="width: 502.00px" src="img/59d6d28ce28b8d79.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure HTTP Listener Configuration" duration="1">
+        <h2 is-upgraded><strong>Generate a Self-Signed Certificate</strong></h2>
+<p>Before you set up the HTTP Listener, you need to create a keystore.jks file. Open a terminal window and paste and run the following command:</p>
+<pre><code>keytool -genkeypair -keystore keystore.jks   -dname &#34;CN=localhost, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown&#34;  -keypass password  -storepass password  -keyalg RSA  -sigalg SHA1withRSA  -keysize 2048  -alias mule  -ext SAN=DNS:localhost,IP:127.0.0.1 -validity 9999</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/e6442eb95a689253.png"></p>
+<p>Navigate to the folder where you generated that keystore file and copy and paste it into the <code>src/main/resources</code> directory of the Mule project.</p>
+<p class="image-container"><img style="width: 239.00px" src="img/e863e44315a3e76e.png"></p>
+<h2 is-upgraded><strong>Set HTTP Listener Configuration</strong></h2>
+<p>Now go back and select the HTTP Listener component in the flow we just created. If the Mule Properties tab doesn&#39;t open, click the <strong>Listener</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 420.17px" src="img/196ce9d4f08b5111.png"></p>
+<p><br>Under the <strong>General</strong> tab, and in the <strong>Connection</strong> section, change the <strong>Protocol:</strong> to <strong>HTTPS </strong>and then change the <strong>Port</strong> to <strong>8082</strong>. </p>
+<p class="image-container"><img style="width: 432.50px" src="img/df3e196513a6a16c.png"></p>
+<p>Click on the <strong>TLS</strong> tab and change the <strong>TLS Configuration</strong> dropdown to <strong>Edit inline</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/25f801a524bb17bc.png"></p>
+<p>In the <strong>Key Store Configuration</strong> section, change the <strong>Type</strong> dropdown to <strong>JKS</strong>. Fill in the following fields:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Path</strong></p>
+</td><td colspan="1" rowspan="1"><p>keystore.jks</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Alias</strong></p>
+</td><td colspan="1" rowspan="1"><p>mule</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Key Password</strong></p>
+</td><td colspan="1" rowspan="1"><p>password</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Password</strong></p>
+</td><td colspan="1" rowspan="1"><p>password</p>
+</td></tr>
+</table>
+<p>Click <strong>OK</strong> to close the dialog window and proceed to the next step.</p>
+<h2 is-upgraded><br><strong>Set Listener Path</strong></h2>
+<p>Back in the <strong>Listener</strong> Mule properties tab, fill in the <strong>Path</strong> field with the value <strong>/send. </strong>Also fill in the <strong>Display Name</strong> field with the value <strong>/send</strong>.</p>
+<p class="image-container"><img style="width: 393.00px" src="img/bffb225061d150a2.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Slack Configuration" duration="5">
+        <p>Let&#39;s configure the <strong>Send Message</strong> component to call Slack.</p>
+<h2 is-upgraded><strong>Set Slack Configuration</strong></h2>
+<p>Select the <strong>Send Message</strong> component. If the Mule Properties tab doesn&#39;t open, click the <strong>Send Message</strong> icon and click on the green plus sign to create a new Connector configuration.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/59477e89d3fb5180.png"></p>
+<p>This is where the bulk of the configuration will be for calling the Slack API.<br><br>Under the <strong>General</strong> tab, and in the <strong>oauthAuthorizationCode</strong> section, fill in the <strong>Consumer key: </strong>and <strong>Consumer secret:</strong> field with the <strong>Client ID</strong> and <strong>Client Secret </strong>from the previous step from Slack. In the <strong>Scopes</strong> field, replace the default text with the following:</p>
+<pre><code>channels:read chat:write:bot</code></pre>
+<p>See the screenshot below to see what it should look like.</p>
+<p class="image-container"><img style="width: 516.50px" src="img/1a6eb00ccc95332f.png"></p>
+<p>Next, scroll down and find the <strong>oauthCallbackConfig</strong> section. Fill in the <strong>Callback path:</strong> and <strong>Authorize path:</strong> fields to match the following screenshot below. <br></p>
+<p class="image-container"><img style="width: 573.00px" src="img/8e4a2827916c026b.png"></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><strong>Callback path:</strong></p>
+</td><td colspan="1" rowspan="1"><p>/callback</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Authorize path:</strong></p>
+</td><td colspan="1" rowspan="1"><p>/authorize</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>External callback url:</strong></p>
+</td><td colspan="1" rowspan="1"><p>https://127.0.0.1:8082/callback</p>
+</td></tr>
+</table>
+<p><br>Then click on <strong>OK</strong> to close the screen.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Transform Message - Before" duration="1">
+        <p>In this component, we&#39;re going to create the JSON message that we want to pass to the <strong>Send Message</strong> component. The message contains the channel that we want to send to the message as well as the message itself. For this lab, we&#39;re going to hard code the message (e.g. &#34;Hello World!&#34;). Double click on the <strong>Transform Message </strong>component and paste the following DataWeave script into the editor.</p>
+<pre><code>%dw 2.0
+output application/json
+---
+{
+        channel: &#34;demos&#34;,
+        text: &#34;Hello World!&#34;
+}</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/312fedb41fd627e6.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure Transform Message - After" duration="1">
+        <p>We&#39;re going to take the response from the <strong>Send Message</strong> operation and convert the output to JSON and return that back to the browser. Double click on the <strong>Transform Message </strong>component and paste the following DataWeave script into the editor.</p>
+<pre><code>%dw 2.0
+output application/json
+---
+payload</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/75a9923a2387cd10.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run Mule Project" duration="3">
+        <p>Now that everything has been configured, let&#39;s run the project and test the flow. Right-click on the canvas and click on <code>Run project <project name></code></p>
+<p class="image-container"><img style="width: 466.50px" src="img/5272423622cf5757.png"></p>
+<p>When the project is successfully deployed, switch to your browser and navigate to the following URL:</p>
+<pre><code>https://localhost:8082/authorize</code></pre>
+<p>If configured correctly, you&#39;ll be redirected to the Slack workspace screen to allow the app access to the workspace. </p>
+<p class="image-container"><img style="width: 517.50px" src="img/6346859bde987c0e.png"></p>
+<p>Once you click on <strong>Allow</strong>, you&#39;ll be redirected to this screen:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/6844dd1528317ceb.png"></p>
+<p>Open a new tab and navigate to the following URL: </p>
+<pre><code>https://localhost:8082/send</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/9495d13d32b60402.png"></p>
+<p>If everything was configured correctly, you should see a response from Slack letting you know that the message was sent successfully. Switch to Slack and navigate to the channel where you configured the application to write the message to and you see the message that we sent.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2113ac55ab2625b7.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations" duration="1">
+        <p>In this codelab you learned how to set up and use the Slack connector in Anypoint Studio. </p>
+<p>We only covered using the <strong>Send Message</strong> operation but you can take what you learned and use any of the other operations that the Slack connector provides. </p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

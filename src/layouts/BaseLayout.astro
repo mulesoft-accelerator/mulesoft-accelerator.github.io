@@ -1,0 +1,83 @@
+---
+import ThemeToggle from '../components/ThemeToggle.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Hands-on, guided MuleSoft jumpstarts.' } = Astro.props;
+
+// Honors `base` from astro.config.mjs so links work at the deployed path.
+const base = import.meta.env.BASE_URL;
+const home = base.endsWith('/') ? base : base + '/';
+// The Jumpstarts grid lives at /jumpstarts/ (the site root stays your existing
+// accelerator landing page, which this project does not touch).
+const grid = `${home}jumpstarts/`;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#4F7DC9" />
+    <title>{title}</title>
+    <link rel="icon" href={`${home}favicon.svg`} type="image/svg+xml" />
+
+    {/* No-flash theme init: runs before first paint, so we never render the
+        wrong theme. System preference is the fallback when nothing is stored. */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (stored === 'dark' || (!stored && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="flex min-h-screen flex-col">
+    <header
+      class="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur transition-colors dark:border-gray-800 dark:bg-gray-950/80"
+    >
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <a href={grid} class="flex items-center gap-2 text-xl font-bold text-brand-600 dark:text-brand-300">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+          </svg>
+          MuleSoft Jumpstarts
+        </a>
+        <nav class="flex items-center gap-4 text-sm">
+          <a href={grid} class="text-gray-600 transition-colors hover:text-brand-600 dark:text-gray-300 dark:hover:text-brand-300">
+            All Jumpstarts
+          </a>
+          <a
+            href="https://mulesoft-accelerator.github.io/"
+            class="hidden text-gray-600 transition-colors hover:text-brand-600 dark:text-gray-300 dark:hover:text-brand-300 sm:inline"
+          >
+            Home
+          </a>
+          <ThemeToggle />
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-gray-200 py-8 text-center text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <p>MuleSoft Jumpstarts &middot; Guided, hands-on tutorials.</p>
+      </div>
+    </footer>
+  </body>
+</html>
