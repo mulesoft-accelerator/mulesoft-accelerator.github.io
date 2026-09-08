@@ -1,0 +1,22 @@
+---
+import CodelabLayout from '../../layouts/CodelabLayout.astro';
+import { getLabs, getLabEmbed } from '../../lib/labs';
+
+// One static page per lab at /jumpstarts/<slug>/, matching the legacy claat
+// paths. We embed the original <google-codelab> element so its native step
+// navigation + "time remaining" countdown keep working inside the theme shell.
+export async function getStaticPaths() {
+  return getLabs().map((lab) => ({
+    params: { slug: lab.slug },
+    props: { slug: lab.slug },
+  }));
+}
+
+const { slug } = Astro.props;
+const { title, html } = getLabEmbed(slug);
+---
+<CodelabLayout title={title}>
+  {/* Raw claat markup. codelab-elements.js (loaded in the layout) upgrades the
+      custom elements client-side into the interactive codelab. */}
+  <Fragment set:html={html} />
+</CodelabLayout>
