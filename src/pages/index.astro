@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CodelabCard from '../components/CodelabCard.astro';
+import { getLabs, getCategories } from '../lib/labs';
+
+// Root landing page (/). The site is an org GitHub Pages site served from the
+// domain root, so this replaces the legacy static index.html. It gives the
+// project a proper front door and funnels visitors into the /jumpstarts/ grid.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const gridHref = `${base}/jumpstarts`;
+
+const labs = getLabs();
+const categories = getCategories(labs);
+// Feature a handful of labs on the landing page; the grid has the full set.
+const featured = labs.slice(0, 6);
+const totalMinutes = labs.reduce((sum, l) => sum + l.durationMin, 0);
+
+const highlights = [
+  {
+    title: 'Hands-on, step by step',
+    body: 'Each jumpstart walks you through building a small application or adding a feature, with the claat step navigation and time-remaining countdown built in.',
+    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+  {
+    title: 'Real MuleSoft scenarios',
+    body: 'Integrations, API management, gateways, OAuth, and CI/CD — grounded in the patterns you actually ship on the Anypoint Platform.',
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+  },
+  {
+    title: 'Learn at your own pace',
+    body: 'Start anywhere, pick up where you left off, and switch between light and dark. No setup, no accounts — just open a lab and go.',
+    icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+];
+---
+<BaseLayout
+  title="MuleSoft Jumpstarts · Guided, hands-on tutorials"
+  description="Hands-on, guided MuleSoft jumpstarts. Step through building integrations, API management, gateways, OAuth, and CI/CD on the Anypoint Platform."
+>
+  {/* Hero */}
+  <section class="relative overflow-hidden">
+    <div
+      class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-brand-50 to-transparent dark:from-gray-900 dark:to-transparent"
+    >
+    </div>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
+      <div class="mx-auto max-w-3xl text-center">
+        <span
+          class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-3 py-1 text-sm font-medium text-brand-700 dark:border-brand-800 dark:bg-gray-900/70 dark:text-brand-300"
+        >
+          <span class="h-2 w-2 rounded-full bg-brand-500"></span>
+          {labs.length} guided {labs.length === 1 ? 'jumpstart' : 'jumpstarts'} available
+        </span>
+
+        <h1
+          class="mt-6 text-4xl font-black tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl"
+        >
+          Get productive on MuleSoft,
+          <span class="text-brand-600 dark:text-brand-300"> one jumpstart at a time.</span>
+        </h1>
+
+        <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
+          Short, hands-on tutorials that walk you through building integrations, managing
+          APIs, configuring gateways, and automating delivery on the Anypoint Platform.
+          Follow along at your own pace — no setup required.
+        </p>
+
+        <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <a
+            href={gridHref}
+            class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-300"
+          >
+            Browse all jumpstarts &rarr;
+          </a>
+          {featured.length > 0 && (
+            <a
+              href={`${base}/jumpstarts/${featured[0].slug}`}
+              class="inline-flex items-center gap-2 rounded-full border border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-colors hover:border-brand-300 hover:text-brand-600 dark:border-gray-700 dark:text-gray-200 dark:hover:border-brand-500 dark:hover:text-brand-300"
+            >
+              Start the first lab
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Highlights */}
+  <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {highlights.map((h) => (
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-gray-800 dark:text-brand-300">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d={h.icon} />
+            </svg>
+          </div>
+          <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{h.title}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{h.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* Featured labs */}
+  {featured.length > 0 && (
+    <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      <div class="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            Featured jumpstarts
+          </h2>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">
+            A few places to start. See the full catalog for everything else.
+          </p>
+        </div>
+        <a
+          href={gridHref}
+          class="hidden shrink-0 text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-300 sm:inline"
+        >
+          View all &rarr;
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {featured.map((lab) => <CodelabCard lab={lab} />)}
+      </div>
+
+      {categories.length > 0 && (
+        <div class="mt-10">
+          <p class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            Explore by topic
+          </p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <a
+                href={gridHref}
+                class="rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-600 transition-colors hover:border-brand-300 hover:text-brand-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-brand-500 dark:hover:text-brand-300"
+              >
+                {cat.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  )}
+
+  {/* Closing CTA */}
+  <section class="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
+    <div
+      class="overflow-hidden rounded-3xl bg-brand-500 px-6 py-14 text-center dark:bg-brand-700 sm:px-12"
+    >
+      <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        Ready to build something?
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-brand-50">
+        Pick a jumpstart and follow along. Each one is self-contained and takes you from
+        an empty project to a working result.
+      </p>
+      <a
+        href={gridHref}
+        class="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-brand-700 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/70"
+      >
+        Browse all jumpstarts &rarr;
+      </a>
+    </div>
+  </section>
+</BaseLayout>
