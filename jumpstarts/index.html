@@ -17,13 +17,14 @@
 
   <section class="max-w-7xl mx-auto p-8">
     <h2 class="text-3xl font-semibold mb-2">Jumpstarts</h2>
-    <p class="mb-6 text-lg text-gray-700">Guided, hands-on tutorials. Each jumpstart steps you through building a small application or adding a new feature. 34 labs available.</p>
+    <p class="mb-6 text-lg text-gray-700">Guided, hands-on tutorials. Each jumpstart steps you through building a small application or adding a new feature. 35 labs available.</p>
 
     <div class="mb-6 flex flex-col gap-4">
       <input id="search" type="search" placeholder="Search jumpstarts&hellip;"
              class="w-full md:w-1/2 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300">
       <div class="flex flex-wrap gap-2">
         <button data-filter="all" class="filter-btn px-3 py-1 rounded-full text-sm border border-blue-500 bg-blue-500 text-white">All</button>
+      <button data-filter="agent-fabric" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Agent Fabric</button>
       <button data-filter="azure" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Azure</button>
       <button data-filter="github" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">GitHub</button>
       <button data-filter="google" class="filter-btn px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 hover:bg-blue-50">Google</button>
@@ -41,6 +42,16 @@
     </div>
 
     <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <a href="./agent-broker-v2-quickstart/index.html"
+         class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+         data-title="agent broker v2 quickstart" data-cat="agent-fabric" data-tags="mulesoft,ai,agents">
+        <span class="inline-block text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">Agent Fabric</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Agent Broker v2 Quickstart</h3>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>&#9201; 62 min</span>
+          <span>Updated 2026-09-08</span>
+        </div>
+      </a>
       <a href="./build-a-cicd-solution-with-azure-pipelines/index.html"
          class="codelab-card block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
          data-title="build a cicd solution with azure pipelines" data-cat="azure" data-tags="mulesoft">

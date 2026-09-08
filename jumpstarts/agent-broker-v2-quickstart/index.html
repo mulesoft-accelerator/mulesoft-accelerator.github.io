@@ -1,0 +1,646 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Agent Broker v2 Quickstart</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../assets/codelab-elements.css">
+  <style>
+    .success { color: #1e8e3e; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="agent-broker-v2-quickstart"
+                  title="Agent Broker v2 Quickstart"
+                  environment="web"
+                  feedback-link="https://github.com/tbolis-at-mulesoft/mule-broker-v2-quickstart">
+    <google-codelab-step label="Overview" duration="2">
+<p>This jumpstart is a step-by-step walkthrough for deploying your first example
+<strong>agent network</strong> on MuleSoft&#39;s Anypoint Platform &mdash; from an empty machine to a
+deployed <strong>Agent Network Broker</strong> you can call.</p>
+<h2 is-upgraded>What you'll build</h2>
+<p>Working through the phases in order, you will go from a fresh environment to a
+published, deployed, and tested agent network broker running on CloudHub 2.0.</p>
+<h2 is-upgraded>What you'll need</h2>
+<ul>
+<li>Visual Studio Code with the Anypoint Extension Pack</li>
+<li>The CLI for Agent Fabric plugin (latest version)</li>
+<li>A MuleSoft free trial (Anypoint Platform account)</li>
+<li>An Agentforce 360 Platform free trial org (for MuleSoft Vibes)</li>
+</ul>
+<aside class="special"><p>Screenshots for each phase live alongside the original guide and are
+reproduced here. Work through the phases in order &mdash; each one builds on the last.</p></aside>
+    </google-codelab-step>
+    <google-codelab-step label="Prerequisites" duration="3">
+<p>Before signing up or building anything, install the local tooling: VS Code, the Anypoint Extension Pack, and the CLI for Agent Fabric plugin.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-visual-studio-code">1. Visual Studio Code</a></li> <li><a href="#2-anypoint-extension-pack">2. Anypoint Extension Pack</a></li> <li><a href="#3-cli-for-agent-fabric-plugin">3. CLI for Agent Fabric plugin</a></li> <li><a href="#4-verify-you-are-on-the-latest-versions">4. Verify you are on the latest versions</a></li> </ul> <h2 id="1-visual-studio-code">  1. Visual Studio Code </h2> <p>Install VS Code, “the open source AI code editor” — MuleSoft’s Anypoint tooling for agent networks runs as extensions inside it.</p> <ol> <li>Go to https://code.visualstudio.com/</li> <li>Click <strong>Download for macOS</strong> (or use the Web, Insiders, or other-platform links for a different OS).</li> </ol> <p><img src="img/01-vscode-download.png" alt="VS Code download page" /></p> <h2 id="2-anypoint-extension-pack">  2. Anypoint Extension Pack </h2> <p>Install the <strong>Anypoint Extension Pack</strong> (publisher: Salesforce, id <code class="language-plaintext highlighter-rouge">salesforce.mule-dx-extension-pack</code>) from the VS Code Marketplace. It bundles the tools needed for API design, integration development, debugging, and testing on Anypoint Platform (Anypoint Code Builder).</p> <ol> <li>Open https://marketplace.visualstudio.com/items?itemName=salesforce.mule-dx-extension-pack and click <strong>Install</strong> — or search <strong>“Anypoint Extension Pack”</strong> in the VS Code Extensions view and click <strong>Install</strong> there.</li> <li>Requires <strong>VS Code v1.99.3+</strong> and an <strong>Anypoint Platform account</strong> (see <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/01-account-setup.html">Phase 1 — Account Setup</a> to create one).</li> <li>Supported platforms: macOS (Apple Silicon &amp; Intel), Windows x64, Web.</li> </ol> <p><img src="img/02-anypoint-extension-pack-listing.png" alt="Anypoint Extension Pack marketplace listing" /></p> <p>The pack installs 8 sub-extensions, including Anypoint Code Builder (Platform, Runtime, MUnit, DataWeave, and dependency extensions):</p> <p><img src="img/03-vscode-install-anypoint-extension-pack.png" alt="Installing the Anypoint Extension Pack from within VS Code" /></p> <p>Since this is the first extension you’re installing from the Salesforce publisher, VS Code asks you to confirm you trust it. Salesforce is shown as a verified owner of salesforce.com — click <strong>Trust Publisher &amp; Install</strong> to proceed.</p> <p><img src="img/04-trust-publisher-install.png" alt="Trust publisher confirmation dialog" /></p> <h2 id="3-cli-for-agent-fabric-plugin">  3. CLI for Agent Fabric plugin </h2> <p>The <strong>CLI for Agent Fabric plugin</strong> provides the <code class="language-plaintext highlighter-rouge">agent-network</code> commands that create, build, publish, and deploy agent network projects, and that set up the Agent Network Gateways. Anypoint Code Builder runs the same commands under the hood, so the plugin is what lets you drive — or troubleshoot — every phase of this guide from a terminal.</p> <h3 id="31-install-nodejs">  3.1 Install Node.js </h3> <p>The plugin is built with Node.js and installed with npm, so you need <strong>Node.js 20+</strong> (<strong>22+</strong> if you also install the Anypoint CLI core package) and <strong>npm 7+</strong>. Download them from the <a href="https://nodejs.org/en/download/">Node.js download page</a>, then confirm:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node <span class="nt">--version</span>
+npm <span class="nt">--version</span>
+</code></pre></div></div> <h3 id="32-install-the-cli-for-agent-fabric-plugin-globally">  3.2 Install the CLI for Agent Fabric plugin globally </h3> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nt">-g</span> i mulesoft-anypoint-cli-agent-fabric-plugin
+</code></pre></div></div> <p>The package ships its own executable, so a global install is all you need — there is no separate core CLI to install first. Verify it:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>anypoint-cli-agent-fabric-plugin <span class="nt">--version</span>
+</code></pre></div></div> <p>The output reports the plugin version, your platform, and the Node.js version it is running on:</p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mulesoft-anypoint-cli-agent-fabric-plugin/1.2.11 darwin-arm64 node-v24.18.0
+</code></pre></div></div> <p><img src="img/05-agent-fabric-cli-version.png" alt="Agent Fabric CLI plugin version check" /></p> <p>Every command is invoked through that executable, for example:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>anypoint-cli-agent-fabric-plugin agent-network project build
+</code></pre></div></div> <p>These are the commands it provides:</p> <ul> <li><code class="language-plaintext highlighter-rouge">agent-network:project:create</code> — creates a new agent network project and its initial configuration files</li> <li><code class="language-plaintext highlighter-rouge">agent-network:project:build</code> — builds the project and validates its configuration</li> <li><code class="language-plaintext highlighter-rouge">agent-network:project:publish</code> — publishes the project to Anypoint Exchange</li> <li><code class="language-plaintext highlighter-rouge">agent-network:project:deploy</code> — deploys the project to the target environment</li> <li><code class="language-plaintext highlighter-rouge">agent-network:setup:gateways</code> — sets up the Agent Network Gateways in a target space</li> </ul> <p>Full flag reference: <a href="https://docs.mulesoft.com/anypoint-cli/latest/agent-fabric">CLI for Agent Fabric Plugin</a>.</p> <h3 id="33-optional-add-it-to-the-anypoint-cli-4x-core-package">  3.3 Optional: add it to the Anypoint CLI 4.x core package </h3> <p>If you already use the Anypoint CLI for other Anypoint Platform tasks, you can also register Agent Fabric as one of its plugins, which makes the same commands available under <code class="language-plaintext highlighter-rouge">anypoint-cli-v4</code>:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> anypoint-cli-v4-public
+anypoint-cli-v4 plugins:install mulesoft-anypoint-cli-agent-fabric-plugin
+anypoint-cli-v4 plugins
+</code></pre></div></div> <p>This guide uses the standalone <code class="language-plaintext highlighter-rouge">anypoint-cli-agent-fabric-plugin</code> executable from step 3.2.</p> <h2 id="4-verify-you-are-on-the-latest-versions">  4. Verify you are on the latest versions </h2> <blockquote> <p><strong>Important:</strong> Agent Fabric is evolving fast. Check <strong>both</strong> the Anypoint Extension Pack (Anypoint Code Builder) <strong>and</strong> the CLI for Agent Fabric plugin against their latest published versions, and <strong>update anything that is behind before you continue</strong>. Mixing an older extension or plugin with the current platform is the most common cause of failures later in this guide: missing <code class="language-plaintext highlighter-rouge">agent-network</code> commands, schema validation errors on <code class="language-plaintext highlighter-rouge">agent-network.yaml</code>, and gateway or deployment steps that fail without an obvious reason.</p> </blockquote> <p><strong>Anypoint Extension Pack (Anypoint Code Builder)</strong></p> <ol> <li>In VS Code, open the Extensions view (<code class="language-plaintext highlighter-rouge">Cmd</code>/<code class="language-plaintext highlighter-rouge">Ctrl</code> + <code class="language-plaintext highlighter-rouge">Shift</code> + <code class="language-plaintext highlighter-rouge">X</code>).</li> <li>Search for <strong>“Anypoint Extension Pack”</strong> and check the installed entry: if an <strong>Update</strong> button is shown, click it, then reload VS Code.</li> <li>Run <strong>Extensions: Check for Extension Updates</strong> from the Command Palette (<code class="language-plaintext highlighter-rouge">Cmd</code>/<code class="language-plaintext highlighter-rouge">Ctrl</code> + <code class="language-plaintext highlighter-rouge">Shift</code> + <code class="language-plaintext highlighter-rouge">P</code>) to catch updates to the 8 bundled sub-extensions as well.</li> <li>Compare against the version on the <a href="https://marketplace.visualstudio.com/items?itemName=salesforce.mule-dx-extension-pack">Marketplace listing</a> (<strong>Version History</strong> tab), and keep VS Code itself on <strong>v1.99.3+</strong>.</li> </ol> <p><strong>CLI for Agent Fabric plugin</strong></p> <ol> <li> <p>Check the latest published version on npm — either on the <a href="https://www.npmjs.com/package/mulesoft-anypoint-cli-agent-fabric-plugin">package page</a> or from a terminal:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm view mulesoft-anypoint-cli-agent-fabric-plugin version
+</code></pre></div> </div> </li> <li> <p>Compare it with your installed version — the number after the <code class="language-plaintext highlighter-rouge">/</code> is what has to match:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>anypoint-cli-agent-fabric-plugin <span class="nt">--version</span>
+</code></pre></div> </div> </li> <li> <p>If they differ, reinstall globally to pull the latest:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nt">-g</span> i mulesoft-anypoint-cli-agent-fabric-plugin@latest
+</code></pre></div> </div> <p>If you also registered it inside the Anypoint CLI core package (<a href="#33-optional-add-it-to-the-anypoint-cli-4x-core-package">step 3.3</a>), update that copy too — otherwise <code class="language-plaintext highlighter-rouge">anypoint-cli-v4</code> keeps running the older version:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> anypoint-cli-v4-public
+anypoint-cli-v4 plugins:install mulesoft-anypoint-cli-agent-fabric-plugin
+</code></pre></div> </div> </li> </ol> <blockquote> <p><strong>Note:</strong> This guide was written against <code class="language-plaintext highlighter-rouge">mulesoft-anypoint-cli-agent-fabric-plugin</code> 1.2.11. Newer versions are expected — treat this as a floor, not a target, and always verify against npm rather than pinning to the number above.</p> </blockquote>
+    </google-codelab-step>
+    <google-codelab-step label="Account Setup" duration="5">
+<p>Sign up for a MuleSoft free trial. This creates the Anypoint Platform account needed for the Anypoint Extension Pack and for deploying the agent network later.</p> <blockquote> <p><strong>Alternative entry point:</strong> Salesforce also maintains a single directory of all Salesforce free trials at https://developer.salesforce.com/free-trials — including the <strong>MuleSoft Free Trial</strong> (30 days) alongside Tableau, Slack, Quip, and others. Use <strong>Browse trials</strong> or find the “MuleSoft Free Trial” card and click <strong>Sign Up</strong> as a shortcut instead of starting from mulesoft.com directly.</p> <p><img src="img/06-salesforce-free-trials-entry-point.png" alt="Salesforce developer free trials directory" /></p> </blockquote> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-start-a-free-mulesoft-trial">1. Start a free MuleSoft trial</a></li> <li><a href="#2-fill-out-the-trial-form">2. Fill out the trial form</a></li> <li><a href="#3-verify-your-email-optional">3. Verify your email (optional)</a></li> <li><a href="#4-agentforce-360-platform-free-trial-for-mulesoft-vibes">4. Agentforce 360 Platform Free Trial (for MuleSoft Vibes)</a></li> </ul> <h2 id="1-start-a-free-mulesoft-trial">  1. Start a free MuleSoft trial </h2> <p>Go to https://www.mulesoft.com/ and click <strong>Free Trial</strong> (top-right nav) — or use the alternative entry point above.</p> <p>MuleSoft positions itself as a single enterprise <strong>agent control plane</strong>: discover and unify every agent, app, API, and MCP server, then build reliable multi-step experiences that span agents, tools, and business apps while tracking token cost spend.</p> <p><img src="img/07-mulesoft-home-free-trial.png" alt="MuleSoft homepage" /></p> <h2 id="2-fill-out-the-trial-form">  2. Fill out the trial form </h2> <p>Fill out the <strong>“Start your free trial”</strong> form.</p> <p>Required fields: First Name, Last Name, Email, Job Title, Country, Company Name, Number of Employees, Username, Password. Optional fields: State/Province (enabled once Country is set), Industry, Phone Number.</p> <p><img src="img/08-start-your-free-trial-form.png" alt="Start your free trial form" /></p> <p>Submit the form to create your trial account.</p> <h2 id="3-verify-your-email-optional">  3. Verify your email (optional) </h2> <p>After submitting, you may be prompted to verify your email address:</p> <ol> <li>Enter the verification code sent to the email you registered with, then click <strong>Confirm</strong>.</li> <li>If it hasn’t arrived, check spam or click <strong>Send a New Code</strong>.</li> <li>This step is optional — click <strong>Not Now</strong> to defer it and continue.</li> </ol> <p><img src="img/09-verify-email-code.png" alt="Enter verification code dialog" /></p> <h2 id="4-agentforce-360-platform-free-trial-for-mulesoft-vibes">  4. Agentforce 360 Platform Free Trial (for MuleSoft Vibes) </h2> <p>MuleSoft Vibes (the Agentforce Vibes IDE) runs against a Salesforce org, not the Anypoint Platform account — sign up for a free <strong>Agentforce 360 Platform Free Trial</strong> org, separate from the MuleSoft trial account created above.</p> <ol> <li>Go to https://www.salesforce.com/platform/free-trial/signup/ and sign up for the <strong>Agentforce 360 Platform Free Trial</strong>.</li> <li>Fill out the <strong>“Fill out one form to unlock all our resources”</strong> form: First name, Last name, Job title, Company, Company size, Country/region, Email, Phone.</li> <li>Check <strong>“I agree to the Main Services Agreement and the Slack User Terms of Service”</strong>, then click <strong>Try for free</strong>.</li> </ol> <p>This provisions a free Salesforce Platform environment with Agentforce and Data 360 — including a hosted MCP endpoint, the Agentforce Vibes browser IDE (no local setup), and 60+ MCP tools / 30+ coding skills out of the box. Note: the org is terminated after 45 days of inactivity.</p> <p><img src="img/10-salesforce-developer-edition-signup.png" alt="Agentforce 360 Platform Free Trial signup form" /></p> <p>After submitting, you’ll land on a confirmation page — check your email for a <strong>“Welcome to your Developer Edition”</strong> message with a link to reset your password and your org’s login URL and username.</p> <p><img src="img/11-salesforce-post-signup-check-email.png" alt="Post-signup confirmation — check your email" /></p> <p>The email itself has a <strong>Verify account</strong> button plus a save-for-later login URL and a generated username. Both are blurred below — treat them like credentials and avoid sharing unredacted screenshots of this email.</p> <p><img src="img/12-salesforce-confirmation-email-blurred.png" alt="Salesforce welcome email, with the login URL and username blurred" /></p> <p>Once you’ve clicked <strong>Verify account</strong>, reset your password, and logged in, you’ll land on a guided-tour welcome page for your Developer Edition org — confirming the org is ready to use.</p> <p><img src="img/13-developer-edition-landing-page.png" alt="Welcome to your Headless 360 Platform Free Trial — guided tour landing page" /></p>
+    </google-codelab-step>
+    <google-codelab-step label="Environment Setup" duration="3">
+<p>With the prerequisites installed and a trial account created, confirm the local dev environment is ready before building the agent network.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-confirm-vs-code-is-installed-and-ready">1. Confirm VS Code is installed and ready</a></li> <li><a href="#2-open-the-anypoint-code-builder-welcome-view">2. Open the Anypoint Code Builder welcome view</a></li> <li><a href="#3-log-in-to-anypoint-platform">3. Log in to Anypoint Platform</a></li> </ul> <h2 id="1-confirm-vs-code-is-installed-and-ready">  1. Confirm VS Code is installed and ready </h2> <p>Open VS Code. You should land on the Welcome tab with no folders open yet — this is the starting point for setting up the agent-network project.</p> <p><img src="img/14-vscode-installed-welcome.png" alt="Freshly installed VS Code welcome screen" /></p> <h2 id="2-open-the-anypoint-code-builder-welcome-view">  2. Open the Anypoint Code Builder welcome view </h2> <p>With the Anypoint Extension Pack installed, click the MuleSoft icon in the Activity Bar (left sidebar) to open <strong>Anypoint Code Builder</strong>, the Anypoint Platform IDE for designing, implementing, and deploying APIs and integrations. The <strong>Create</strong> section includes a <strong>Create an Agent Network</strong> link — this is the entry point for Phase 3.</p> <p>The bottom-right status bar shows <strong>“Not logged in to Anypoint Platform.”</strong></p> <p><img src="img/15-anypoint-code-builder-welcome.png" alt="Welcome to Anypoint Code Builder" /></p> <h2 id="3-log-in-to-anypoint-platform">  3. Log in to Anypoint Platform </h2> <p>Click <strong>“Not logged in to Anypoint Platform”</strong> in the bottom-right corner of the status bar to start the sign-in flow.</p> <ol> <li> <p>VS Code asks the Anypoint Code Builder extension’s permission to sign in — click <strong>Allow</strong>.</p> <p><img src="img/16-anypoint-signin-confirm.png" alt="Confirm the extension may sign in using Anypoint Platform" /></p> </li> <li> <p>Your browser opens the MuleSoft sign-in page. Enter your trial account’s username and password (created in <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/01-account-setup.html">Phase 1</a>) and click <strong>Sign in</strong>.</p> <p><img src="img/17-mulesoft-signin-page.png" alt="MuleSoft sign-in page" /></p> </li> <li> <p>Your browser asks permission to hand control back to VS Code via a <code class="language-plaintext highlighter-rouge">vscode://</code> URI — click <strong>Open</strong> (optionally check “Do not ask me again for this extension” to skip this prompt next time).</p> <p><img src="img/18-allow-open-vscode-uri.png" alt="Allow the extension to open the VS Code URI" /></p> </li> <li> <p>Back in VS Code, the status bar now shows your Anypoint Platform username — you’re signed in.</p> <p><img src="img/19-anypoint-logged-in.png" alt="Signed in to Anypoint Platform" /></p> </li> </ol>
+    </google-codelab-step>
+    <google-codelab-step label="Link Anypoint Platform to Salesforce" duration="5">
+<p>MuleSoft Vibes and Agentforce features in Anypoint Platform run against a linked Salesforce org. This links the Agentforce 360 Platform Free Trial org created in <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/00-prerequisites.html">Phase 0</a> to the Anypoint Platform account from <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/01-account-setup.html">Phase 1</a>.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-enable-einstein-in-salesforce-if-not-already-on">1. Enable Einstein in Salesforce (if not already on)</a></li> <li><a href="#2-open-access-management--salesforce">2. Open Access Management → Salesforce</a></li> <li><a href="#3-accept-the-agentforce-terms">3. Accept the Agentforce terms</a></li> <li><a href="#4-start-adding-the-salesforce-org">4. Start adding the Salesforce org</a></li> <li><a href="#5-get-the-tenant-key-from-salesforce-setup">5. Get the tenant key from Salesforce Setup</a></li> <li><a href="#6-paste-the-tenant-key-back-in-anypoint-platform">6. Paste the tenant key back in Anypoint Platform</a></li> <li><a href="#7-confirm-the-alias-and-add-the-org">7. Confirm the alias and add the org</a></li> <li><a href="#8-copy-the-anypoint-platform-org-key">8. Copy the Anypoint Platform Org Key</a></li> <li><a href="#9-paste-the-org-key-back-in-salesforce">9. Paste the Org Key back in Salesforce</a></li> <li><a href="#10-confirm-agentforce-is-enabled">10. Confirm Agentforce is enabled</a></li> <li><a href="#11-verify-mulesoft-vibes-chat-in-vs-code">11. Verify: MuleSoft Vibes chat in VS Code</a></li> <li><a href="#12-enable-all-mcp-servers">12. Enable all MCP servers</a></li> </ul> <h2 id="1-enable-einstein-in-salesforce-if-not-already-on">  1. Enable Einstein in Salesforce (if not already on) </h2> <p>Before linking the two platforms, make sure Einstein is turned on in the Salesforce org — Agentforce/Vibes features depend on it. In Salesforce <strong>Setup</strong>, search for <strong>“Einstein”</strong> → <strong>Einstein Setup</strong>, and check that <strong>Turn on Einstein</strong> is set to <strong>On</strong>.</p> <p><img src="img/20-einstein-setup-turn-on.png" alt="Einstein Setup — Turn on Einstein" /></p> <h2 id="2-open-access-management--salesforce">  2. Open Access Management → Salesforce </h2> <p>In Anypoint Platform, go to <strong>Access Management</strong> and select <strong>Salesforce</strong> from the left nav. This page manages capabilities integrated with Salesforce — cross-platform access to data and AI tools through trusted Salesforce orgs.</p> <p><img src="img/21-anypoint-salesforce-access-management.png" alt="Manage Capabilities Integrated with Salesforce" /></p> <h2 id="3-accept-the-agentforce-terms">  3. Accept the Agentforce terms </h2> <p>Click <strong>Accept</strong> on the <strong>“Enable Agentforce for Anypoint Platform”</strong> banner. Review the terms (including the Generative AI section), check <strong>“I accept the terms and conditions”</strong>, then click <strong>Accept</strong>.</p> <p><img src="img/22-accept-agentforce-terms.png" alt="Accept Terms for Agentforce in Anypoint Platform" /></p> <h2 id="4-start-adding-the-salesforce-org">  4. Start adding the Salesforce org </h2> <p>Click <strong>Add Salesforce Org</strong>. This opens a dialog asking for a <strong>Salesforce Org Tenant Key</strong> — you can get this from the Salesforce Administrator inside <strong>MuleSoft &gt; Setup</strong> in the Salesforce org itself, so leave this dialog open and switch to Salesforce next.</p> <p><img src="img/23-add-salesforce-org-dialog.png" alt="Add Salesforce Org dialog" /></p> <h2 id="5-get-the-tenant-key-from-salesforce-setup">  5. Get the tenant key from Salesforce Setup </h2> <p>In the Salesforce org (from <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/00-prerequisites.html">Phase 0</a>), go to <strong>Setup</strong> and search for <strong>“Anypoint”</strong> → <strong>Anypoint Platform Setup</strong>. This page shows the connection status and capabilities that can be enabled between the two platforms (seamless login, MuleSoft service discovery, and Agentforce in Anypoint Platform).</p> <p>Click <strong>Complete the Connection</strong>.</p> <p><img src="img/24-salesforce-anypoint-platform-setup.png" alt="MuleSoft Anypoint Platform Setup page in Salesforce" /></p> <p>This opens a dialog with <strong>“Your Salesforce org tenant key”</strong> — copy it using the copy icon next to it. (Treat this key like a credential; it’s blurred here since it authorizes the connection to this org.)</p> <p><img src="img/25-salesforce-tenant-key-blurred.png" alt="Connection to MuleSoft Anypoint Platform, showing the tenant key field" /></p> <h2 id="6-paste-the-tenant-key-back-in-anypoint-platform">  6. Paste the tenant key back in Anypoint Platform </h2> <p>Switch back to the <strong>Add Salesforce Org</strong> dialog in Anypoint Platform and paste the tenant key into the <strong>Salesforce Org Tenant Key</strong> field.</p> <p><img src="img/26-add-salesforce-org-key-pasted.png" alt="Add Salesforce Org dialog with the tenant key pasted in" /></p> <h2 id="7-confirm-the-alias-and-add-the-org">  7. Confirm the alias and add the org </h2> <p>Once the tenant key validates (green checkmark), the dialog reveals the Salesforce org’s <strong>Org ID</strong> and <strong>Org URL</strong>, plus a <strong>Name Used in Anypoint Platform</strong> field — this is just a display alias inside Anypoint Platform, so any name works. Confirm or edit it, then click <strong>Add</strong>.</p> <p><img src="img/27-add-salesforce-org-alias.png" alt="Add Salesforce Org dialog with the alias name field, ready to add" /></p> <h2 id="8-copy-the-anypoint-platform-org-key">  8. Copy the Anypoint Platform Org Key </h2> <p>A success dialog confirms the Salesforce org was added, and shows the <strong>Anypoint Platform Org Key</strong> — the reverse credential needed to complete the connection from the Salesforce side. Copy it using the <strong>Copy</strong> button.</p> <p><img src="img/28-anypoint-org-key-success.png" alt="Success dialog showing the Anypoint Platform Org Key" /></p> <h2 id="9-paste-the-org-key-back-in-salesforce">  9. Paste the Org Key back in Salesforce </h2> <p>Switch back to Salesforce’s <strong>Connection to MuleSoft Anypoint Platform</strong> dialog, paste the Anypoint Platform Org Key into the <strong>Anypoint Platform Organization ID</strong> field, and click <strong>Connect</strong>.</p> <p><img src="img/29-salesforce-paste-org-key.png" alt="Salesforce dialog with the Anypoint Platform Org Key pasted into the Organization ID field" /></p> <h2 id="10-confirm-agentforce-is-enabled">  10. Confirm Agentforce is enabled </h2> <p>Salesforce shows an <strong>“Agentforce successfully enabled in MuleSoft Anypoint Platform”</strong> banner, and the <strong>Anypoint Platform Setup</strong> page now shows the connected org’s details — the connected Anypoint org, its Org ID, and the Anypoint org admin’s name and email.</p> <p><img src="img/30-agentforce-enabled-connected.png" alt="Agentforce successfully enabled, with the connected org's details" /></p> <p>From here, the Agentforce/Vibes capabilities can also be enabled from the <strong>Capabilities Managed in Anypoint Platform</strong> section on the Salesforce access management page.</p> <h2 id="11-verify-mulesoft-vibes-chat-in-vs-code">  11. Verify: MuleSoft Vibes chat in VS Code </h2> <p>With the two accounts linked, the <strong>MuleSoft Vibes</strong> chat panel in Anypoint Code Builder (VS Code) is ready to use — a “Build with Agent” chat surface alongside the editor.</p> <p><img src="img/31-mulesoft-vibes-chat-panel.png" alt="MuleSoft Vibes chat panel in Anypoint Code Builder" /></p> <h2 id="12-enable-all-mcp-servers">  12. Enable all MCP servers </h2> <p>The MuleSoft Vibes panel starts with only 1 of 3 MCP servers active. Click <strong>Manage MCP Servers</strong> to expand the list, then toggle on the remaining servers — <strong>MuleSoft MCP DX Server</strong>, <strong>MuleSoft MCP DX Policy Server</strong>, and <strong>MuleSoft Platform MCP Server</strong> — until all three show active.</p> <p><img src="img/32-mcp-servers-before-enable.png" alt="MuleSoft Vibes panel before enabling the remaining MCP servers" /></p> <p><img src="img/33-mcp-servers-all-enabled.png" alt="MCP Servers list with all three servers toggled on" /></p>
+    </google-codelab-step>
+    <google-codelab-step label="Set Up Mock Agents and MCP Servers" duration="8">
+<p>The agent network built in <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/06-build-agent-network.html">Phase 6</a> needs other agents and MCP servers to talk to. Since this guide focuses on the <strong>agent network broker</strong> itself rather than any specific downstream agent, it’s enough to use <strong>a2d</strong> to design and mock the agents and MCP servers the network will call, instead of standing up real ones.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-go-to-a2d-aicom-and-get-started">1. Go to a2d-ai.com and get started</a></li> <li><a href="#2-register-an-account">2. Register an account</a></li> <li><a href="#3-accept-the-terms-on-the-dashboard">3. Accept the terms on the Dashboard</a></li> <li><a href="#4-go-to-organization-settings">4. Go to Organization Settings</a></li> <li><a href="#5-import-the-example-agent-specs">5. Import the example agent specs</a></li> <li><a href="#6-note-down-each-assets-endpoint-url">6. Note down each asset’s endpoint URL</a></li> </ul> <h2 id="1-go-to-a2d-aicom-and-get-started">  1. Go to a2d-ai.com and get started </h2> <p>Go to <a href="https://www.a2d-ai.com/">a2d-ai.com</a> — <strong>A²D (Agentic Asset Designer)</strong> is a community tool for designing secure, compliant MCP Server specs and Agent Cards, with built-in mocking, validation, and publishing to Anypoint Exchange. Click <strong>Get Started</strong>.</p> <p><img src="img/34-a2d-landing-page.png" alt="A2D landing page" /></p> <h2 id="2-register-an-account">  2. Register an account </h2> <p>Sign up with Google or GitHub, or create an account manually with an Organization Name, Email, and Password.</p> <p><img src="img/35-a2d-signup-form.png" alt="A2D Create your account form" /></p> <h2 id="3-accept-the-terms-on-the-dashboard">  3. Accept the terms on the Dashboard </h2> <p>On first login, the Dashboard shows a <strong>“Know Before You Start — Required Acknowledgment”</strong> banner. Review the items — this is a community solution, auth/data is stored via Supabase, the app is hosted on Vercel, it’s provided “as-is”, and you’re responsible for your own data and API key security. Check all items and click <strong>Accept All Terms</strong> to continue.</p> <p><img src="img/36-a2d-dashboard-accept-terms.png" alt="A2D Dashboard with Know Before You Start acknowledgment banner" /></p> <h2 id="4-go-to-organization-settings">  4. Go to Organization Settings </h2> <p>In the left nav, go to <strong>Settings → Organization Settings</strong>. The <strong>Import / Export</strong> tab lets you export design specs (MCP servers, agent cards, REST APIs) as JSON/ZIP, or import them into another instance.</p> <p><img src="img/37-a2d-organization-settings-import-export.png" alt="A2D Organization Settings, Import / Export tab" /></p> <h2 id="5-import-the-example-agent-and-mcp-specs">  5. Import the example agent and MCP specs </h2> <p>This repo includes example specs to use as mocks for the agent network. They live alongside this guide, under <code class="language-plaintext highlighter-rouge">docs/quickstart/specs/</code> — download the JSON files linked below (on the Pages site, right-click → <strong>Save link as…</strong>):</p> <ul> <li><code class="language-plaintext highlighter-rouge">agent-cards/</code> — bare Agent Card specs: <ul> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/agent-cards/license-procurement-agent.json"><code class="language-plaintext highlighter-rouge">license-procurement-agent.json</code></a> — checks software license availability and provisions licenses for employees.</li> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/agent-cards/help-center-agent.json"><code class="language-plaintext highlighter-rouge">help-center-agent.json</code></a> — searches the IT knowledge base for answers to common issues.</li> </ul> </li> <li><code class="language-plaintext highlighter-rouge">mcp-metadata/</code> — MCP server specs: <ul> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/mcp-metadata/escalation-mcp.json"><code class="language-plaintext highlighter-rouge">escalation-mcp.json</code></a> — escalates a support ticket to the on-call team.</li> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/mcp-metadata/jira-mcp.json"><code class="language-plaintext highlighter-rouge">jira-mcp.json</code></a> — updates a Jira ticket’s status and adds a resolution comment.</li> </ul> </li> <li><code class="language-plaintext highlighter-rouge">a2d-specs/</code> — full A2D design spec exports, including each asset’s mock scenarios: <ul> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/a2d-specs/license-procurement-agent.json"><code class="language-plaintext highlighter-rouge">license-procurement-agent.json</code></a> — Agent Card; mock scenarios for Figma, Tableau, and GitHub Enterprise license checks.</li> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/a2d-specs/help-center-agent.json"><code class="language-plaintext highlighter-rouge">help-center-agent.json</code></a> — Agent Card; mock scenarios for VPN password reset and email sync issues.</li> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/a2d-specs/jira-mcp.json"><code class="language-plaintext highlighter-rouge">jira-mcp.json</code></a> — MCP server; mock scenario for a successful Jira ticket update.</li> <li><a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/specs/a2d-specs/escalation-mcp.json"><code class="language-plaintext highlighter-rouge">escalation-mcp.json</code></a> — MCP server; mock scenario for a successful ticket escalation.</li> </ul> </li> </ul> <p>In the <strong>Upload design spec</strong> panel (same <strong>Import / Export</strong> tab), drag and drop each JSON file from <code class="language-plaintext highlighter-rouge">specs/a2d-specs/</code>, or click <strong>Choose file</strong>, then select which assets to import.</p> <p>After uploading a spec, an <strong>“Import design spec — select assets”</strong> dialog lists the assets found in the file (e.g. <strong>License Procurement Agent</strong>, <strong>Help Center Agent</strong> — each tagged <strong>Agent Card</strong>, or <strong>Jira MCP</strong> tagged <strong>MCP Server</strong>). Leave them checked (or click <strong>Select all</strong>) and click <strong>Import selected</strong>. Repeat for each <code class="language-plaintext highlighter-rouge">a2d-specs/</code> file to import all the assets.</p> <p><img src="img/38-import-design-spec-select-assets.png" alt="Import design spec, select assets dialog" /></p> <h2 id="6-note-down-each-assets-endpoint-url">  6. Note down each asset’s endpoint URL </h2> <p>After importing, open each asset’s detail page (<strong>Overview</strong> tab) and note its <strong>Endpoint URL</strong> — the agent network broker will call these mock endpoints.</p> <ul> <li> <p><strong>License Procurement Agent</strong> — Agent Card. Endpoint URL (POST <code class="language-plaintext highlighter-rouge">message/send</code>): <code class="language-plaintext highlighter-rouge">https://www.a2d-ai.com/api/platform/1b8e91aa-986b-459d-8dff-f376058df62f/a2a</code>. Agent card URL (GET well-known): <code class="language-plaintext highlighter-rouge">https://www.a2d-ai.com/api/platform/1b8e91aa-986b-459d-8dff-f376058df62f/a2a/.well-known/agent-card.json</code>.</p> <p><img src="img/39-license-procurement-agent-endpoint.png" alt="License Procurement Agent asset detail page showing its endpoint URL" /></p> </li> <li> <p><strong>Help Center Agent</strong> — Agent Card. Endpoint URL (POST <code class="language-plaintext highlighter-rouge">message/send</code>): <code class="language-plaintext highlighter-rouge">https://www.a2d-ai.com/api/platform/44431c1a-3bfa-46b7-b66d-16d0f9859c12/a2a</code>. Agent card URL (GET well-known): <code class="language-plaintext highlighter-rouge">https://www.a2d-ai.com/api/platform/44431c1a-3bfa-46b7-b66d-16d0f9859c12/a2a/.well-known/agent-card.json</code>.</p> <p><img src="img/40-help-center-agent-endpoint.png" alt="Help Center Agent asset detail page showing its endpoint URL" /></p> </li> <li> <p><strong>Jira MCP</strong> — MCP Server. Endpoint URL: <code class="language-plaintext highlighter-rouge">https://www.a2d-ai.com/api/platform/cee52004-1761-435d-9b34-f62ab9f4fc0a/mcp</code>.</p> <p><img src="img/41-jira-mcp-endpoint.png" alt="Jira MCP asset detail page showing its endpoint URL" /></p> </li> <li> <p><strong>Escalation MCP</strong> — MCP Server. Endpoint URL: <code class="language-plaintext highlighter-rouge">https://www.a2d-ai.com/api/platform/a242730a-9a16-4408-80a4-9c25e7e06d0f/mcp</code>.</p> <p><img src="img/42-escalation-mcp-endpoint.png" alt="Escalation MCP asset detail page showing its endpoint URL" /></p> </li> </ul>
+    </google-codelab-step>
+    <google-codelab-step label="Set Up Agent Network Gateways" duration="6">
+<p>With Anypoint Platform linked to Salesforce and the MCP servers enabled, set up the Agent Network Gateways the agent network will run on.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-grant-the-required-anypoint-platform-permissions">1. Grant the required Anypoint Platform permissions</a></li> <li><a href="#2-set-up-agent-network-gateways">2. Set up Agent Network Gateways</a> <ul> <li><a href="#anypoint-platform-ui-approach">Anypoint Platform UI approach</a></li> <li><a href="#command-palette-approach-non-trial-accounts-only">Command Palette approach (non-trial accounts only)</a> <ul> <li><a href="#select-a-business-group">Select a Business Group</a></li> <li><a href="#select-an-environment">Select an environment</a></li> <li><a href="#select-the-target-space-type">Select the target space type</a></li> <li><a href="#select-the-target-region">Select the target region</a></li> <li><a href="#confirm-the-gateway-name">Confirm the gateway name</a></li> </ul> </li> </ul> </li> <li><a href="#3-wait-for-the-gateway-to-deploy">3. Wait for the gateway to deploy</a></li> </ul> <h2 id="1-grant-the-required-anypoint-platform-permissions">  1. Grant the required Anypoint Platform permissions </h2> <p>Before setting up the gateways, make sure the user has the permissions listed in the <a href="https://docs.mulesoft.com/agent-network/latest/af-get-started#platform-requirements">Agent Network platform requirements</a> docs — permissions across Runtime Manager, Anypoint Code Builder, Design Center, API Manager, Exchange, Usage, and CloudHub 2.0.</p> <p><img src="img/43-agent-network-permissions-table.png" alt="Anypoint Platform Requirements and Permissions table" /></p> <p>In Anypoint Platform, go to <strong>Access Management → Users</strong>, select the user, and click <strong>Add Permissions</strong>. For simplicity, rather than picking individual permissions one by one, click <strong>Select all</strong> on each product category to grant every permission, then continue through <strong>Select Business Groups</strong> and <strong>Select Environments</strong> and scope that to just the Business Group and environment you’ll use for the agent network.</p> <p><img src="img/44-add-permissions-dialog.png" alt="Add Permissions dialog in Anypoint Access Management" /></p> <h2 id="2-set-up-agent-network-gateways">  2. Set up Agent Network Gateways </h2> <h3 id="anypoint-platform-ui-approach">  Anypoint Platform UI approach </h3> <p><strong>For trial accounts, use the Anypoint Platform UI</strong> — the VS Code Command Palette command doesn’t work on trial accounts due to trial-related limitations, so the UI is the go-to path here.</p> <p>In Anypoint Platform, go to <strong>Runtime Manager → Omni Gateways</strong>, select the <strong>Managed Omni Gateway</strong> tab, and click <strong>Add Managed Omni Gateway</strong>.</p> <p><img src="img/45-runtime-manager-omni-gateways.png" alt="Runtime Manager Omni Gateways page, with Add Managed Omni Gateway" /></p> <p>Fill out the form: <strong>Gateway Name</strong> (e.g. <code class="language-plaintext highlighter-rouge">agent-network-shared-gw</code>), <strong>Deployment Target</strong> (region + space type, e.g. Cloudhub-US-East-2 / Shared Space), <strong>Release Channel</strong> (e.g. Edge), <strong>Version</strong> (latest), and <strong>Gateway type</strong> (e.g. Small Omni Gateway). Note: some configurations are disabled and not customizable on trial accounts.</p> <p><img src="img/46-add-managed-omni-gateway-form.png" alt="Add Managed Omni Gateway form, with name, deployment target, release channel, version, and gateway type" /></p> <h3 id="command-palette-approach-non-trial-accounts-only">  Command Palette approach (non-trial accounts only) </h3> <p>This is an alternative to the Anypoint Platform UI approach for non-trial accounts only. Open the Command Palette (<strong>Cmd+Shift+P</strong>) and run <strong>“MuleSoft: Set Up Agent Network Gateways…“</strong>. The command walks through the same choices as a series of quick-picks instead of a single form.</p> <p><img src="img/47-command-palette-setup-gateways.png" alt="Command Palette running MuleSoft: Set Up Agent Network Gateways" /></p> <h4 id="select-a-business-group">  Select a Business Group </h4> <p>Pick the Business Group to set up the gateways in — for example, the <strong>Salesforce</strong> Business Group.</p> <p><img src="img/48-select-business-group.png" alt="Select a Business Group quick-pick" /></p> <h4 id="select-an-environment">  Select an environment </h4> <p>Pick the environment to deploy the gateway to — for example, <strong>Sandbox</strong>.</p> <p><img src="img/49-select-environment.png" alt="Select the environment quick-pick" /></p> <h4 id="select-the-target-space-type">  Select the target space type </h4> <p>Pick <strong>Shared Space</strong> or <strong>Private Space</strong> for the gateway.</p> <p><img src="img/50-select-target-space-type.png" alt="Select the target space type quick-pick" /></p> <h4 id="select-the-target-region">  Select the target region </h4> <p>Pick the CloudHub region to deploy the gateway to — for example, <strong>Cloudhub-US-East-2</strong>.</p> <p><img src="img/51-select-target-region.png" alt="Select the target region quick-pick" /></p> <h4 id="confirm-the-gateway-name">  Confirm the gateway name </h4> <p>Confirm or edit the default gateway name, then press <strong>Enter</strong>.</p> <p><img src="img/52-gateway-default-name.png" alt="Enter a name for the gateway, showing the default name" /></p> <h2 id="3-wait-for-the-gateway-to-deploy">  3. Wait for the gateway to deploy </h2> <p>Either path (Command Palette or manual) redirects to the gateway’s <strong>Dashboard</strong> in Runtime Manager, showing status <strong>Starting…</strong> while it deploys. Wait until the status shows the gateway is running before continuing — the dashboard also shows the gateway’s public and cluster endpoints.</p> <p><img src="img/53-gateway-dashboard-deploying.png" alt="Gateway Dashboard showing status Starting..." /></p> <p>Once deployed, the status turns green and shows <strong>Running</strong>.</p> <p><img src="img/54-gateway-dashboard-running.png" alt="Gateway Dashboard showing status Running" /></p>
+    </google-codelab-step>
+    <google-codelab-step label="Build the Agent Network" duration="15">
+<p>With the Agent Network Gateways up and running, build the first example agent network.</p> <blockquote> <p><strong>Note:</strong> MuleSoft Vibes execution is probabilistic, so generated steps, wording, intermediate corrections, and visible output may differ from the screenshots. Focus on achieving the documented final state rather than matching the screenshots exactly.</p> </blockquote> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-create-the-agent-network-project">1. Create the Agent Network project</a> <ul> <li><a href="#prompt-1--register-the-network-assets">Prompt 1 — Register the network assets</a></li> <li><a href="#prompt-2--add-broker-metadata">Prompt 2 — Add broker metadata</a></li> <li><a href="#prompt-3--create-the-it-help-investigation-flow">Prompt 3 — Create the IT help investigation flow</a></li> </ul> </li> </ul> <h2 id="1-create-the-agent-network-project">  1. Create the Agent Network project </h2> <p>With the gateway running, create the agent network project in Anypoint Code Builder. Open the Command Palette (<strong>Cmd+Shift+P</strong>) and run <strong>“MuleSoft: Create an Agent Network Project…“</strong>, or use the Welcome view’s <strong>Create → Create an Agent Network</strong> link.</p> <p><img src="img/55-create-agent-network-project-command.png" alt="Command Palette running MuleSoft: Create an Agent Network Project, with the Create an Agent Network link in the Welcome view" /></p> <p>In the <strong>Create an Agent Network Project</strong> dialog, enter a <strong>Project Name</strong> (e.g. <code class="language-plaintext highlighter-rouge">IT Help Investigation Agent Network</code>), confirm the <strong>Project Location</strong>, pick the <strong>Business Group</strong> (e.g. <strong>Salesforce</strong>), and click <strong>Create Project</strong>.</p> <p><img src="img/56-create-agent-network-project-dialog.png" alt="Create an Agent Network Project dialog, with project name, location, and business group filled in" /></p> <p>You land in the scaffolded project. The Explorer shows <code class="language-plaintext highlighter-rouge">brokers/broker1.agent</code>, <code class="language-plaintext highlighter-rouge">agent-network.yaml</code>, and <code class="language-plaintext highlighter-rouge">exchange.json</code>. <code class="language-plaintext highlighter-rouge">agent-network.yaml</code> defines the network — <code class="language-plaintext highlighter-rouge">agentNetwork: 2.0.0</code>, the network’s <code class="language-plaintext highlighter-rouge">label</code>, and a <code class="language-plaintext highlighter-rouge">registry.agents</code> example agent (<code class="language-plaintext highlighter-rouge">myAgent</code>, platform <code class="language-plaintext highlighter-rouge">Bedrock</code>, an <code class="language-plaintext highlighter-rouge">a2a</code> card). The <strong>Canvas</strong> view visualizes the broker’s flow: a Generator, an Executor (<code class="language-plaintext highlighter-rouge">RunAction</code>), a Router (<code class="language-plaintext highlighter-rouge">ResultRouter</code>) with <strong>Success</strong>/<strong>Otherwise</strong> branches, and Echo nodes for the success and error responses.</p> <p><img src="img/57-scaffolded-agent-network-project.png" alt="Scaffolded agent network project, showing agent-network.yaml and the Canvas view" /></p> <h3 id="prompt-1--register-the-network-assets">  Prompt 1 — Register the network assets </h3> <p>In <strong>MuleSoft Vibes</strong>, enter the following prompt:</p> <blockquote> <p><strong>Note:</strong> Replace the four example A2A and MCP URLs in the prompt with the corresponding endpoint URLs you <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/04-mock-agents-and-mcps.html#6-note-down-each-assets-endpoint-url">recorded in Phase 4</a>. Leave <code class="language-plaintext highlighter-rouge">https://api.openai.com/v1</code> unchanged.</p> </blockquote> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Register the assets for an IT Help Investigation Agent Network.
+
+Retrieve the A2A agent cards from these endpoints and use the card data to configure the agents. Do not invent card fields:
+- helpCenterAgent: https://www.a2d-ai.com/api/platform/8224cfe1-0492-4deb-9239-ca90ebe7f9ad/a2a
+- licenseProcurementAgent: https://www.a2d-ai.com/api/platform/de8ab8b5-a2c7-470b-91ba-99ccf191734c/a2a
+
+Also register:
+- escalationMcp: streamable HTTP MCP at https://www.a2d-ai.com/api/platform/7d7ed142-32b5-4589-a285-0da266b85e25/
+- jiraMcp: streamable HTTP MCP at https://www.a2d-ai.com/api/platform/b57202bb-baa0-4b96-aa82-eeb178303da8/
+- openAI: OpenAI gpt-5-mini at https://api.openai.com/v1
+
+Create a connection for every registered asset using lowercase snake_case only for names.
+</code></pre></div></div> <p><img src="img/58-enter-agent-network-registration-prompt.png" alt="MuleSoft Vibes with the agent network asset registration prompt entered" /></p> <p>Approve commands when MuleSoft Vibes requests permission. At the end, allow it to run the build command to validate the project. If validation or build errors occur, allow MuleSoft Vibes to address all errors and keep iterating—fixing issues and rerunning the build—until the project builds successfully.</p> <p><img src="img/59-approve-agent-network-build-command.png" alt="MuleSoft Vibes requesting approval to run the final project validation command" /></p> <p><img src="img/60-agent-network-build-success.png" alt="Agent Network project built successfully" /></p> <p>The <strong>Task Completed</strong> screen confirms that all five assets are registered, their connections and configuration are updated, and the project builds cleanly.</p> <p><img src="img/61-agent-network-task-completed.png" alt="Task Completed screen confirming five registered assets, updated connections and configuration, and a clean project build" /></p> <h4 id="resulting-agent-networkyaml">  Resulting <code class="language-plaintext highlighter-rouge">agent-network.yaml</code> </h4> <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">agentNetwork</span><span class="pi">:</span> <span class="s">2.0.0</span>
+<span class="na">info</span><span class="pi">:</span>
+    <span class="na">label</span><span class="pi">:</span> <span class="s">IT Help Investigation Agent Network</span>
+    <span class="na">version</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">registry</span><span class="pi">:</span>
+    <span class="na">agents</span><span class="pi">:</span>
+        <span class="na">helpCenterAgent</span><span class="pi">:</span>
+            <span class="na">info</span><span class="pi">:</span>
+                <span class="na">label</span><span class="pi">:</span> <span class="s">IT Knowledge Base Agent</span>
+            <span class="na">metadata</span><span class="pi">:</span>
+                <span class="na">platform</span><span class="pi">:</span> <span class="s">Other</span>
+                <span class="na">interfaces</span><span class="pi">:</span>
+                    <span class="na">a2a</span><span class="pi">:</span>
+                        <span class="na">card</span><span class="pi">:</span>
+                            <span class="na">name</span><span class="pi">:</span> <span class="s">IT Knowledge Base Agent</span>
+                            <span class="na">description</span><span class="pi">:</span> <span class="s">Use this agent to search the internal IT knowledge base and resolve technical support queries (e.g., VPN resets, software sync issues) with step-by-step articles. If no documentation exists, the agent diagnoses the gap, identifies structural access or licensing issues to route to teams like procurement, and explicitly flags unresolved cases for human escalation.</span>
+                            <span class="na">version</span><span class="pi">:</span> <span class="s">1.0.0</span>
+                            <span class="na">capabilities</span><span class="pi">:</span>
+                                <span class="na">streaming</span><span class="pi">:</span> <span class="no">false</span>
+                                <span class="na">pushNotifications</span><span class="pi">:</span> <span class="no">false</span>
+                            <span class="na">defaultInputModes</span><span class="pi">:</span>
+                                <span class="pi">-</span> <span class="s">application/json</span>
+                                <span class="pi">-</span> <span class="s">text/plain</span>
+                            <span class="na">defaultOutputModes</span><span class="pi">:</span>
+                                <span class="pi">-</span> <span class="s">application/json</span>
+                                <span class="pi">-</span> <span class="s">text/plain</span>
+                            <span class="na">skills</span><span class="pi">:</span>
+                                <span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">knowledge_base_lookup</span>
+                                  <span class="na">name</span><span class="pi">:</span> <span class="s">IT Knowledge Base Lookup</span>
+                                  <span class="na">description</span><span class="pi">:</span> <span class="s">Searches internal corporate documentation repositories, technical wikis, and systemic reference indexes to locate specific, pre-documented answers regarding standardized IT configurations, enterprise hardware directory specifications, and real-time environment status lookups.</span>
+                                  <span class="na">tags</span><span class="pi">:</span> <span class="pi">[]</span>
+                                  <span class="na">examples</span><span class="pi">:</span> <span class="pi">[]</span>
+                                <span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">technical_troubleshooting_retrieval</span>
+                                  <span class="na">name</span><span class="pi">:</span> <span class="s">Technical Troubleshooting Retrieval</span>
+                                  <span class="na">description</span><span class="pi">:</span> <span class="s">Extracts and delivers highly structured, sequentially ordered operational instructions designed to assist end-users with the direct self-remediation of desktop client applications, active infrastructure failures, operating system exceptions, and hardware malfunctions.</span>
+                                  <span class="na">tags</span><span class="pi">:</span> <span class="pi">[]</span>
+                                  <span class="na">examples</span><span class="pi">:</span> <span class="pi">[]</span>
+                                <span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">access_and_licensing_gap_diagnosis</span>
+                                  <span class="na">name</span><span class="pi">:</span> <span class="s">Access and Licensing Gap Diagnosis</span>
+                                  <span class="na">description</span><span class="pi">:</span> <span class="s">Analyzes systemic user errors to determine if the technical issue originates from a missing corporate software seed license, unfulfilled manager approvals, or incomplete identity synchronization records, subsequently routing the request to the appropriate procurement or HRIS access team.</span>
+                                  <span class="na">tags</span><span class="pi">:</span> <span class="pi">[]</span>
+                                  <span class="na">examples</span><span class="pi">:</span> <span class="pi">[]</span>
+        <span class="na">licenseProcurementAgent</span><span class="pi">:</span>
+            <span class="na">info</span><span class="pi">:</span>
+                <span class="na">label</span><span class="pi">:</span> <span class="s">License Procurement Agent</span>
+            <span class="na">metadata</span><span class="pi">:</span>
+                <span class="na">platform</span><span class="pi">:</span> <span class="s">Other</span>
+                <span class="na">interfaces</span><span class="pi">:</span>
+                    <span class="na">a2a_v03</span><span class="pi">:</span>
+                        <span class="na">card</span><span class="pi">:</span>
+                            <span class="na">name</span><span class="pi">:</span> <span class="s">License Procurement Agent</span>
+                            <span class="na">description</span><span class="pi">:</span> <span class="s">Checks software license availability and provisions licenses for employees.</span>
+                            <span class="na">url</span><span class="pi">:</span> <span class="s">${licenseProcurementAgent.url}</span>
+                            <span class="na">protocolVersion</span><span class="pi">:</span> <span class="s2">"</span><span class="s">0.3.0"</span>
+                            <span class="na">version</span><span class="pi">:</span> <span class="s">1.0.0</span>
+                            <span class="na">capabilities</span><span class="pi">:</span>
+                                <span class="na">streaming</span><span class="pi">:</span> <span class="no">false</span>
+                                <span class="na">pushNotifications</span><span class="pi">:</span> <span class="no">true</span>
+                                <span class="na">stateTransitionHistory</span><span class="pi">:</span> <span class="no">false</span>
+                            <span class="na">defaultInputModes</span><span class="pi">:</span>
+                                <span class="pi">-</span> <span class="s">application/json</span>
+                                <span class="pi">-</span> <span class="s">text/plain</span>
+                            <span class="na">defaultOutputModes</span><span class="pi">:</span>
+                                <span class="pi">-</span> <span class="s">application/json</span>
+                                <span class="pi">-</span> <span class="s">text/plain</span>
+                            <span class="na">skills</span><span class="pi">:</span>
+                                <span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">license-check</span>
+                                  <span class="na">name</span><span class="pi">:</span> <span class="s">License Check and Provision</span>
+                                  <span class="na">description</span><span class="pi">:</span> <span class="s">Check license availability and provision for a user.</span>
+                                  <span class="na">tags</span><span class="pi">:</span> <span class="pi">[]</span>
+                                  <span class="na">examples</span><span class="pi">:</span>
+                                      <span class="pi">-</span> <span class="s">Provision a Figma license for jane.doe@company.com</span>
+                                      <span class="pi">-</span> <span class="s">Check if we have available GitHub Enterprise seats</span>
+                                      <span class="pi">-</span> <span class="s">I need access to Tableau</span>
+    <span class="na">mcps</span><span class="pi">:</span>
+        <span class="na">escalationMcp</span><span class="pi">:</span>
+            <span class="na">info</span><span class="pi">:</span>
+                <span class="na">label</span><span class="pi">:</span> <span class="s">Escalation MCP</span>
+            <span class="na">metadata</span><span class="pi">:</span>
+                <span class="na">transport</span><span class="pi">:</span>
+                    <span class="na">kind</span><span class="pi">:</span> <span class="s">streamableHttp</span>
+        <span class="na">jiraMcp</span><span class="pi">:</span>
+            <span class="na">info</span><span class="pi">:</span>
+                <span class="na">label</span><span class="pi">:</span> <span class="s">Jira MCP</span>
+            <span class="na">metadata</span><span class="pi">:</span>
+                <span class="na">transport</span><span class="pi">:</span>
+                    <span class="na">kind</span><span class="pi">:</span> <span class="s">streamableHttp</span>
+    <span class="na">llms</span><span class="pi">:</span>
+        <span class="na">openai</span><span class="pi">:</span>
+            <span class="na">info</span><span class="pi">:</span>
+                <span class="na">label</span><span class="pi">:</span> <span class="s">OpenAI GPT-5 Mini</span>
+                <span class="na">description</span><span class="pi">:</span> <span class="s">OpenAI GPT-5 Mini LLM Provider</span>
+            <span class="na">metadata</span><span class="pi">:</span>
+                <span class="na">platform</span><span class="pi">:</span> <span class="s">OpenAI</span>
+<span class="na">context</span><span class="pi">:</span>
+    <span class="na">connections</span><span class="pi">:</span>
+        <span class="na">help_center_agent_connection</span><span class="pi">:</span>
+            <span class="na">kind</span><span class="pi">:</span> <span class="s">a2a</span>
+            <span class="na">ref</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">helpCenterAgent</span>
+            <span class="na">url</span><span class="pi">:</span> <span class="s">${helpCenterAgent.url}</span>
+        <span class="na">license_procurement_agent_connection</span><span class="pi">:</span>
+            <span class="na">kind</span><span class="pi">:</span> <span class="s">a2a</span>
+            <span class="na">ref</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">licenseProcurementAgent</span>
+            <span class="na">url</span><span class="pi">:</span> <span class="s">${licenseProcurementAgent.url}</span>
+        <span class="na">escalation_mcp_connection</span><span class="pi">:</span>
+            <span class="na">kind</span><span class="pi">:</span> <span class="s">mcp</span>
+            <span class="na">ref</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">escalationMcp</span>
+            <span class="na">url</span><span class="pi">:</span> <span class="s">${escalationMcp.url}</span>
+        <span class="na">jira_mcp_connection</span><span class="pi">:</span>
+            <span class="na">kind</span><span class="pi">:</span> <span class="s">mcp</span>
+            <span class="na">ref</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">jiraMcp</span>
+            <span class="na">url</span><span class="pi">:</span> <span class="s">${jiraMcp.url}</span>
+        <span class="na">openai_connection</span><span class="pi">:</span>
+            <span class="na">kind</span><span class="pi">:</span> <span class="s">llm</span>
+            <span class="na">ref</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">openai</span>
+            <span class="na">url</span><span class="pi">:</span> <span class="s">https://api.openai.com/v1</span>
+            <span class="na">authentication</span><span class="pi">:</span>
+                <span class="na">kind</span><span class="pi">:</span> <span class="s">apiKey</span>
+                <span class="na">apiKey</span><span class="pi">:</span> <span class="s">${openai.apiKey}</span>
+<span class="na">brokers</span><span class="pi">:</span>
+    <span class="s">...</span>
+</code></pre></div></div> <h4 id="resulting-exchangejson">  Resulting <code class="language-plaintext highlighter-rouge">exchange.json</code> </h4> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"main"</span><span class="p">:</span><span class="w"> </span><span class="s2">"agent-network.yaml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"IT Help Investigation Agent Network"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"classifier"</span><span class="p">:</span><span class="w"> </span><span class="s2">"agentic-network"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"organizationId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"b397b009-dcfc-4b5b-826d-5ab393ec75b0"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"descriptorVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"apiVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"v1"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+  </span><span class="nl">"groupId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"b397b009-dcfc-4b5b-826d-5ab393ec75b0"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"assetId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"it-help-investigation-agent-network"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.0.0"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+  </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"variables"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"helpCenterAgent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"IT Knowledge Base Agent URL"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.a2d-ai.com/api/platform/8224cfe1-0492-4deb-9239-ca90ebe7f9ad/a2a"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"secret"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"licenseProcurementAgent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"License Procurement Agent URL"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.a2d-ai.com/api/platform/de8ab8b5-a2c7-470b-91ba-99ccf191734c/a2a"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"secret"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"escalationMcp"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Escalation MCP URL"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.a2d-ai.com/api/platform/7d7ed142-32b5-4589-a285-0da266b85e25/"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"secret"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"jiraMcp"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Jira MCP URL"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.a2d-ai.com/api/platform/b57202bb-baa0-4b96-aa82-eeb178303da8/"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"secret"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"openai"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"apiKey"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OpenAI API key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"secret"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h3 id="prompt-2--add-broker-metadata">  Prompt 2 — Add broker metadata </h3> <p>Start a new <strong>MuleSoft Vibes</strong> task for this prompt. Do not continue the task used for Prompt 1.</p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Replace the existing scaffolded brokers.broker1 entry in full with the following it_help_investigation broker metadata.
+
+- Broker ID: it_help_investigation
+- kind: AgentScript
+- implementation: ./brokers/it-help-investigation.agent
+- A2A card name: IT Help Investigation Broker
+- Description: Triages IT support tickets, escalates critical issues, and resolves common problems through cross-platform investigation.
+- Version: 1.0.0
+- streaming false; pushNotifications true
+- text/plain input/output
+- Skill ticket-triage / IT Ticket Triage, description "Classifies and resolves IT support tickets.", tags it-support and help-desk
+- Under `interfaces.a2a.card.supportedInterfaces`, add two objects with `url`, `protocolVersion`, and `protocolBinding`:
+  - HTTP+JSON at http://localhost:8001/itHelpInvestigationBroker/, protocolVersion "1.0"
+  - JSONRPC at http://localhost:8001/itHelpInvestigationBroker/, protocolVersion "1.0"
+</code></pre></div></div> <p>The <strong>Task Completed</strong> notification confirms that the scaffolded <code class="language-plaintext highlighter-rouge">brokers.broker1</code> entry was replaced with the <code class="language-plaintext highlighter-rouge">it_help_investigation</code> broker metadata, including both supported interfaces. The missing <code class="language-plaintext highlighter-rouge">./brokers/it-help-investigation.agent</code> diagnostic is expected at this stage: Prompt 2 adds metadata only, and the broker implementation file has not yet been created.</p> <p><img src="img/62-broker-metadata-task-completed.png" alt="Task Completed notification confirming broker1 was replaced with the IT Help Investigation broker metadata and both supported interfaces" /></p> <h4 id="resulting-broker-configuration">  Resulting broker configuration </h4> <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">...</span>
+<span class="na">brokers</span><span class="pi">:</span>
+    <span class="na">it_help_investigation</span><span class="pi">:</span>
+        <span class="na">kind</span><span class="pi">:</span> <span class="s">AgentScript</span>
+        <span class="na">implementation</span><span class="pi">:</span> <span class="s">./brokers/it-help-investigation.agent</span>
+        <span class="na">interfaces</span><span class="pi">:</span>
+            <span class="na">a2a</span><span class="pi">:</span>
+                <span class="na">card</span><span class="pi">:</span>
+                    <span class="na">name</span><span class="pi">:</span> <span class="s">IT Help Investigation Broker</span>
+                    <span class="na">description</span><span class="pi">:</span> <span class="s">Triages IT support tickets, escalates critical issues, and resolves common problems through cross-platform investigation.</span>
+                    <span class="na">version</span><span class="pi">:</span> <span class="s">1.0.0</span>
+                    <span class="na">capabilities</span><span class="pi">:</span>
+                        <span class="na">streaming</span><span class="pi">:</span> <span class="no">false</span>
+                        <span class="na">pushNotifications</span><span class="pi">:</span> <span class="no">true</span>
+                    <span class="na">defaultInputModes</span><span class="pi">:</span>
+                        <span class="pi">-</span> <span class="s">text/plain</span>
+                    <span class="na">defaultOutputModes</span><span class="pi">:</span>
+                        <span class="pi">-</span> <span class="s">text/plain</span>
+                    <span class="na">skills</span><span class="pi">:</span>
+                        <span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">ticket-triage</span>
+                          <span class="na">name</span><span class="pi">:</span> <span class="s">IT Ticket Triage</span>
+                          <span class="na">description</span><span class="pi">:</span> <span class="s">Classifies and resolves IT support tickets.</span>
+                          <span class="na">tags</span><span class="pi">:</span>
+                              <span class="pi">-</span> <span class="s">it-support</span>
+                              <span class="pi">-</span> <span class="s">help-desk</span>
+                    <span class="na">supportedInterfaces</span><span class="pi">:</span>
+                        <span class="pi">-</span> <span class="na">url</span><span class="pi">:</span> <span class="s">http://localhost:8001/itHelpInvestigationBroker/</span>
+                          <span class="na">protocolVersion</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1.0"</span>
+                          <span class="na">protocolBinding</span><span class="pi">:</span> <span class="s">HTTP+JSON</span>
+                        <span class="pi">-</span> <span class="na">url</span><span class="pi">:</span> <span class="s">http://localhost:8001/itHelpInvestigationBroker/</span>
+                          <span class="na">protocolVersion</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1.0"</span>
+                          <span class="na">protocolBinding</span><span class="pi">:</span> <span class="s">JSONRPC</span>
+</code></pre></div></div> <p>If <code class="language-plaintext highlighter-rouge">brokers/broker1.agent</code> is still present, delete it. It is an unused artifact from the initial project scaffold.</p> <h3 id="prompt-3--create-the-it-help-investigation-flow">  Prompt 3 — Create the IT help investigation flow </h3> <blockquote> <p><strong>Implementation note:</strong> In this example, severity classification is performed by a Subagent node. A Generator node would likely be a simpler choice for this focused classification step, but both node types work.</p> </blockquote> <p>In <strong>MuleSoft Vibes</strong>, enter the following prompt:</p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Create the broker behavior for this use case:
+
+Employees submit IT support requests that can include a Jira ticket ID. The broker must understand the request, assess its severity, investigate routine issues across the available services, keep Jira updated, and escalate cases that cannot be handled automatically.
+
+Flow:
+1. Read the incoming request and identify its Jira ticket ID. If none is provided, use JIRA001.
+2. Classify the issue as high or low severity and retain a short reason based on scope, security risk, business impact, urgency, and whether a workaround exists.
+   - High: an outage or degradation affecting multiple users, a team, a building, or a department; a security incident such as suspicious access, compromised credentials, malware, or possible data exposure; a business-critical service or production system is unavailable; or work is broadly blocked with no viable workaround.
+   - Low: a clearly scoped single-user issue; password reset, MFA setup, email sync, or routine VPN/connectivity help; a software license or access request with no security incident; a how-to question; or an issue with a reasonable workaround.
+   - Do not classify an issue as high only because the user says it is urgent. Base severity on evidence of scope, security, and impact.
+   - If the request is too vague to classify, ask for the affected users, systems, security indicators, business impact, and available workaround before continuing.
+   - The classification reason must identify the decisive evidence in one concise sentence.
+3. Immediately escalate high-severity issues through the Escalation MCP service, then tell the user which ticket was escalated and why.
+4. For low-severity issues, search the Help Center for a known solution.
+5. If the issue concerns software licensing or access, consult the License Procurement agent.
+6. Update Jira with the investigation findings and resolution notes.
+7. Finish with one of three outcomes:
+   - Help provided: summarize the solution for the user.
+   - License or access provided: summarize what was provisioned.
+   - Unresolved: escalate to a human and tell the user, including the ticket ID and investigation summary.
+
+For both high-severity and unresolved escalation, call the Escalation MCP tool named `escalate`. It requires these string inputs:
+- `ticket_id`: the extracted Jira ticket ID, or JIRA001 when absent
+- `severity`: `high` for immediate high-severity escalation, or `low` for an unresolved low-severity case
+- `reason`: the classification reason for high severity, or a concise explanation that automated investigation could not resolve the case
+- `description`: the full original support request
+
+Business constraints:
+- Escalation must happen only for high-severity or unresolved cases.
+- The investigation must not escalate a case by itself.
+- Routing between outcomes must follow the assessed severity and investigation result.
+- Every path must return a clear final response to the original caller.
+- Use only the agents, MCP services, and OpenAI model already registered in the project.
+
+Choose the appropriate Agent Network implementation from this use case and flow. Do not ask me to specify nodes, transitions, action names, connection names, or Agent Script syntax.
+</code></pre></div></div> <p>If MuleSoft Vibes asks for permission to run the build, approve it so the project can be validated.</p> <p>The <strong>Task Completed</strong> notification confirms that the build validated cleanly and the broker implementation contains the complete IT help investigation flow.</p> <p><img src="img/63-investigation-flow-build-validated.png" alt="Task Completed notification confirming the IT help investigation flow build validated without errors or warnings" /></p> <p>Open the <strong>Canvas</strong> view and verify that the generated flow looks similar to the reference below. Confirm that it includes ticket intake, severity classification, immediate high-severity escalation, low-severity cross-platform investigation, resolution routing, and a clear response for each outcome. Node names and layout may vary.</p> <p><img src="img/64-it-help-investigation-flow-canvas.png" alt="Canvas view of the IT help investigation flow with severity and resolution routing" /></p> <h3 id="resulting-brokersit-help-investigationagent">  Resulting <code class="language-plaintext highlighter-rouge">brokers/it-help-investigation.agent</code> </h3> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># @dialect: AGENTFABRIC=1.1
+
+system:
+  instructions: "You are an IT Help Desk broker. You triage incoming IT support tickets, classify their severity, escalate critical issues immediately, and investigate common problems through available services."
+
+config:
+  agent_name: "it-help-investigation"
+  default_llm: @llm.openai_mini
+
+llm:
+  openai_mini:
+    target: "llm://openai_connection"
+    kind: "OpenAI"
+    model: "gpt-5-mini"
+
+
+# -- ACTION DEFINITIONS -------------------------------------------------------
+
+actions:
+  help_center_agent:
+    target: "a2a://help_center_agent_connection"
+    kind: "a2a:send_message"
+
+  license_procurement_agent:
+    target: "a2a://license_procurement_agent_connection"
+    kind: "a2a:send_message"
+
+  escalate:
+    target: "mcp://escalation_mcp_connection"
+    kind: "mcp:tool"
+    tool_name: "escalate"
+    inputs:
+      ticket_id: string
+      severity: string
+      reason: string
+      description: string
+
+  update_jira:
+    target: "mcp://jira_mcp_connection"
+    kind: "mcp:tool"
+    tool_name: "updateIssue"
+
+
+# -- TRIGGER ------------------------------------------------------------------
+
+trigger ticketTrigger:
+  kind: "a2a"
+  target: "brokers://it_help_investigation/a2a"
+  on_message: -&gt;
+    transition to @subagent.classifySeverity
+
+
+# -- SEVERITY CLASSIFICATION --------------------------------------------------
+
+subagent classifySeverity:
+  description: "Classifies the severity of the IT support ticket, extracts the Jira ticket ID, and requests clarification when the request is too vague to classify."
+  label: "Classify Severity"
+  llm: @llm.openai_mini
+  system:
+    instructions: |
+      You are an IT support triage specialist. Classify the severity of the incoming ticket and extract its Jira ticket ID.
+
+      TICKET ID:
+      - Extract the Jira ticket ID from the request (e.g., JIRA-123, ITSD-456).
+      - If no ticket ID is present, use "JIRA001".
+
+      SEVERITY — classify as HIGH when ANY of the following apply:
+      - An outage or service degradation affecting multiple users, a team, a building, or a department.
+      - A security incident: suspicious access, compromised credentials, malware, or possible data exposure.
+      - A business-critical service or production system is unavailable.
+      - Work is broadly blocked with no viable workaround.
+
+      SEVERITY — classify as LOW when the issue meets one of these profiles:
+      - Clearly scoped to a single user with no team-wide impact.
+      - Password reset, MFA setup, email sync, or routine VPN/connectivity help.
+      - Software license or access request with no security incident.
+      - A how-to question.
+      - An issue that has a reasonable workaround available.
+
+      IMPORTANT RULES:
+      - Do NOT classify as high solely because the user says the issue is "urgent" or "critical". Base classification on evidence of scope, security risk, and business impact.
+      - The reason must identify the decisive evidence in one concise sentence.
+
+      IF THE REQUEST IS TOO VAGUE TO CLASSIFY:
+      - If you lack sufficient information to determine severity, ask the user for all of the following before classifying:
+        1. How many users are affected?
+        2. Which systems or services are impacted?
+        3. Are there any security indicators (suspicious logins, credential exposure, malware)?
+        4. What is the business impact if unresolved?
+        5. Is there a workaround available?
+      - Wait for the user's response, then classify.
+  reasoning:
+    instructions: -&gt;
+      | Classify the severity of this IT support ticket: {!@request.payload.message.parts[0].text}
+    outputs:
+      properties:
+        ticket_id:
+          type: "string"
+          description: "The Jira ticket ID extracted from the input, or JIRA001 if absent"
+        severity:
+          type: "string"
+          description: "The severity level of the ticket"
+          enum:
+            - "high"
+            - "low"
+        reason:
+          type: "string"
+          description: "One concise sentence identifying the decisive evidence for the classification"
+    max_number_of_loops: 5
+  on_exit: -&gt;
+    transition to @router.severityRouter
+
+
+# -- SEVERITY ROUTING ---------------------------------------------------------
+
+router severityRouter:
+  description: "Routes based on classified severity."
+  routes:
+    - target: @executor.escalateTicket
+      when: @subagent.classifySeverity.output.severity == "high"
+      label: "High"
+  otherwise:
+    target: @orchestrator.crossPlatformTriage
+
+
+# -- HIGH: ESCALATION ---------------------------------------------------------
+
+executor escalateTicket:
+  description: "Immediately escalates a high-severity ticket via the Escalation MCP service."
+  do: -&gt;
+    run @actions.escalate
+      with ticket_id = @subagent.classifySeverity.output.ticket_id
+      with severity = "high"
+      with reason = @subagent.classifySeverity.output.reason
+      with description = @request.payload.message.parts[0].text
+  on_exit: -&gt;
+    transition to @echo.escalationResponse
+
+echo escalationResponse:
+  kind: "a2a:status_update_event"
+  state: "TASK_STATE_COMPLETED"
+  message: a2a.message({
+    messageId: uuid(),
+    parts: [
+      a2a.textPart("Ticket " + @subagent.classifySeverity.output.ticket_id + " has been escalated to the on-call team. Reason: " + @subagent.classifySeverity.output.reason)
+    ]
+  })
+
+
+# -- LOW: CROSS-PLATFORM TRIAGE -----------------------------------------------
+
+orchestrator crossPlatformTriage:
+  description: "Investigates low-severity tickets across the Help Center, License Procurement, and Jira."
+  label: "Cross-Platform Triage"
+  llm: @llm.openai_mini
+  system:
+    instructions: |
+      Investigate this low-severity IT support ticket. Follow these steps in order:
+
+      Step 1: Search the Help Center agent for relevant articles or known solutions.
+      Step 2: If the issue involves software licensing, software access, or a missing entitlement (and there is no security incident), also consult the License Procurement agent.
+      Step 3: Update the Jira ticket with your investigation findings and resolution notes.
+
+      Resolution rules:
+      - If the Help Center provided a solution that resolves the issue, set resolution to "help_given".
+      - If the License Procurement agent resolved a licensing or access issue, set resolution to "license_given".
+      - If neither agent could resolve the issue and it requires human intervention, set resolution to "unresolved".
+
+      Always update the Jira ticket before exiting.
+  reasoning:
+    instructions: -&gt;
+      | Investigate and resolve this IT support ticket. Ticket ID: {!@subagent.classifySeverity.output.ticket_id}. Original request: {!@request.payload.message.parts[0].text}
+    actions:
+      search_help: @actions.help_center_agent
+      check_license: @actions.license_procurement_agent
+      update_ticket: @actions.update_jira
+    outputs:
+      properties:
+        resolution:
+          type: "string"
+          description: "The resolution outcome"
+          enum:
+            - "help_given"
+            - "license_given"
+            - "unresolved"
+        summary:
+          type: "string"
+          description: "Summary of investigation findings and resolution actions taken"
+    max_number_of_loops: 8
+    task_timeout_secs: 120
+  on_exit: -&gt;
+    transition to @router.resolutionRouter
+
+
+# -- RESOLUTION ROUTING -------------------------------------------------------
+
+router resolutionRouter:
+  description: "Routes based on the resolution type from triage."
+  routes:
+    - target: @generator.licenseSummary
+      when: @orchestrator.crossPlatformTriage.output.resolution == "license_given"
+      label: "License Given"
+    - target: @executor.escalateUnresolved
+      when: @orchestrator.crossPlatformTriage.output.resolution == "unresolved"
+      label: "Unresolved"
+  otherwise:
+    target: @generator.helpSummary
+
+
+# -- HELP GIVEN PATH ----------------------------------------------------------
+
+generator helpSummary:
+  description: "Generates a clear resolution summary for the user."
+  system:
+    instructions: "Generate a clear, actionable resolution summary for the end user based on the Help Center findings."
+  prompt: -&gt;
+    | Resolution found. Original request: {!@request.payload.message.parts[0].text}. Investigation findings: {!@orchestrator.crossPlatformTriage.output.summary}. Write a concise, friendly summary the user can act on.
+  on_exit: -&gt;
+    transition to @echo.helpResponse
+
+echo helpResponse:
+  kind: "a2a:status_update_event"
+  state: "TASK_STATE_COMPLETED"
+  message: a2a.message({
+    messageId: uuid(),
+    parts: [
+      a2a.textPart(@generator.helpSummary.output)
+    ]
+  })
+
+
+# -- LICENSE GIVEN PATH -------------------------------------------------------
+
+generator licenseSummary:
+  description: "Generates a summary of what license or access was provisioned."
+  system:
+    instructions: "Generate a clear, friendly summary of the license or access provisioning completed for the end user."
+  prompt: -&gt;
+    | License or access provisioned. Original request: {!@request.payload.message.parts[0].text}. Actions taken: {!@orchestrator.crossPlatformTriage.output.summary}. Write a concise summary of what was provisioned.
+  on_exit: -&gt;
+    transition to @echo.licenseResponse
+
+echo licenseResponse:
+  kind: "a2a:status_update_event"
+  state: "TASK_STATE_COMPLETED"
+  message: a2a.message({
+    messageId: uuid(),
+    parts: [
+      a2a.textPart(@generator.licenseSummary.output)
+    ]
+  })
+
+
+# -- UNRESOLVED PATH ----------------------------------------------------------
+
+executor escalateUnresolved:
+  description: "Escalates an unresolved low-severity ticket to a human agent."
+  do: -&gt;
+    run @actions.escalate
+      with ticket_id = @subagent.classifySeverity.output.ticket_id
+      with severity = "low"
+      with reason = @orchestrator.crossPlatformTriage.output.summary
+      with description = @request.payload.message.parts[0].text
+  on_exit: -&gt;
+    transition to @echo.unresolvedResponse
+
+echo unresolvedResponse:
+  kind: "a2a:status_update_event"
+  state: "TASK_STATE_COMPLETED"
+  message: a2a.message({
+    messageId: uuid(),
+    parts: [
+      a2a.textPart("Ticket " + @subagent.classifySeverity.output.ticket_id + " could not be resolved automatically and has been escalated to a human agent. Investigation summary: " + @orchestrator.crossPlatformTriage.output.summary)
+    ]
+  })
+</code></pre></div></div>
+    </google-codelab-step>
+    <google-codelab-step label="Publish the Agent Network" duration="5">
+<p>Publish the completed agent network project to Anypoint Exchange so its brokers, agents, MCP servers, and provider definitions are available as Exchange assets.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-review-the-project-metadata">1. Review the project metadata</a></li> <li><a href="#2-publish-the-agent-network-assets">2. Publish the Agent Network assets</a></li> <li><a href="#3-verify-the-assets-in-exchange">3. Verify the assets in Exchange</a></li> </ul> <h2 id="1-review-the-project-metadata">  1. Review the project metadata </h2> <p>Before publishing, confirm that the project builds successfully and review <code class="language-plaintext highlighter-rouge">exchange.json</code>. Verify the asset name, asset ID, version, organization ID, group ID, and required variables.</p> <p>The <code class="language-plaintext highlighter-rouge">groupId</code> determines the Anypoint Platform business group where the assets are published. Update it before publishing if the assets must belong to a different business group.</p> <h2 id="2-publish-the-agent-network-assets">  2. Publish the Agent Network assets </h2> <p>Make sure Anypoint Code Builder is signed in to the correct Anypoint Platform account. Then publish the project using either of these methods:</p> <ul> <li>In the Explorer, right-click <code class="language-plaintext highlighter-rouge">agent-network.yaml</code> and select <strong>Agent Network → Publish Agent Network Assets…</strong>.</li> <li>Open the Command Palette (<strong>Cmd+Shift+P</strong>) and run <strong>MuleSoft: Publish Agent Network Assets</strong>.</li> </ul> <p><img src="img/65-publish-agent-network-menu.png" alt="Explorer context menu showing Agent Network and Publish Agent Network Assets" /></p> <p>In <strong>Publish Agent Network Assets to Exchange</strong>, enter the <strong>Asset Version Group</strong> (for example, <code class="language-plaintext highlighter-rouge">v1</code>) and review the Asset Name, Asset ID, and Business Group under <strong>Project Metadata</strong>. Click <strong>Publish</strong>.</p> <p><img src="img/66-publish-agent-network-assets-dialog.png" alt="Publish Agent Network Assets to Exchange view with version group and project metadata ready to publish" /></p> <p>Anypoint Code Builder builds the project and publishes the Agent Network assets to Anypoint Exchange. If Code Builder asks for confirmation or permission to run the required commands, approve the request.</p> <p>Open the <strong>Output</strong> tab, select <strong>Agent Fabric CLI</strong>, and wait for every asset and the Agent Network to report <code class="language-plaintext highlighter-rouge">finished</code>. Publishing is complete when the output and notification confirm that the network was published to Anypoint Exchange. If any issue occurs, use <strong>MuleSoft Vibes</strong> to diagnose and address it, then retry until publishing succeeds.</p> <p><img src="img/67-agent-network-publish-complete.png" alt="Agent Fabric CLI output and notification confirming the Agent Network assets were published to Anypoint Exchange" /></p> <h2 id="3-verify-the-assets-in-exchange">  3. Verify the assets in Exchange </h2> <p>Open Anypoint Exchange and select <strong>All assets</strong>. Open the business group filter, select the same business group used during publishing, and click <strong>Apply</strong> to filter the asset list.</p> <p><img src="img/68-exchange-business-group-filter.png" alt="Anypoint Exchange All assets view with the publishing business group selected as a filter" /></p> <p>You should see these seven published assets:</p> <ul> <li>IT Help Investigation Agent Network</li> <li>IT Help Investigation Broker</li> <li>IT Knowledge Base Agent</li> <li>License Procurement Agent</li> <li>Jira MCP</li> <li>Escalation MCP</li> <li>OpenAI GPT-5 Mini</li> </ul> <p>Confirm that their published versions match the project metadata.</p> <p><img src="img/69-seven-published-agent-network-assets.png" alt="Anypoint Exchange showing all seven published IT Help Investigation Agent Network assets" /></p> <p>Open <strong>IT Help Investigation Agent Network</strong> and select <strong>Registry</strong>. Verify that <strong>IT Help Investigation Broker</strong> references OpenAI GPT-5 Mini, both agents, and both MCP servers. Also confirm that the expected version is marked <strong>Stable</strong>.</p> <p><img src="img/70-agent-network-exchange-registry.png" alt="IT Help Investigation Agent Network asset in Exchange showing its broker registry, agents, MCP servers, LLM, and stable version" /></p> <p>You can also open <strong>Agents &amp; Tools → Agent Visualizer</strong> to inspect the rendered network. Confirm that <strong>IT Help Investigation Broker</strong> is connected to both agents and both MCP servers.</p> <p><img src="img/71-agent-network-visualizer.png" alt="Agent Visualizer rendering the IT Help Investigation Broker and its connected agents and MCP servers" /></p> <p>For the detailed product workflow, see <a href="https://docs.mulesoft.com/anypoint-code-builder/af-publish-agent-network-assets">Publish Agent Network Assets</a>.</p>
+    </google-codelab-step>
+    <google-codelab-step label="Deploy the Agent Network" duration="5">
+<p>Deploy the published Agent Network to CloudHub 2.0 so its broker and connections are available as running instances.</p> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-confirm-the-deployment-prerequisites">1. Confirm the deployment prerequisites</a></li> <li><a href="#2-open-the-deployment-workflow">2. Open the deployment workflow</a></li> <li><a href="#3-configure-and-deploy-the-network">3. Configure and deploy the network</a></li> <li><a href="#4-verify-the-deployed-instances">4. Verify the deployed instances</a></li> </ul> <h2 id="1-confirm-the-deployment-prerequisites">  1. Confirm the deployment prerequisites </h2> <p>Before deploying, confirm that:</p> <ul> <li>The Agent Network project builds successfully.</li> <li>The Agent Network assets are published to Anypoint Exchange.</li> <li>The target CloudHub 2.0 shared or private space is available.</li> <li>The Agent Network gateways from <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/05-set-up-agent-network-gateways.html">Phase 5</a> are running.</li> <li>Anypoint Code Builder is signed in to the correct Anypoint Platform account.</li> </ul> <h2 id="2-open-the-deployment-workflow">  2. Open the deployment workflow </h2> <p>In Anypoint Code Builder, start deployment using either of these methods:</p> <ul> <li>In the Explorer, right-click <code class="language-plaintext highlighter-rouge">agent-network.yaml</code> and select <strong>Agent Network → Deploy Agent Network…</strong>.</li> <li>Open the Command Palette (<strong>Cmd+Shift+P</strong>) and run <strong>MuleSoft: Deploy Agent Network</strong>.</li> </ul> <p><img src="img/72-deploy-agent-network-menu.png" alt="Explorer context menu showing Agent Network and Deploy Agent Network" /></p> <h2 id="3-configure-and-deploy-the-network">  3. Configure and deploy the network </h2> <p>In <strong>Deploy Agent Network</strong>, select the <strong>Environment</strong> and <strong>Deployment Target</strong>. For a shared space, select its managed gateway; for a private space, select the corresponding target space and gateways.</p> <p>Under <strong>Variables</strong>, verify the agent and MCP endpoint URLs, then enter your OpenAI API key in <code class="language-plaintext highlighter-rouge">openai.apiKey</code>. Keep this secret value private and do not save it in source control. Review the project metadata and click <strong>Deploy</strong>.</p> <p><img src="img/73-configure-agent-network-deployment.png" alt="Deploy Agent Network view with environment, shared-space gateway, endpoint variables, and OpenAI API key field" /></p> <p>If no deployment target appears, return to <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/05-set-up-agent-network-gateways.html">Phase 5</a> and verify that the target space and gateways are configured for the selected business group and environment.</p> <p>Open the <strong>Output</strong> tab, select <strong>Agent Fabric CLI</strong>, and wait for the connections, Agent Graph, and broker instance to finish deploying. Deployment is complete when the output reports that the Agent Network was deployed and the notification confirms the target environment. If any issue occurs, use <strong>MuleSoft Vibes</strong> to diagnose and address it, then retry until deployment succeeds.</p> <p><img src="img/74-agent-network-deployment-complete.png" alt="Agent Fabric CLI output and notification confirming the IT Help Investigation Agent Network was deployed to Sandbox" /></p> <h2 id="4-verify-the-deployed-instances">  4. Verify the deployed instances </h2> <p>In Anypoint Platform, go to <strong>API Manager → Agent and Tool Instances</strong> and select the deployment environment. Verify that the five expected instances appear: the IT Help Investigation Broker, both agents, and both MCP servers.</p> <p><img src="img/75-agent-and-tool-instances.png" alt="API Manager Agent and Tool Instances showing the deployed broker, two agents, and two MCP servers in Sandbox" /></p> <p>Open <strong>IT Help Investigation Broker</strong> and confirm that its status is <strong>Active</strong>. Note down the <strong>Consumer Endpoint</strong>; you use this URL to call and test the deployed broker. Open the endpoint link and copy the complete URL, because the value displayed on the summary page can be truncated.</p> <p><img src="img/77-broker-consumer-endpoint.png" alt="IT Help Investigation Broker summary in API Manager showing its active status and consumer endpoint" /></p> <p><img src="img/78-consumer-endpoint-link.png" alt="Consumer Endpoint link for the deployed IT Help Investigation Broker" /></p> <p>Then go to <strong>Runtime Manager → Applications</strong>, select the deployment environment, and open the Agent Network application. Confirm that its status is <strong>Running</strong> and that the target and target type match the selected CloudHub 2.0 space.</p> <p><img src="img/76-runtime-manager-agent-network-running.png" alt="Runtime Manager showing the IT Help Investigation Agent Network application running in the CloudHub 2.0 shared space" /></p> <p>For the detailed product workflow and troubleshooting guidance, see <a href="https://docs.mulesoft.com/agent-network/latest/af-deploy-agent-network-targets">Deploy Agent Network Instances</a>.</p>
+    </google-codelab-step>
+    <google-codelab-step label="Test the Agent Network Broker" duration="5">
+<p>Test the deployed IT Help Investigation Broker through its A2A consumer endpoint and verify that requests follow the expected investigation paths.</p> <blockquote> <p><strong>Note:</strong> This guide uses A² Playground for convenience, but you can test the broker with any A2A 1.0-compatible client, including Postman, cURL, or a custom application.</p> </blockquote> <h2 id="contents">  Contents </h2> <ul> <li><a href="#1-prepare-the-broker-endpoint">1. Prepare the broker endpoint</a></li> <li><a href="#2-verify-the-broker-agent-card">2. Verify the broker agent card</a></li> <li><a href="#3-send-test-support-requests">3. Send test support requests</a></li> <li><a href="#4-verify-the-responses-and-activity">4. Verify the responses and activity</a></li> </ul> <h2 id="1-prepare-the-broker-endpoint">  1. Prepare the broker endpoint </h2> <p>Use the complete <strong>Consumer Endpoint</strong> recorded in <a href="https://tbolis-at-mulesoft.github.io/mule-broker-v2-quickstart/docs/quickstart/08-deploy-agent-network.html#4-verify-the-deployed-instances">Phase 8</a>. Confirm that the IT Help Investigation Broker instance is <strong>Active</strong> before testing.</p> <p>Go to <a href="https://www.a2d-ai.com/">a2d-ai.com</a>, open <strong>A² Playground</strong>, and select the <strong>A2A</strong> protocol. Paste the Consumer Endpoint into <strong>Enter endpoint URL</strong> and click <strong>Connect</strong>.</p> <p><img src="img/79-a2d-a2a-playground.png" alt="A² Playground ready to connect to an A2A consumer endpoint" /></p> <h2 id="2-verify-the-broker-agent-card">  2. Verify the broker agent card </h2> <p>After you click <strong>Connect</strong>, A² Playground retrieves the broker’s A2A agent card. Confirm that it shows <strong>IT Help Investigation Broker</strong>, A2A 1.0, and the <strong>IT Ticket Triage</strong> skill. The message panel is now ready for test requests.</p> <p><img src="img/80-a2a-playground-connected-broker.png" alt="A² Playground connected to the IT Help Investigation Broker and showing its agent card and ticket-triage skill" /></p> <h2 id="3-send-test-support-requests">  3. Send test support requests </h2> <p>Use these four messages to exercise the broker’s escalation, licensing, and Help Center paths. Because none includes a Jira ticket ID, verify that responses which reference a ticket use <code class="language-plaintext highlighter-rouge">JIRA001</code>.</p> <ul> <li> <p><strong>License Procurement — low severity</strong></p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Provision a Figma license for jane.doe@company.com
+</code></pre></div> </div> </li> <li> <p><strong>Unresolved two-factor authentication request — low severity</strong></p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>How do I set up two-factor authentication?
+</code></pre></div> </div> </li> <li> <p><strong>Help Center VPN password reset — low severity</strong></p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>How do I reset my VPN password?
+</code></pre></div> </div> </li> <li> <p><strong>Immediate escalation — high severity</strong></p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Our website is completely down!
+</code></pre></div> </div> </li> </ul> <h3 id="expected-responses">  Expected responses </h3> <p>Exact wording, generated IDs, and timing can vary. Verify that each response uses the expected route and outcome:</p> <ul> <li> <p><strong>Website outage:</strong> Returns <code class="language-plaintext highlighter-rouge">200 OK</code>, uses <code class="language-plaintext highlighter-rouge">JIRA001</code>, and confirms immediate escalation to the on-call team with the high-severity reason.</p> <p><img src="img/82-outage-escalation-response.png" alt="Expected response for a website outage showing JIRA001 escalated to the on-call team" /></p> </li> <li> <p><strong>Figma license:</strong> Returns <code class="language-plaintext highlighter-rouge">200 OK</code> and confirms that a Figma Developer license was provisioned for <code class="language-plaintext highlighter-rouge">jane.doe@company.com</code> and the ticket was updated.</p> <p><img src="img/83-figma-license-response.png" alt="Expected response confirming a Figma Developer license was provisioned" /></p> </li> <li> <p><strong>Two-factor authentication:</strong> Returns <code class="language-plaintext highlighter-rouge">200 OK</code>; when the automated investigation cannot find a solution, it confirms that <code class="language-plaintext highlighter-rouge">JIRA001</code> was escalated to a human with an investigation summary.</p> <p><img src="img/84-two-factor-unresolved-response.png" alt="Expected unresolved response for two-factor authentication setup showing escalation to a human" /></p> </li> <li> <p><strong>VPN password reset:</strong> Returns <code class="language-plaintext highlighter-rouge">200 OK</code> and provides actionable self-service password-reset instructions from the Help Center.</p> <p><img src="img/85-vpn-password-reset-response.png" alt="Expected Help Center response with steps to reset a VPN password" /></p> </li> </ul> <h2 id="4-verify-the-responses-and-activity">  4. Verify the responses and activity </h2> <p>For each request, confirm that the broker returns a clear final response and follows the expected route:</p> <ul> <li>High-severity issues are escalated immediately.</li> <li>Routine low-severity issues use the Help Center.</li> <li>License and access requests consult License Procurement.</li> <li>Jira receives the investigation findings and resolution notes.</li> <li>Unresolved low-severity issues are escalated to a human.</li> </ul> <p>Use API Manager message logs and Anypoint Monitoring when additional troubleshooting or request tracing is needed.</p> <blockquote> <p><strong>Performance note:</strong> In <strong>Anypoint Monitoring → Insights</strong>, the example test window reports a p99 response time of about 10 seconds for <code class="language-plaintext highlighter-rouge">openai</code> and 33 seconds for <code class="language-plaintext highlighter-rouge">it_help_investigation</code>. These values are p99 latency, not averages, and vary with traffic and downstream service performance.</p> </blockquote> <p><img src="img/86-anypoint-insights-response-times.png" alt="Anypoint Insights showing request volume, p99 response time, and error rate for the broker and connected services" /></p> <p>For protocol details, see the <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-script-reference">Agent Script Reference</a>.</p>
+    </google-codelab-step>
+
+  </google-codelab>
+
+  <script src="../assets/native-shim.js"></script>
+  <script src="../assets/custom-elements.min.js"></script>
+  <script src="../assets/prettify.js"></script>
+  <script src="../assets/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
