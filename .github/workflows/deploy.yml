@@ -6,6 +6,12 @@ on:
     branches: [main]
   # Allow manual runs from the Actions tab.
   workflow_dispatch:
+  # Rebuild when the content repo (mulesoft-accelerator/jumpstarts) signals that
+  # lab content changed. That repo's .github/workflows/notify-site.yml sends this
+  # event via the GitHub API on every content push. Without this listener the
+  # dispatch is accepted but ignored, so new/updated labs never publish.
+  repository_dispatch:
+    types: [content-updated]
 
 # Permissions required to deploy to GitHub Pages.
 permissions:
@@ -24,6 +30,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Pull the authoritative lab content from the content repo. This is the
+      # single source of truth: authors edit mulesoft-accelerator/jumpstarts,
+      # and every lab folder (claat index.html + img/, or new-style index.md)
+      # lands under ./jumpstarts here for the build to consume.
+      - name: Check out content repo
+        uses: actions/checkout@v4
+        with:
+          repository: mulesoft-accelerator/jumpstarts
+          ref: main
+          path: .content-src
+
+      # Overlay the content into ./jumpstarts (additive: adds new labs and
+      # refreshes existing ones; leaves site-only files like jumpstarts/index.html
+      # untouched). --delete is intentionally NOT used so a partial/failed source
+      # checkout can never wipe published labs.
+      - name: Sync content into ./jumpstarts
+        run: |
+          mkdir -p jumpstarts
+          rsync -a --exclude='.git' --exclude='README.md' .content-src/ jumpstarts/
+          rm -rf .content-src
+          echo "Labs now staged under ./jumpstarts:"
+          ls -1 jumpstarts | head -50
 
       # Installs deps, runs `npm run build` (which chains `npm run stage`
       # + `astro build`), and uploads ./dist as the Pages artifact.
