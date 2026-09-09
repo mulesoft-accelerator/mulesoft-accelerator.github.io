@@ -16,6 +16,8 @@ import path from 'node:path';
 const ROOT = path.join(process.cwd(), 'jumpstarts');
 
 export interface Lab {
+  /** How this lab renders: a legacy claat HTML export, or a Markdown source. */
+  kind: 'claat' | 'md';
   slug: string;
   title: string;
   /** Display category, e.g. "Salesforce" (from the legacy grid), or null. */
@@ -76,6 +78,7 @@ function readLab(slug: string, meta: ReturnType<typeof legacyMeta>): Lab | null 
 
   const m = meta[slug] ?? { category: null, categoryKey: null, tags: [], updated: null };
   return {
+    kind: 'claat',
     slug,
     title,
     category: m.category,

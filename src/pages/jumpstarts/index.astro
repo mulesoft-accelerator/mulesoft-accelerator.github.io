@@ -1,10 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CodelabCard from '../../components/CodelabCard.astro';
-import { getLabs, getCategories } from '../../lib/labs';
+import { getCategories } from '../../lib/labs';
+import { getAllLabs } from '../../lib/allLabs';
 
 // Grid landing at /jumpstarts/ — replaces the legacy ./jumpstarts/index.html.
-const codelabs = getLabs();
+// Includes both legacy claat labs and new Markdown labs.
+const codelabs = await getAllLabs();
 const categories = getCategories(codelabs);
 ---
 <BaseLayout

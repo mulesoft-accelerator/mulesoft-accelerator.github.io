@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CodelabCard from '../components/CodelabCard.astro';
-import { getLabs, getCategories } from '../lib/labs';
+import { getCategories } from '../lib/labs';
+import { getAllLabs } from '../lib/allLabs';
 
 // Root landing page (/). The site is an org GitHub Pages site served from the
 // domain root, so this replaces the legacy static index.html. It gives the
@@ -9,7 +10,7 @@ import { getLabs, getCategories } from '../lib/labs';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const gridHref = `${base}/jumpstarts`;
 
-const labs = getLabs();
+const labs = await getAllLabs();
 const categories = getCategories(labs);
 // Feature a handful of labs on the landing page; the grid has the full set.
 const featured = labs.slice(0, 6);
